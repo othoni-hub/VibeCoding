@@ -30,4 +30,13 @@ Vue animée du Système Solaire
 
 [Retour en haut](#VibeCoding)
 
+## ArbreFractal
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/ArbreFractal/" target="_blank" rel="noopener noreferrer">Arbre Fractal </a></li> :
+
+<img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/f18cdd00-020d-4254-8924-208ecba1e9c5" />
+
+Arbre fractal avec paramètres
+
+[Retour en haut](#VibeCoding)
 
