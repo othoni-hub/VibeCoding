@@ -1,0 +1,2796 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Constructor — Géométrie Dynamique</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;overflow:hidden;background:#030712;font-family:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#374151;border-radius:4px}
+.app{display:flex;flex-direction:column;height:100vh;color:#e2e8f0;user-select:none}
+/* Header */
+.header{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#0f172a;border-bottom:1px solid #1e293b;flex-shrink:0;flex-wrap:wrap;z-index:20}
+.brand{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.brand-text{line-height:1.1}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:.18em;color:#f8fafc;text-transform:uppercase}
+.brand-sub{font-size:10px;color:#475569}
+.sep{width:1px;height:28px;background:#1e293b;flex-shrink:0}
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:2px;background:rgba(30,41,59,.7);border-radius:12px;padding:5px 8px;border:1px solid #1e293b;flex-wrap:wrap;gap:3px}
+.tool-btn{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;transition:all .15s;background:transparent;color:#64748b}
+.tool-btn:hover{background:#1e293b;color:#e2e8f0}
+.tool-btn.active{color:#f8fafc;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.tool-btn.active.c-blue{background:#1d4ed8}
+.tool-btn.active.c-slate{background:#475569}
+.tool-btn.active.c-emerald{background:#065f46}
+.tool-btn.active.c-gray{background:#374151}
+.tool-btn.active.c-purple{background:#6d28d9}
+.tool-btn.active.c-forged{background:#1e1b4b;border:1px solid #4c1d95}
+.tool-badge{font-size:10px;color:inherit;opacity:.7}
+.forge-btn{padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;transition:all .15s;background:#1e1b4b;color:#a78bfa}
+.forge-btn:hover{background:#2e1065;color:#c4b5fd}
+.forge-btn.active{background:#5b21b6;color:#fff;box-shadow:0 0 12px rgba(124,58,237,.4)}
+.vsep{width:1px;height:20px;background:#1e293b;margin:0 2px}
+.spacer{flex:1}
+/* Action buttons */
+.action-btns{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.ab{padding:5px 8px;border-radius:8px;border:1px solid #1e293b;cursor:pointer;font-size:11px;background:#0f172a;color:#64748b;font-family:'JetBrains Mono',monospace;transition:all .15s}
+.ab:hover{background:#1e293b;color:#e2e8f0}
+.ab.active{background:#1e293b;border-color:#475569;color:#fff}
+.ab.danger{background:#1a0505;border-color:#4a1010;color:#ef4444}
+.ab.danger:hover{background:#450a0a;color:#fca5a5}
+/* Body */
+.body{display:flex;flex:1;min-height:0}
+/* Roadmap */
+.roadmap{width:252px;background:#0f172a;border-right:1px solid #1e293b;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.roadmap-header{padding:10px 12px;border-bottom:1px solid #1e293b;flex-shrink:0}
+.roadmap-title{font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.12em}
+.roadmap-body{flex:1;overflow-y:auto;padding:4px 0}
+.level-header{padding:6px 12px 4px;font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.1em;background:rgba(30,41,59,.3)}
+.challenge{margin:3px 8px;border-radius:10px;padding:8px 10px;border:1px solid transparent;transition:all .15s}
+.challenge.locked{border-color:rgba(51,65,85,.3)}
+.challenge.forge{border-color:rgba(161,98,7,.4);background:rgba(120,53,15,.05)}
+.challenge.ok{border-color:rgba(6,78,59,.5);background:rgba(6,78,59,.05)}
+.challenge-top{display:flex;align-items:center;gap:6px}
+.challenge-icon{font-size:13px}
+.challenge-name{font-size:11px;font-weight:700}
+.challenge.locked .challenge-name{color:#475569}
+.challenge.forge .challenge-name{color:#fbbf24}
+.challenge.ok .challenge-name{color:#34d399}
+.hint-btn{margin-left:auto;background:none;border:none;cursor:pointer;font-size:11px;color:#374151;padding:2px;transition:color .15s}
+.hint-btn:hover{color:#94a3b8}
+.challenge-desc{font-size:10px;color:#475569;margin-top:3px;padding-left:20px;line-height:1.5}
+.lib-section{padding:10px 8px}
+.lib-title{font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;padding-left:4px}
+.lib-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:rgba(30,41,59,.5);margin-bottom:4px;border:1px solid rgba(51,65,85,.3)}
+.lib-item-name{font-size:11px;font-weight:700;color:#e2e8f0}
+.lib-item-count{margin-left:auto;font-size:10px;color:#475569}
+/* Canvas area */
+.canvas-area{flex:1;position:relative;overflow:hidden}
+.canvas-svg{width:100%;height:100%;display:block}
+/* Status bar */
+.status-bar{position:absolute;bottom:8px;left:8px;font-size:10px;color:#334155;background:rgba(15,23,42,.85);border-radius:8px;padding:4px 8px;border:1px solid #1e293b;pointer-events:none;font-family:'JetBrains Mono',monospace}
+/* Panels */
+.panel-floating{position:absolute;background:rgba(15,23,42,.97);border-radius:16px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:30}
+.selection-panel{top:8px;right:8px;width:200px;border:1px solid #1e293b}
+.forge-panel{bottom:32px;left:50%;transform:translateX(-50%);width:320px;border:1px solid #5b21b6;background:rgba(15,10,30,.97)}
+.pending-badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(23,37,84,.92);border:1px solid #1e40af;border-radius:10px;padding:6px 12px;font-size:11px;color:#93c5fd;pointer-events:none;white-space:nowrap}
+.panel-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.panel-value{font-size:18px;font-weight:700;color:#fff;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.panel-btn{width:100%;padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-align:left;margin-bottom:5px;transition:all .15s}
+.panel-btn.normal{background:#1e293b;color:#cbd5e1}
+.panel-btn.normal:hover{background:#273549}
+.panel-btn.danger{background:rgba(127,29,29,.4);color:#fca5a5}
+.panel-btn.danger:hover{background:rgba(127,29,29,.7)}
+.panel-parents{margin-top:10px;padding-top:8px;border-top:1px solid #1e293b;font-size:10px;color:#475569;font-family:'JetBrains Mono',monospace}
+.forge-title{font-size:13px;font-weight:700;color:#a78bfa;margin-bottom:8px}
+.forge-steps{background:rgba(91,33,182,.15);border-radius:8px;padding:8px;margin-bottom:10px;max-height:80px;overflow-y:auto;font-size:10px;font-family:'JetBrains Mono',monospace}
+.forge-step{color:#c4b5fd;line-height:1.6}
+.forge-input{width:100%;background:rgba(91,33,182,.2);border:1px solid #5b21b6;border-radius:8px;padding:8px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:10px;outline:none}
+.forge-input:focus{border-color:#7c3aed}
+.forge-btns{display:flex;gap:8px}
+.forge-btns button{flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;transition:all .15s}
+.forge-cancel{background:#1e293b;color:#94a3b8}
+.forge-cancel:hover{background:#273549}
+.forge-go{background:#5b21b6;color:#fff}
+.forge-go:hover{background:#6d28d9}
+.forge-go:disabled{opacity:.4;cursor:not-allowed}
+/* Boa bar */
+.boa-bar{display:flex;align-items:center;gap:10px;padding:7px 14px;background:#0f172a;border-top:1px solid #1e293b;flex-shrink:0;transition:background .3s}
+.boa-bar.pulse{background:#1e1b4b}
+.boa-msg{font-size:12px;color:#cbd5e1;flex:1;line-height:1.4}
+.oracle-tag{font-size:10px;color:#334155}
+/* Context menu */
+.ctx-overlay{position:fixed;inset:0;z-index:48}
+.ctx-menu{position:fixed;z-index:50;background:#1e293b;border:1px solid #334155;border-radius:12px;padding:4px 0;min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.ctx-header{padding:5px 12px;font-size:10px;color:#475569;border-bottom:1px solid #334155;margin-bottom:2px;font-family:'JetBrains Mono',monospace}
+.ctx-item{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:11px;cursor:pointer;color:#cbd5e1;background:none;border:none;width:100%;text-align:left;font-family:'JetBrains Mono',monospace;transition:background .1s}
+.ctx-item:hover{background:#273549}
+.ctx-item.danger{color:#fca5a5}
+.ctx-item.danger:hover{background:rgba(127,29,29,.4)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:60;display:flex;align-items:center;justify-content:center}
+.modal{background:#1e293b;border:1px solid #334155;border-radius:18px;padding:22px;width:340px;box-shadow:0 12px 40px rgba(0,0,0,.7)}
+.modal h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.modal p{font-size:10px;color:#475569;margin-bottom:14px;font-family:'JetBrains Mono',monospace}
+.modal-input{width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 10px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:14px;outline:none}
+.modal-input:focus{border-color:#3b82f6}
+.modal-btns{display:flex;gap:8px}
+.modal-btns button{flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;transition:all .15s}
+.btn-cancel{background:#334155;color:#94a3b8}
+.btn-cancel:hover{background:#3d5068}
+.btn-ok{background:#2563eb;color:#fff}
+.btn-ok:hover{background:#1d4ed8}
+/* Help */
+.help-section{border-left:2px solid #4c1d95;padding-left:10px;margin-bottom:14px}
+.help-section h4{font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:3px;font-family:'JetBrains Mono',monospace}
+.help-section p{font-size:10px;color:#64748b;line-height:1.6}
+/* Forge overlay ring on canvas */
+.forge-ring{position:absolute;inset:0;pointer-events:none;border:3px dashed rgba(124,58,237,.5);border-radius:0;z-index:5}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+
+const {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useReducer
+} = React;
+
+// ============================================================
+// AUTO-NAMING
+// ============================================================
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function toSub(n) {
+  return String(n).split("").map(d => "₀₁₂₃₄₅₆₇₈₉"[+d]).join("");
+}
+function nextPointLbl(objs) {
+  const used = new Set(objs.filter(o => o.type === "point" || o.type === "intersection").map(o => o.label));
+  for (let p = 0; p < 10; p++) {
+    const s = "'".repeat(p);
+    for (let i = 0; i < 26; i++) {
+      const l = LETTERS[i] + s;
+      if (!used.has(l)) return l;
+    }
+  }
+  return "P";
+}
+function nextLineLbl(objs) {
+  const used = new Set(objs.filter(o => o.type === "line").map(o => o.label));
+  if (!used.has("(d)")) return "(d)";
+  for (let n = 1; n < 999; n++) {
+    const l = `(d${toSub(n)})`;
+    if (!used.has(l)) return l;
+  }
+}
+function nextCircleLbl(objs) {
+  const used = new Set(objs.filter(o => o.type === "circle").map(o => o.label));
+  if (!used.has("(c)")) return "(c)";
+  for (let n = 1; n < 999; n++) {
+    const l = `(c${toSub(n)})`;
+    if (!used.has(l)) return l;
+  }
+}
+
+// ============================================================
+// GEOMETRY ENGINE
+// ============================================================
+const d2 = (a, b) => Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+function llX(p1, p2, p3, p4) {
+  const d1x = p2.x - p1.x,
+    d1y = p2.y - p1.y,
+    d2x = p4.x - p3.x,
+    d2y = p4.y - p3.y;
+  const cr = d1x * d2y - d1y * d2x;
+  if (Math.abs(cr) < 1e-10) return null;
+  const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / cr;
+  return {
+    x: p1.x + t * d1x,
+    y: p1.y + t * d1y
+  };
+}
+function ccX(c1, r1, c2, r2) {
+  const d = d2(c1, c2);
+  if (d > r1 + r2 + 1e-10 || d < Math.abs(r1 - r2) - 1e-10 || d < 1e-10) return [];
+  const a = (r1 * r1 - r2 * r2 + d * d) / (2 * d),
+    h = Math.sqrt(Math.max(0, r1 * r1 - a * a));
+  const mx = c1.x + a / d * (c2.x - c1.x),
+    my = c1.y + a / d * (c2.y - c1.y);
+  const dx = h / d * (c2.y - c1.y),
+    dy = h / d * (c2.x - c1.x);
+  if (h < 1e-10) return [{
+    x: mx,
+    y: my
+  }];
+  return [{
+    x: mx + dx,
+    y: my - dy
+  }, {
+    x: mx - dx,
+    y: my + dy
+  }];
+}
+function lcX(p1, p2, ctr, rad) {
+  const dx = p2.x - p1.x,
+    dy = p2.y - p1.y,
+    fx = p1.x - ctr.x,
+    fy = p1.y - ctr.y;
+  const a = dx * dx + dy * dy,
+    b = 2 * (fx * dx + fy * dy),
+    c = fx * fx + fy * fy - rad * rad;
+  const disc = b * b - 4 * a * c;
+  if (disc < -1e-10) return [];
+  const sq = Math.sqrt(Math.max(0, disc)),
+    t1 = (-b - sq) / (2 * a),
+    t2 = (-b + sq) / (2 * a);
+  if (Math.abs(disc) < 1e-10) return [{
+    x: p1.x + t1 * dx,
+    y: p1.y + t1 * dy
+  }];
+  return [{
+    x: p1.x + t1 * dx,
+    y: p1.y + t1 * dy
+  }, {
+    x: p1.x + t2 * dx,
+    y: p1.y + t2 * dy
+  }];
+}
+function compInterPos(obj, objs) {
+  const a = objs.find(o => o.id === obj.parentIds[0]),
+    b = objs.find(o => o.id === obj.parentIds[1]);
+  if (!a || !b) return null;
+  const ag = getGeom(a, objs),
+    bg = getGeom(b, objs);
+  if (!ag || !bg) return null;
+  let pts = [];
+  if (a.type === "line" && b.type === "line") {
+    const ip = llX(ag.p1, ag.p2, bg.p1, bg.p2);
+    if (ip) pts = [ip];
+  } else if (a.type === "circle" && b.type === "circle") pts = ccX(ag.center, ag.radius, bg.center, bg.radius);else {
+    const ln = a.type === "line" ? ag : bg,
+      ci = a.type === "circle" ? ag : bg;
+    pts = lcX(ln.p1, ln.p2, ci.center, ci.radius);
+  }
+  if (!pts.length) return null;
+  const idx = obj.intersectionIndex || 0;
+  return idx < pts.length ? pts[idx] : pts[0];
+}
+function getPt(obj, objs) {
+  if (obj.type === "point") return {
+    x: obj.x,
+    y: obj.y
+  };
+  if (obj.type === "intersection") return compInterPos(obj, objs);
+  return null;
+}
+function getGeom(obj, objs) {
+  if (obj.type === "point") return {
+    x: obj.x,
+    y: obj.y
+  };
+  if (obj.type === "intersection") return compInterPos(obj, objs);
+  if (obj.type === "line") {
+    const p1 = objs.find(o => o.id === obj.parentIds[0]),
+      p2 = objs.find(o => o.id === obj.parentIds[1]);
+    if (!p1 || !p2) return null;
+    const pp1 = getPt(p1, objs),
+      pp2 = getPt(p2, objs);
+    if (!pp1 || !pp2) return null;
+    return {
+      p1: pp1,
+      p2: pp2
+    };
+  }
+  if (obj.type === "circle") {
+    const c = objs.find(o => o.id === obj.parentIds[0]),
+      r = objs.find(o => o.id === obj.parentIds[1]);
+    if (!c || !r) return null;
+    const cp = getPt(c, objs),
+      rp = getPt(r, objs);
+    if (!cp || !rp) return null;
+    return {
+      center: cp,
+      radius: d2(cp, rp)
+    };
+  }
+  return null;
+}
+function propagate(objs, movedId) {
+  const res = [...objs],
+    queue = [];
+  function col(id) {
+    res.forEach(o => {
+      if (o.parentIds?.includes(id) && !queue.includes(o.id)) {
+        queue.push(o.id);
+        col(o.id);
+      }
+    });
+  }
+  col(movedId);
+  queue.forEach(id => {
+    const i = res.findIndex(o => o.id === id);
+    if (i >= 0 && res[i].type === "intersection") {
+      const p = compInterPos(res[i], res);
+      if (p) res[i] = {
+        ...res[i],
+        computedX: p.x,
+        computedY: p.y
+      };
+    }
+  });
+  return res;
+}
+
+// ============================================================
+// FORGED TOOL REPLAY ENGINE
+// ============================================================
+// A forged tool stores:
+//   steps: array of object ids created during forge (in order)
+//   inputs: [{ id, label, type, role }]  — the "parameter" objects
+//   outputs: [{ id, label, type, role }] — the "result" objects
+//
+// When applying a forged tool:
+//   1. User clicks objects matching each input type in sequence
+//   2. We replay each step, remapping parentIds from original input ids → new input ids
+//   3. New objects are added to the canvas
+
+function applyForgedTool(ft, inputBindings, existingObjects) {
+  // inputBindings: { [originalInputId]: newObjectId }
+  // ft.outputs[].id = original IDs of output objects — everything else is hidden construction
+  const outputOriginalIds = new Set((ft.outputs || []).map(o => o.id));
+  const idMap = {
+    ...inputBindings
+  };
+  const newObjects = [];
+  let currentObjs = [...existingObjects];
+  ft.steps.forEach(step => {
+    // Skip input objects — they are already on canvas
+    if (idMap[step.id]) return;
+    const remapIds = ids => ids.map(pid => idMap[pid] || pid);
+    // Construction steps are hidden; only designated outputs are visible
+    const isOutput = outputOriginalIds.has(step.id);
+    const visibility = isOutput ? "visible" : "hidden";
+    let newObj = null;
+    if (step.type === "point") {
+      const lbl = isOutput ? nextPointLbl([...currentObjs, ...newObjects]) : step.label;
+      newObj = {
+        ...step,
+        id: uid(),
+        label: lbl,
+        visibility
+      };
+      newObjects.push(newObj);
+      currentObjs = [...currentObjs, newObj];
+      idMap[step.id] = newObj.id;
+    } else if (step.type === "line") {
+      const lbl = isOutput ? nextLineLbl([...currentObjs, ...newObjects]) : step.label;
+      newObj = {
+        ...step,
+        id: uid(),
+        label: lbl,
+        visibility,
+        parentIds: remapIds(step.parentIds)
+      };
+      newObjects.push(newObj);
+      currentObjs = [...currentObjs, newObj];
+      idMap[step.id] = newObj.id;
+    } else if (step.type === "circle") {
+      const lbl = isOutput ? nextCircleLbl([...currentObjs, ...newObjects]) : step.label;
+      newObj = {
+        ...step,
+        id: uid(),
+        label: lbl,
+        visibility,
+        parentIds: remapIds(step.parentIds)
+      };
+      newObjects.push(newObj);
+      currentObjs = [...currentObjs, newObj];
+      idMap[step.id] = newObj.id;
+    } else if (step.type === "intersection") {
+      const lbl = isOutput ? nextPointLbl([...currentObjs, ...newObjects]) : step.label;
+      const remappedParents = remapIds(step.parentIds);
+      let computedX = step.computedX,
+        computedY = step.computedY;
+      const pos = compInterPos({
+        ...step,
+        parentIds: remappedParents
+      }, currentObjs);
+      if (pos) {
+        computedX = pos.x;
+        computedY = pos.y;
+      }
+      newObj = {
+        ...step,
+        id: uid(),
+        label: lbl,
+        visibility,
+        parentIds: remappedParents,
+        computedX,
+        computedY
+      };
+      newObjects.push(newObj);
+      currentObjs = [...currentObjs, newObj];
+      idMap[step.id] = newObj.id;
+    }
+  });
+  return newObjects;
+}
+
+// ============================================================
+// REDUCER
+// ============================================================
+function geoReducer(s, a) {
+  switch (a.type) {
+    case "ADD":
+      return {
+        ...s,
+        objects: [...s.objects, a.obj]
+      };
+    case "ADD_MANY":
+      return {
+        ...s,
+        objects: [...s.objects, ...a.objs]
+      };
+    case "MOVE":
+      {
+        let o = s.objects.map(x => x.id === a.id ? {
+          ...x,
+          x: a.x,
+          y: a.y
+        } : x);
+        return {
+          ...s,
+          objects: propagate(o, a.id)
+        };
+      }
+    case "VIS":
+      return {
+        ...s,
+        objects: s.objects.map(o => o.id === a.id ? {
+          ...o,
+          visibility: a.vis
+        } : o)
+      };
+    case "DEL":
+      {
+        const ids = new Set([a.id]);
+        let ch = true;
+        while (ch) {
+          ch = false;
+          s.objects.forEach(o => {
+            if (o.parentIds?.some(p => ids.has(p)) && !ids.has(o.id)) {
+              ids.add(o.id);
+              ch = true;
+            }
+          });
+        }
+        return {
+          ...s,
+          objects: s.objects.filter(o => !ids.has(o.id))
+        };
+      }
+    case "LABEL":
+      return {
+        ...s,
+        objects: s.objects.map(o => o.id === a.id ? {
+          ...o,
+          label: a.label
+        } : o)
+      };
+    case "FORGE":
+      return {
+        ...s,
+        forgedTools: [...s.forgedTools, a.tool]
+      };
+    case "UNLOCK":
+      return {
+        ...s,
+        unlockedChallenges: [...new Set([...s.unlockedChallenges, a.id])]
+      };
+    case "LOAD":
+      return a.state;
+    case "CLEAR":
+      return {
+        ...s,
+        objects: []
+      };
+    default:
+      return s;
+  }
+}
+let _c = 1;
+const uid = () => `o${_c++}`;
+
+// ============================================================
+// ROADMAP DATA
+// ============================================================
+const ROADMAP = [{
+  level: 1,
+  title: "Niveau 1 — Fondations",
+  challenges: [{
+    id: "mediatrice",
+    name: "Médiatrice",
+    desc: "Construis la médiatrice d'un segment [AB].",
+    prereqs: [],
+    hint: "Deux cercles de même rayon en A et B → leurs intersections définissent la médiatrice."
+  }, {
+    id: "milieu",
+    name: "Milieu",
+    desc: "Trouve le milieu d'un segment [AB].",
+    prereqs: ["mediatrice"],
+    hint: "Le milieu est l'intersection de la médiatrice avec la droite AB."
+  }, {
+    id: "perpendiculaire",
+    name: "Perpendiculaire",
+    desc: "Trace une perpendiculaire à une droite par un point.",
+    prereqs: ["mediatrice"],
+    hint: "Utilise la médiatrice d'un segment construit sur la droite."
+  }, {
+    id: "bissectrice",
+    name: "Bissectrice",
+    desc: "Construis la bissectrice d'un angle.",
+    prereqs: ["mediatrice"],
+    hint: "Deux cercles de même rayon depuis le sommet → deux points équidistants des côtés."
+  }]
+}, {
+  level: 2,
+  title: "Niveau 2 — Triangle",
+  challenges: [{
+    id: "parallele",
+    name: "Parallèle",
+    desc: "Trace une droite parallèle par un point.",
+    prereqs: ["perpendiculaire"],
+    hint: "La perpendiculaire d'une perpendiculaire est parallèle."
+  }, {
+    id: "cercle_circonscrit",
+    name: "Cercle circonscrit",
+    desc: "Construis le cercle circonscrit au triangle.",
+    prereqs: ["mediatrice"],
+    hint: "Centre = intersection des médiatrices des côtés."
+  }, {
+    id: "mediane",
+    name: "Médiane",
+    desc: "Trace les médianes d'un triangle.",
+    prereqs: ["milieu"],
+    hint: "Une médiane relie un sommet au milieu du côté opposé."
+  }, {
+    id: "hauteur",
+    name: "Hauteur",
+    desc: "Trace les hauteurs d'un triangle.",
+    prereqs: ["perpendiculaire"],
+    hint: "La hauteur est perpendiculaire au côté, passant par le sommet opposé."
+  }, {
+    id: "centre_gravite",
+    name: "Centre de gravité",
+    desc: "Trouve le centroïde d'un triangle.",
+    prereqs: ["mediane"],
+    hint: "Intersection des trois médianes."
+  }, {
+    id: "orthocentre",
+    name: "Orthocentre",
+    desc: "Construis l'orthocentre d'un triangle.",
+    prereqs: ["hauteur"],
+    hint: "Intersection des trois hauteurs."
+  }]
+}, {
+  level: 3,
+  title: "Niveau 3 — Cercles avancés",
+  challenges: [{
+    id: "cercle_inscrit",
+    name: "Cercle inscrit",
+    desc: "Construis le cercle inscrit dans un triangle.",
+    prereqs: ["bissectrice", "perpendiculaire"],
+    hint: "Centre = intersection des bissectrices."
+  }, {
+    id: "tangente",
+    name: "Tangente à un cercle",
+    desc: "Trace la tangente à un cercle en un point.",
+    prereqs: ["perpendiculaire"],
+    hint: "La tangente est perpendiculaire au rayon au point de tangence."
+  }, {
+    id: "droite_euler",
+    name: "Droite d'Euler",
+    desc: "Construis la droite d'Euler d'un triangle.",
+    prereqs: ["cercle_circonscrit", "orthocentre", "centre_gravite"],
+    hint: "Passe par le circumcentre, le centroïde et l'orthocentre."
+  }]
+}, {
+  level: 4,
+  title: "Niveau 4 — Géométrie avancée",
+  challenges: [{
+    id: "cercle_euler_9",
+    name: "Cercle d'Euler (9 pts)",
+    desc: "Construis le cercle des neuf points.",
+    prereqs: ["milieu", "hauteur", "cercle_circonscrit"],
+    hint: "9 points : milieux des côtés, pieds des hauteurs, milieux (sommet-orthocentre)."
+  }, {
+    id: "division_harmonique",
+    name: "Division harmonique",
+    desc: "Construis la division harmonique.",
+    prereqs: ["parallele", "mediatrice"],
+    hint: "Utilise un quadrilatère complet."
+  }, {
+    id: "polygones_reguliers",
+    name: "Polygones réguliers",
+    desc: "Construis des polygones réguliers.",
+    prereqs: ["bissectrice", "perpendiculaire"],
+    hint: "Utilise les propriétés des cercles et des angles."
+  }]
+}];
+
+// ============================================================
+// BOA LOGO — 3D wireframe snake
+// ============================================================
+function BoaLogo({
+  size = 36,
+  pulse = false
+}) {
+  return /*#__PURE__*/React.createElement("svg", {
+    width: size,
+    height: size,
+    viewBox: "0 0 64 64",
+    style: {
+      flexShrink: 0,
+      filter: pulse ? "drop-shadow(0 0 6px #a78bfa)" : "none",
+      transition: "filter .3s"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
+    id: "wg1",
+    x1: "0%",
+    y1: "0%",
+    x2: "100%",
+    y2: "100%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#7c3aed"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "50%",
+    stopColor: "#a78bfa"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#4c1d95"
+  })), /*#__PURE__*/React.createElement("linearGradient", {
+    id: "wg2",
+    x1: "100%",
+    y1: "0%",
+    x2: "0%",
+    y2: "100%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#c4b5fd"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#5b21b6"
+  })), /*#__PURE__*/React.createElement("filter", {
+    id: "glow2"
+  }, /*#__PURE__*/React.createElement("feGaussianBlur", {
+    stdDeviation: "1.2",
+    result: "blur"
+  }), /*#__PURE__*/React.createElement("feMerge", null, /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "blur"
+  }), /*#__PURE__*/React.createElement("feMergeNode", {
+    in: "SourceGraphic"
+  })))), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "32",
+    cy: "46",
+    rx: "22",
+    ry: "7",
+    fill: "none",
+    stroke: "#3b0764",
+    strokeWidth: "3.5",
+    opacity: "0.7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M10 38 Q32 32 54 38",
+    fill: "none",
+    stroke: "#4c1d95",
+    strokeWidth: "3",
+    opacity: "0.8"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M10 44 Q32 50 54 44",
+    fill: "none",
+    stroke: "#6d28d9",
+    strokeWidth: "3.5"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "14",
+    y1: "40",
+    x2: "14",
+    y2: "48",
+    stroke: "#5b21b6",
+    strokeWidth: "1.5",
+    opacity: "0.6"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "22",
+    y1: "36",
+    x2: "22",
+    y2: "51",
+    stroke: "#7c3aed",
+    strokeWidth: "1.5",
+    opacity: "0.7"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "32",
+    y1: "34",
+    x2: "32",
+    y2: "53",
+    stroke: "#8b5cf6",
+    strokeWidth: "1.5",
+    opacity: "0.7"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "42",
+    y1: "36",
+    x2: "42",
+    y2: "51",
+    stroke: "#7c3aed",
+    strokeWidth: "1.5",
+    opacity: "0.7"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "50",
+    y1: "40",
+    x2: "50",
+    y2: "48",
+    stroke: "#5b21b6",
+    strokeWidth: "1.5",
+    opacity: "0.6"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "32",
+    cy: "44",
+    rx: "22",
+    ry: "6",
+    fill: "none",
+    stroke: "url(#wg1)",
+    strokeWidth: "2.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M20 40 Q18 28 24 18 Q26 12 32 10",
+    fill: "none",
+    stroke: "#4c1d95",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M26 40 Q28 28 32 20 Q34 13 38 10",
+    fill: "none",
+    stroke: "url(#wg2)",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }), [[24, 34, 26, 33], [23, 30, 27, 28], [23, 25, 28, 23], [25, 19, 30, 16]].map(([x1, y1, x2, y2], i) => /*#__PURE__*/React.createElement("line", {
+    key: i,
+    x1: x1,
+    y1: y1,
+    x2: x2,
+    y2: y2,
+    stroke: "#7c3aed",
+    strokeWidth: "1.2",
+    opacity: "0.65"
+  })), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "34",
+    cy: "9",
+    rx: "11",
+    ry: "7",
+    fill: "#0a0514",
+    stroke: "url(#wg1)",
+    strokeWidth: "2"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "23",
+    y1: "9",
+    x2: "45",
+    y2: "9",
+    stroke: "#8b5cf6",
+    strokeWidth: "1.2",
+    opacity: "0.6"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "34",
+    y1: "2",
+    x2: "34",
+    y2: "16",
+    stroke: "#8b5cf6",
+    strokeWidth: "1.2",
+    opacity: "0.5"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: "34",
+    cy: "9",
+    rx: "7",
+    ry: "4",
+    fill: "none",
+    stroke: "#a78bfa",
+    strokeWidth: "1",
+    opacity: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M25 6 Q34 4 43 6",
+    fill: "none",
+    stroke: "#c4b5fd",
+    strokeWidth: "1.5",
+    strokeLinecap: "round",
+    opacity: "0.8"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "29",
+    cy: "8",
+    r: "2.5",
+    fill: "#0a0514",
+    stroke: "#a78bfa",
+    strokeWidth: "1.2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "39",
+    cy: "8",
+    r: "2.5",
+    fill: "#0a0514",
+    stroke: "#a78bfa",
+    strokeWidth: "1.2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "29",
+    cy: "8",
+    r: "1.2",
+    fill: "#7c3aed",
+    filter: "url(#glow2)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "39",
+    cy: "8",
+    r: "1.2",
+    fill: "#7c3aed",
+    filter: "url(#glow2)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "29.5",
+    cy: "7.5",
+    r: "0.5",
+    fill: "#e9d5ff"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "39.5",
+    cy: "7.5",
+    r: "0.5",
+    fill: "#e9d5ff"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M33 15.5 L33 19 M33 19 L31 22 M33 19 L35 22",
+    stroke: "#f43f5e",
+    strokeWidth: "1.2",
+    fill: "none",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M28 3 L34 0.5 L40 3",
+    stroke: "#fbbf24",
+    strokeWidth: "1.2",
+    fill: "none",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    opacity: "0.9"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "34",
+    cy: "0.5",
+    r: "1.4",
+    fill: "#fbbf24",
+    opacity: "0.9"
+  }));
+}
+
+// ============================================================
+// LABEL SVG COMPONENT
+// ============================================================
+function ObjLabel({
+  text,
+  x,
+  y,
+  kind
+}) {
+  const fill = kind === "point" ? "#bfdbfe" : kind === "line" ? "#cbd5e1" : "#a7f3d0";
+  const fw = kind === "point" ? "700" : "400";
+  const fs = kind === "point" ? 13 : 11;
+  return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("text", {
+    x: x,
+    y: y,
+    fontSize: fs,
+    fontFamily: "'JetBrains Mono',monospace",
+    fontWeight: fw,
+    fill: "#030712",
+    stroke: "#030712",
+    strokeWidth: 4,
+    strokeLinejoin: "round",
+    paintOrder: "stroke fill",
+    style: {
+      userSelect: "none"
+    }
+  }, text), /*#__PURE__*/React.createElement("text", {
+    x: x,
+    y: y,
+    fontSize: fs,
+    fontFamily: "'JetBrains Mono',monospace",
+    fontWeight: fw,
+    fill: fill,
+    style: {
+      userSelect: "none"
+    }
+  }, text));
+}
+
+// ============================================================
+// CONSTANTS
+// ============================================================
+const TOOLS = {
+  SELECT: "select",
+  POINT: "point",
+  REGLE: "regle",
+  COMPAS: "compas",
+  INTERSECTION: "intersection"
+};
+const VIS = {
+  HIDDEN: "hidden",
+  FAINT: "faint",
+  VISIBLE: "visible"
+};
+const COL = {
+  point: "#60a5fa",
+  line: "#94a3b8",
+  circle: "#94a3b8",
+  inter: "#34d399",
+  sel: "#f59e0b",
+  hov: "#f472b6",
+  forgeIn: "#fb923c",
+  forgeOut: "#4ade80"
+};
+
+// ============================================================
+// MAIN APP
+// ============================================================
+function App() {
+  const [state, dispatch] = useReducer(geoReducer, {
+    objects: [],
+    forgedTools: [],
+    unlockedChallenges: []
+  });
+  // Undo history — stack of past states (max 50)
+  const historyRef = useRef([]);
+  const [tool, setTool] = useState(TOOLS.SELECT);
+  const [pending, setPending] = useState([]);
+  const [selId, setSelId] = useState(null);
+  const [boa, setBoa] = useState("Bienvenue dans Constructor. Je suis l'Oracle, ton guide géométrique. Sélectionne un outil et commence à construire !");
+  const [boaPulse, setBoaPulse] = useState(false);
+
+  // --- Forge recording state ---
+  const [forgeMode, setForgeMode] = useState(false);
+  const [forgeSteps, setForgeSteps] = useState([]); // full recorded objects (snapshots)
+  const [forgeName, setForgeName] = useState("");
+  const [showForgePanel, setShowForgePanel] = useState(false);
+  const [preForgeTool, setPreForgeTool] = useState(TOOLS.SELECT);
+  // Phase: "record" | "mark_inputs" | "mark_outputs" | "confirm"
+  const [forgePhase, setForgePhase] = useState("record");
+  const [forgeInputIds, setForgeInputIds] = useState([]); // ids marked as inputs
+  const [forgeOutputIds, setForgeOutputIds] = useState([]); // ids marked as outputs
+  const [forgeObjectsSnapshot, setForgeObjectsSnapshot] = useState([]); // objects at forge start
+
+  // --- Forged tool application state ---
+  const [activeForgeTool, setActiveForgeTool] = useState(null); // the ft object being applied
+  const [forgeToolPending, setForgeToolPending] = useState([]); // collected input bindings so far [{originalId, newId}]
+
+  const [showRoadmap, setShowRoadmap] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
+  const [ctxMenu, setCtxMenu] = useState(null);
+  const [pickMenu, setPickMenu] = useState(null); // disambiguation when objects overlap
+  const [dragging, setDragging] = useState(null);
+  const [pan, setPan] = useState({
+    x: 0,
+    y: 0
+  });
+  const [zoom, setZoom] = useState(1);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState(null);
+  const [hovered, setHovered] = useState(null);
+  const [mouse, setMouse] = useState(null);
+  const [labelEdit, setLabelEdit] = useState(null);
+  const svgRef = useRef(null);
+  const labelRef = useRef(null);
+  const say = useCallback(msg => {
+    setBoa(msg);
+    setBoaPulse(true);
+    setTimeout(() => setBoaPulse(false), 600);
+  }, []);
+  // ---- Undo / redo ----
+  const MAX_HISTORY = 50;
+  const UNDOABLE = new Set(["ADD", "ADD_MANY", "MOVE", "VIS", "DEL", "LABEL", "FORGE", "UNLOCK", "CLEAR", "LOAD"]);
+  const dispatchWithHistory = useCallback(action => {
+    if (UNDOABLE.has(action.type)) {
+      historyRef.current = [...historyRef.current.slice(-MAX_HISTORY + 1), JSON.parse(JSON.stringify(state))];
+    }
+    dispatch(action);
+  }, [state]);
+  const canUndo = historyRef.current.length > 0;
+  const undo = useCallback(() => {
+    if (historyRef.current.length === 0) {
+      say("Rien à annuler.");
+      return;
+    }
+    const prev = historyRef.current[historyRef.current.length - 1];
+    historyRef.current = historyRef.current.slice(0, -1);
+    dispatch({
+      type: "LOAD",
+      state: prev
+    }); // bare — must not push to history
+    setPending([]);
+    setSelId(null);
+    say("Annulation effectuée.");
+  }, [say]);
+  const svgPt = useCallback((cx, cy) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return {
+      x: 0,
+      y: 0
+    };
+    return {
+      x: (cx - rect.left - pan.x) / zoom,
+      y: (cy - rect.top - pan.y) / zoom
+    };
+  }, [pan, zoom]);
+  const nearest = useCallback((x, y, types, excl = [], thr = 16) => {
+    // Points and intersections are always tested first with their own threshold,
+    // and always win over lines/circles if within their snap radius.
+    const POINT_THR = Math.max(thr, 20);
+    let bestPoint = null,
+      bdPoint = POINT_THR;
+    let bestLine = null,
+      bdLine = thr;
+    state.objects.forEach(o => {
+      if (excl.includes(o.id)) return;
+      if (types && !types.includes(o.type)) return;
+      // Hidden objects are invisible — never selectable/clickable
+      if (o.visibility === VIS.HIDDEN) return;
+      const g = getGeom(o, state.objects);
+      if (!g) return;
+      let dist = Infinity;
+      if (o.type === "point") {
+        dist = d2({
+          x,
+          y
+        }, {
+          x: o.x,
+          y: o.y
+        });
+        if (dist < bdPoint) {
+          bdPoint = dist;
+          bestPoint = o;
+        }
+      } else if (o.type === "intersection") {
+        dist = d2({
+          x,
+          y
+        }, {
+          x: o.computedX ?? 0,
+          y: o.computedY ?? 0
+        });
+        if (dist < bdPoint) {
+          bdPoint = dist;
+          bestPoint = o;
+        }
+      } else if (o.type === "line") {
+        const {
+            p1,
+            p2
+          } = g,
+          dx = p2.x - p1.x,
+          dy = p2.y - p1.y,
+          l2 = dx * dx + dy * dy;
+        if (l2 > 0) {
+          const t = Math.max(0, Math.min(1, ((x - p1.x) * dx + (y - p1.y) * dy) / l2));
+          dist = d2({
+            x,
+            y
+          }, {
+            x: p1.x + t * dx,
+            y: p1.y + t * dy
+          });
+        }
+        if (dist < bdLine) {
+          bdLine = dist;
+          bestLine = o;
+        }
+      } else if (o.type === "circle") {
+        dist = Math.abs(d2({
+          x,
+          y
+        }, g.center) - g.radius);
+        if (dist < bdLine) {
+          bdLine = dist;
+          bestLine = o;
+        }
+      }
+    });
+    if (bestPoint) return bestPoint;
+    return bestLine;
+  }, [state.objects]);
+
+  // ============================================================
+  // FORGED TOOL APPLICATION
+  // ============================================================
+  const currentInput = activeForgeTool ? activeForgeTool.inputs[forgeToolPending.length] : null;
+  const startApplyForgeTool = useCallback(ft => {
+    if (!ft.inputs || ft.inputs.length === 0) {
+      say(`L'outil « ${ft.name} » n'a pas d'entrées définies.`);
+      return;
+    }
+    setActiveForgeTool(ft);
+    setForgeToolPending([]);
+    // Do NOT exit forge mode — we may be composing tools inside a Forge session
+    // Just clear pending construction clicks; keep forgeMode and forgeSteps intact
+    setPending([]);
+    const first = ft.inputs[0];
+    const inForge = forgeMode ? " [en cours de Forge]" : "";
+    say(`Outil « ${ft.name} »${inForge} : clique ${first.prompt || `un(e) ${first.type} (entrée 1/${ft.inputs.length})`}`);
+  }, [say, forgeMode]);
+  const handleForgeToolClick = useCallback((x, y) => {
+    if (!activeForgeTool) return false;
+    const inp = activeForgeTool.inputs[forgeToolPending.length];
+    if (!inp) return false;
+
+    // Find the clicked object matching the expected type
+    const acceptedTypes = inp.type === "point" ? ["point", "intersection"] : [inp.type];
+    const obj = nearest(x, y, acceptedTypes, [], 18);
+    if (!obj) {
+      say(`Attendu : ${inp.prompt || inp.type}. Clique sur un objet valide.`);
+      return true;
+    }
+    const newPending = [...forgeToolPending, {
+      originalId: inp.id,
+      newId: obj.id
+    }];
+    setForgeToolPending(newPending);
+    if (newPending.length < activeForgeTool.inputs.length) {
+      const next = activeForgeTool.inputs[newPending.length];
+      say(`« ${activeForgeTool.name} » : clique ${next.prompt || `un(e) ${next.type} (entrée ${newPending.length + 1}/${activeForgeTool.inputs.length})`}`);
+    } else {
+      // All inputs collected — replay the construction
+      const bindings = {};
+      newPending.forEach(b => {
+        bindings[b.originalId] = b.newId;
+      });
+      const newObjs = applyForgedTool(activeForgeTool, bindings, state.objects);
+      if (newObjs.length === 0) {
+        say(`Impossible d'appliquer « ${activeForgeTool.name} » avec ces objets.`);
+      } else {
+        dispatchWithHistory({
+          type: "ADD_MANY",
+          objs: newObjs
+        });
+        // If we are currently in Forge recording mode, register ALL produced
+        // objects (visible + hidden) as forge steps so they can be referenced
+        // by outer input/output marking — this is what allows forged tools
+        // to compose into higher-level forged tools.
+        if (forgeMode) {
+          setForgeSteps(s => [...s, ...newObjs]);
+        }
+        const outputObjs = newObjs.filter(o => o.visibility === "visible");
+        const outLabels = outputObjs.map(o => o.label).join(", ") || newObjs.slice(-1)[0]?.label;
+        say(`✅ « ${activeForgeTool.name} » appliqué ! Résultat : ${outLabels}`);
+      }
+      setActiveForgeTool(null);
+      setForgeToolPending([]);
+    }
+    return true;
+  }, [activeForgeTool, forgeToolPending, nearest, state.objects, forgeMode, say]);
+
+  // ============================================================
+  // CANVAS CLICK HANDLER
+  // ============================================================
+  const handleClick = useCallback(e => {
+    if (e.button !== 0 || isPanning || dragging) return;
+    if (ctxMenu) {
+      setCtxMenu(null);
+      return;
+    }
+    const {
+      x,
+      y
+    } = svgPt(e.clientX, e.clientY);
+    const objs = state.objects;
+
+    // Forged tool application mode
+    if (activeForgeTool) {
+      handleForgeToolClick(x, y);
+      return;
+    }
+
+    // Forge marking phases (mark inputs / outputs)
+    if (forgeMode && (forgePhase === "mark_inputs" || forgePhase === "mark_outputs")) {
+      const candidates = nearestAll(x, y, null, [], 22);
+      if (!candidates.length) return;
+      const applyPick = obj => {
+        if (forgePhase === "mark_inputs") {
+          if (forgeInputIds.includes(obj.id)) {
+            setForgeInputIds(ids => ids.filter(id => id !== obj.id));
+            say("Entrée " + obj.label + " désélectionnée.");
+          } else {
+            setForgeInputIds(ids => [...ids, obj.id]);
+            say("Entrée " + obj.label + " sélectionnée.");
+          }
+        } else {
+          if (forgeOutputIds.includes(obj.id)) {
+            setForgeOutputIds(ids => ids.filter(id => id !== obj.id));
+            say("Sortie " + obj.label + " désélectionnée.");
+          } else {
+            setForgeOutputIds(ids => [...ids, obj.id]);
+            say("Sortie " + obj.label + " sélectionnée.");
+          }
+        }
+      };
+      if (candidates.length === 1) {
+        applyPick(candidates[0]);
+      } else {
+        setPickMenu({ x: e.clientX, y: e.clientY, candidates, onPick: applyPick });
+      }
+      return;
+    }
+    if (tool === TOOLS.SELECT) {
+      const candidates = nearestAll(x, y, null, [], 20);
+      if (!candidates.length) { setSelId(null); return; }
+      if (candidates.length === 1) { setSelId(candidates[0].id); return; }
+      setPickMenu({ x: e.clientX, y: e.clientY, candidates, onPick: obj => setSelId(obj.id) });
+      return;
+    }
+    if (tool === TOOLS.POINT) {
+      const snap = nearest(x, y, ["point", "intersection"], [], 14);
+      if (!snap) {
+        const lbl = nextPointLbl(objs);
+        const pt = {
+          type: "point",
+          id: uid(),
+          x,
+          y,
+          visibility: VIS.VISIBLE,
+          label: lbl
+        };
+        dispatchWithHistory({
+          type: "ADD",
+          obj: pt
+        });
+        if (forgeMode) setForgeSteps(s => [...s, pt]);
+        say(`Point ${lbl} placé.`);
+      }
+      return;
+    }
+    if (tool === TOOLS.REGLE) {
+      let cur = objs,
+        snap = nearest(x, y, ["point", "intersection"], [], 14),
+        pt;
+      if (snap) {
+        pt = snap;
+      } else {
+        pt = {
+          type: "point",
+          id: uid(),
+          x,
+          y,
+          visibility: VIS.VISIBLE,
+          label: nextPointLbl(cur)
+        };
+        dispatchWithHistory({
+          type: "ADD",
+          obj: pt
+        });
+        cur = [...cur, pt];
+        if (forgeMode) setForgeSteps(s => [...s, pt]);
+      }
+      const nxt = [...pending, pt];
+      if (nxt.length === 2) {
+        const lbl = nextLineLbl(cur);
+        const line = {
+          type: "line",
+          id: uid(),
+          parentIds: [nxt[0].id, nxt[1].id],
+          visibility: VIS.VISIBLE,
+          label: lbl
+        };
+        dispatchWithHistory({
+          type: "ADD",
+          obj: line
+        });
+        if (forgeMode) setForgeSteps(s => [...s, line]);
+        say(`Droite ${lbl} tracée par ${nxt[0].label} et ${nxt[1].label}.`);
+        setPending([]);
+      } else setPending(nxt);
+      return;
+    }
+    if (tool === TOOLS.COMPAS) {
+      let cur = objs,
+        snap = nearest(x, y, ["point", "intersection"], [], 14),
+        pt;
+      if (snap) {
+        pt = snap;
+      } else {
+        pt = {
+          type: "point",
+          id: uid(),
+          x,
+          y,
+          visibility: VIS.VISIBLE,
+          label: nextPointLbl(cur)
+        };
+        dispatchWithHistory({
+          type: "ADD",
+          obj: pt
+        });
+        cur = [...cur, pt];
+        if (forgeMode) setForgeSteps(s => [...s, pt]);
+      }
+      const nxt = [...pending, pt];
+      if (nxt.length === 2) {
+        const lbl = nextCircleLbl(cur);
+        const circ = {
+          type: "circle",
+          id: uid(),
+          parentIds: [nxt[0].id, nxt[1].id],
+          visibility: VIS.VISIBLE,
+          label: lbl
+        };
+        dispatchWithHistory({
+          type: "ADD",
+          obj: circ
+        });
+        if (forgeMode) setForgeSteps(s => [...s, circ]);
+        say(`Cercle ${lbl} centré en ${nxt[0].label}.`);
+        setPending([]);
+      } else setPending(nxt);
+      return;
+    }
+    if (tool === TOOLS.INTERSECTION) {
+      const obj = nearest(x, y, ["line", "circle"], [], 18);
+      if (!obj) {
+        say("Clique sur une droite ou un cercle.");
+        return;
+      }
+      const nxt = [...pending, obj];
+      if (nxt.length === 2) {
+        const [a, b] = nxt,
+          ag = getGeom(a, objs),
+          bg = getGeom(b, objs);
+        let pts = [];
+        if (a.type === "line" && b.type === "line") {
+          const ip = llX(ag.p1, ag.p2, bg.p1, bg.p2);
+          if (ip) pts = [ip];
+        } else if (a.type === "circle" && b.type === "circle") pts = ccX(ag.center, ag.radius, bg.center, bg.radius);else {
+          const ln = a.type === "line" ? ag : bg,
+            ci = a.type === "circle" ? ag : bg;
+          pts = lcX(ln.p1, ln.p2, ci.center, ci.radius);
+        }
+        if (!pts.length) {
+          say("L'Oracle avertit : pas d'intersection ici.");
+          setPending([]);
+          return;
+        }
+        let cur = objs;
+        const lbls = [];
+        pts.forEach((p, i) => {
+          const lbl = nextPointLbl(cur);
+          const iObj = {
+            type: "intersection",
+            id: uid(),
+            parentIds: [a.id, b.id],
+            intersectionIndex: i,
+            computedX: p.x,
+            computedY: p.y,
+            visibility: VIS.VISIBLE,
+            label: lbl
+          };
+          dispatchWithHistory({
+            type: "ADD",
+            obj: iObj
+          });
+          cur = [...cur, iObj];
+          if (forgeMode) setForgeSteps(s => [...s, iObj]);
+          lbls.push(lbl);
+        });
+        say(`Intersection(s) : ${lbls.join(", ")}.`);
+        setPending([]);
+      } else {
+        setPending(nxt);
+        say(`Objet « ${obj.label} » sélectionné — clique le 2ᵉ objet.`);
+      }
+      return;
+    }
+  }, [tool, pending, svgPt, nearest, state.objects, forgeMode, forgePhase, forgeInputIds, forgeOutputIds, isPanning, dragging, ctxMenu, activeForgeTool, handleForgeToolClick, say]);
+
+  // ---- Mouse events ----
+  const handleMouseDown = useCallback(e => {
+    if (e.button === 1 || e.button === 0 && e.altKey) {
+      setIsPanning(true);
+      setPanStart({
+        x: e.clientX - pan.x,
+        y: e.clientY - pan.y
+      });
+      return;
+    }
+    if (e.button !== 0) return;
+    if (tool === TOOLS.SELECT && !activeForgeTool) {
+      const {
+        x,
+        y
+      } = svgPt(e.clientX, e.clientY);
+      const obj = nearest(x, y, ["point", "intersection"], [], 14);
+      if (obj?.type === "point") {
+        setDragging({
+          id: obj.id
+        });
+        e.preventDefault();
+      }
+    }
+  }, [svgPt, nearest, tool, pan, activeForgeTool]);
+  const handleMouseMove = useCallback(e => {
+    const {
+      x,
+      y
+    } = svgPt(e.clientX, e.clientY);
+    setMouse({
+      x,
+      y
+    });
+    if (isPanning && panStart) {
+      setPan({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y
+      });
+      return;
+    }
+    if (dragging) dispatchWithHistory({
+      type: "MOVE",
+      id: dragging.id,
+      x,
+      y
+    });
+  }, [dragging, svgPt, isPanning, panStart]);
+  const handleMouseUp = useCallback(() => {
+    if (isPanning) {
+      setIsPanning(false);
+      setPanStart(null);
+    }
+    if (dragging) {
+      setDragging(null);
+      say("L'Oracle valide : ta construction reste cohérente !");
+    }
+  }, [dragging, isPanning, say]);
+  const handleWheel = useCallback(e => {
+    e.preventDefault();
+    const f = e.deltaY < 0 ? 1.1 : 0.9;
+    const rect = svgRef.current.getBoundingClientRect();
+    const mx = e.clientX - rect.left,
+      my = e.clientY - rect.top;
+    setPan(p => ({
+      x: mx - (mx - p.x) * f,
+      y: my - (my - p.y) * f
+    }));
+    setZoom(z => Math.max(0.1, Math.min(10, z * f)));
+  }, []);
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    el.addEventListener("wheel", handleWheel, {
+      passive: false
+    });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [handleWheel]);
+
+  // Global keyboard shortcut: Ctrl+Z / Cmd+Z = undo
+  useEffect(() => {
+    const onKey = e => {
+      // Ignore when typing in an input/textarea
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undo]);
+
+  // ---- Context menu ----
+  const handleCtx = useCallback(e => {
+    e.preventDefault();
+    const {
+      x,
+      y
+    } = svgPt(e.clientX, e.clientY);
+    setCtxMenu({
+      x: e.clientX,
+      y: e.clientY,
+      obj: nearest(x, y, null)
+    });
+  }, [svgPt, nearest]);
+  const cycleVis = obj => {
+    const ord = [VIS.VISIBLE, VIS.FAINT, VIS.HIDDEN];
+    dispatchWithHistory({
+      type: "VIS",
+      id: obj.id,
+      vis: ord[(ord.indexOf(obj.visibility) + 1) % 3]
+    });
+    setCtxMenu(null);
+  };
+
+  // ---- Tool switching ----
+  const switchTool = t => {
+    setTool(t);
+    setPending([]);
+    const msgs = {
+      [TOOLS.SELECT]: "Mode Sélection. Clique pour sélectionner, glisse un point pour le déplacer.",
+      [TOOLS.POINT]: "Outil Point. Clique sur le canvas pour placer un point libre nommé A, B, C…",
+      [TOOLS.REGLE]: "Outil Règle. Clique deux points pour tracer une droite (d).",
+      [TOOLS.COMPAS]: "Outil Compas. 1er clic : centre. 2e clic : point de rayon.",
+      [TOOLS.INTERSECTION]: "Outil Intersection. Clique deux droites ou cercles → intersection(s)."
+    };
+    say(msgs[t] ?? "");
+  };
+
+  // ============================================================
+  // FORGE WORKFLOW
+  // ============================================================
+  const startForge = () => {
+    setPreForgeTool(tool);
+    setForgeMode(true);
+    setForgePhase("record");
+    setForgeSteps([]);
+    setForgeInputIds([]);
+    setForgeOutputIds([]);
+    setForgeName("");
+    setShowForgePanel(true);
+    setForgeObjectsSnapshot([...state.objects]);
+    if (tool === TOOLS.SELECT) switchTool(TOOLS.REGLE);
+    say("Mode Forge activé ! Construis ta séquence avec les outils habituels.");
+  };
+  const advanceToMarkInputs = () => {
+    if (forgeSteps.length === 0) {
+      say("Construis d'abord quelque chose avant de marquer les entrées.");
+      return;
+    }
+    setForgePhase("mark_inputs");
+    say("Phase Entrées : clique les objets de départ (ex: les deux points A et B pour une médiatrice).");
+  };
+  const advanceToMarkOutputs = () => {
+    if (forgeInputIds.length === 0) {
+      say("Marque au moins une entrée.");
+      return;
+    }
+    setForgePhase("mark_outputs");
+    say("Phase Sorties : clique les objets résultats (ex: la droite médiatrice elle-même).");
+  };
+  const finalizeForge = () => {
+    if (!forgeName.trim() || forgeSteps.length === 0) return;
+    if (forgeOutputIds.length === 0) {
+      say("Marque au moins une sortie avant de forger.");
+      return;
+    }
+    const hue = (forgeSteps.length * 53 + 200) % 360;
+
+    // Build input descriptors with prompts
+    const inputs = forgeInputIds.map((id, idx) => {
+      const obj = state.objects.find(o => o.id === id) || forgeSteps.find(s => s.id === id);
+      const typeLabel = obj?.type === "point" || obj?.type === "intersection" ? "point" : obj?.type || "objet";
+      return {
+        id,
+        type: typeLabel,
+        label: obj?.label || `entrée ${idx + 1}`,
+        prompt: buildPrompt(typeLabel, idx, forgeInputIds.length, forgeName.trim()),
+        originalObj: obj ? {
+          ...obj
+        } : null
+      };
+    });
+
+    // Build output descriptors
+    const outputs = forgeOutputIds.map((id, idx) => {
+      const obj = state.objects.find(o => o.id === id) || forgeSteps.find(s => s.id === id);
+      return {
+        id,
+        type: obj?.type || "objet",
+        label: obj?.label || `sortie ${idx + 1}`,
+        originalObj: obj ? {
+          ...obj
+        } : null
+      };
+    });
+
+    // Build full step snapshots (only non-input intermediate objects)
+    const allStepObjs = forgeSteps.map(s => ({
+      ...s
+    }));
+    const toolObj = {
+      id: `ft_${Date.now()}`,
+      name: forgeName.trim(),
+      steps: allStepObjs,
+      inputs,
+      outputs,
+      color: `hsl(${hue},70%,65%)`
+    };
+    dispatchWithHistory({
+      type: "FORGE",
+      tool: toolObj
+    });
+    const ch = ROADMAP.flatMap(l => l.challenges).find(c => c.name.toLowerCase() === forgeName.trim().toLowerCase());
+    if (ch) {
+      dispatchWithHistory({
+        type: "UNLOCK",
+        id: ch.id
+      });
+      say(`🎉 Défi débloqué : « ${ch.name} » !`);
+    } else say(`Outil « ${forgeName.trim()} » forgé ! ${inputs.length} entrée(s), ${outputs.length} sortie(s).`);
+    setForgeMode(false);
+    setShowForgePanel(false);
+    setForgePhase("record");
+    setForgeSteps([]);
+    setForgeInputIds([]);
+    setForgeOutputIds([]);
+    setPending([]);
+    switchTool(TOOLS.SELECT);
+  };
+  const cancelForge = () => {
+    setForgeMode(false);
+    setShowForgePanel(false);
+    setForgePhase("record");
+    setForgeSteps([]);
+    setForgeInputIds([]);
+    setForgeOutputIds([]);
+    setPending([]);
+    switchTool(preForgeTool === TOOLS.SELECT ? TOOLS.SELECT : preForgeTool);
+    say("Mode Forge annulé.");
+  };
+  function buildPrompt(typeLabel, idx, total, toolName) {
+    if (total === 1) return `un(e) ${typeLabel} pour « ${toolName} »`;
+    if (total === 2) {
+      return idx === 0 ? `la 1ʳᵉ extrémité (${typeLabel})` : `la 2ᵉ extrémité (${typeLabel})`;
+    }
+    return `l'entrée ${idx + 1}/${total} (${typeLabel})`;
+  }
+
+  // ---- Exports ----
+  const triggerDownload = (href, filename) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(href);
+    }, 1000);
+  };
+  const exportJSON = () => {
+    const b = new Blob([JSON.stringify({
+      ...state,
+      date: new Date().toISOString()
+    }, null, 2)], {
+      type: "application/json"
+    });
+    triggerDownload(URL.createObjectURL(b), "constructor.json");
+  };
+  const importJSON = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        dispatchWithHistory({
+          type: "LOAD",
+          state: JSON.parse(ev.target.result)
+        });
+        say("Fichier importé !");
+      } catch {
+        say("Erreur d'importation.");
+      }
+    };
+    r.readAsText(f);
+    e.target.value = "";
+  };
+  const exportSVG = () => {
+    const s = svgRef.current;
+    if (!s) return;
+    const clone = s.cloneNode(true);
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    bg.setAttribute("width", "100%");
+    bg.setAttribute("height", "100%");
+    bg.setAttribute("fill", "#030712");
+    clone.insertBefore(bg, clone.firstChild);
+    const b = new Blob([new XMLSerializer().serializeToString(clone)], {
+      type: "image/svg+xml"
+    });
+    triggerDownload(URL.createObjectURL(b), "constructor.svg");
+  };
+  const exportJPG = () => {
+    const s = svgRef.current;
+    if (!s) return;
+    const rect = s.getBoundingClientRect();
+    const w = Math.round(rect.width),
+      h = Math.round(rect.height);
+
+    // Build a standalone SVG string with an explicit background rect.
+    // Use a base64 data URL (not ObjectURL) so that internal SVG references
+    // (patterns, filters, gradients) resolve correctly when loaded into <img>.
+    const clone = s.cloneNode(true);
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    clone.setAttribute("width", w);
+    clone.setAttribute("height", h);
+    clone.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    // Insert background as very first child
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    bg.setAttribute("x", "0");
+    bg.setAttribute("y", "0");
+    bg.setAttribute("width", w);
+    bg.setAttribute("height", h);
+    bg.setAttribute("fill", "#030712");
+    clone.insertBefore(bg, clone.firstChild);
+    const svgStr = new XMLSerializer().serializeToString(clone);
+    // Encode as base64 data URL — this makes internal url(#id) refs work in <img>
+    const b64 = btoa(unescape(encodeURIComponent(svgStr)));
+    const dataUrl = "data:image/svg+xml;base64," + b64;
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#030712";
+    ctx.fillRect(0, 0, w, h);
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => {
+        if (blob) triggerDownload(URL.createObjectURL(blob), "constructor.jpg");else say("Erreur : impossible de générer le JPG.");
+      }, "image/jpeg", 0.95);
+    };
+    img.onerror = () => say("Erreur lors du rendu SVG → JPG.");
+    img.src = dataUrl;
+  };
+
+  // ---- Challenge status ----
+  const chStatus = ch => {
+    if (state.unlockedChallenges.includes(ch.id)) return "ok";
+    return ch.prereqs.every(p => state.unlockedChallenges.includes(p)) ? "forge" : "locked";
+  };
+
+  // ---- Label edit ----
+  const openLabel = id => {
+    const o = state.objects.find(x => x.id === id);
+    if (!o) return;
+    setLabelEdit({
+      id,
+      value: o.label || ""
+    });
+    setTimeout(() => labelRef.current?.focus(), 50);
+  };
+  const commitLabel = () => {
+    if (labelEdit) dispatchWithHistory({
+      type: "LABEL",
+      id: labelEdit.id,
+      label: labelEdit.value
+    });
+    setLabelEdit(null);
+  };
+
+  // ---- Snap candidate ----
+  const snapObj = mouse ? nearest(mouse.x, mouse.y, ["point", "intersection"], [], 14) : null;
+
+  // ============================================================
+  // RENDER OBJECTS
+  // ============================================================
+  const renderObjs = () => {
+    const bg = state.objects.filter(o => o.type === "line" || o.type === "circle");
+    const fg = state.objects.filter(o => o.type === "point" || o.type === "intersection");
+    return [...bg, ...fg].map(obj => {
+      if (obj.visibility === VIS.HIDDEN) return null;
+      const sel = selId === obj.id,
+        hov = hovered === obj.id,
+        faint = obj.visibility === VIS.FAINT;
+      const snap = snapObj?.id === obj.id;
+      const opacity = faint ? 0.15 : 1;
+
+      // Forge highlighting
+      const isForgeIn = forgeMode && forgeInputIds.includes(obj.id);
+      const isForgeOut = forgeMode && forgeOutputIds.includes(obj.id);
+      const isForgeStep = forgeMode && forgeSteps.some(s => s.id === obj.id);
+
+      // Forged tool application: highlight expected input type
+      const isForgeToolTarget = activeForgeTool && currentInput && (currentInput.type === "point" ? obj.type === "point" || obj.type === "intersection" : obj.type === currentInput.type) && forgeToolPending.every(b => b.newId !== obj.id);
+      const isForgeToolBound = activeForgeTool && forgeToolPending.some(b => b.newId === obj.id);
+      let accent = sel ? COL.sel : hov ? COL.hov : null;
+      if (isForgeIn) accent = COL.forgeIn;
+      if (isForgeOut) accent = COL.forgeOut;
+      if (isForgeToolBound) accent = COL.forgeOut;
+      if (obj.type === "point") {
+        const r = sel || hov ? 7 : snap || isForgeToolTarget ? 9 : 5;
+        return /*#__PURE__*/React.createElement("g", {
+          key: obj.id,
+          opacity: opacity,
+          onMouseEnter: () => setHovered(obj.id),
+          onMouseLeave: () => setHovered(null),
+          onDoubleClick: () => openLabel(obj.id),
+          style: {
+            cursor: tool === TOOLS.SELECT ? "grab" : "crosshair"
+          }
+        }, (snap && !sel || isForgeToolTarget) && /*#__PURE__*/React.createElement("circle", {
+          cx: obj.x,
+          cy: obj.y,
+          r: 15,
+          fill: "none",
+          stroke: isForgeToolTarget ? "#fb923c" : "#60a5fa",
+          strokeWidth: "1.5",
+          strokeDasharray: "4 3",
+          opacity: "0.6"
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: obj.x,
+          cy: obj.y,
+          r: r,
+          fill: accent || COL.point,
+          stroke: sel ? "#fbbf24" : isForgeIn ? "#ea580c" : isForgeOut ? "#16a34a" : "#172554",
+          strokeWidth: "2"
+        }), obj.label && /*#__PURE__*/React.createElement(ObjLabel, {
+          text: obj.label,
+          x: obj.x + 9,
+          y: obj.y - 9,
+          kind: "point"
+        }));
+      }
+      if (obj.type === "intersection") {
+        const px = obj.computedX,
+          py = obj.computedY;
+        if (px == null || py == null) return null;
+        const r = sel || hov ? 7 : 5;
+        return /*#__PURE__*/React.createElement("g", {
+          key: obj.id,
+          opacity: opacity,
+          onMouseEnter: () => setHovered(obj.id),
+          onMouseLeave: () => setHovered(null),
+          onDoubleClick: () => openLabel(obj.id)
+        }, isForgeToolTarget && /*#__PURE__*/React.createElement("circle", {
+          cx: px,
+          cy: py,
+          r: 15,
+          fill: "none",
+          stroke: "#fb923c",
+          strokeWidth: "1.5",
+          strokeDasharray: "4 3",
+          opacity: "0.6"
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: px,
+          cy: py,
+          r: r,
+          fill: accent || COL.inter,
+          stroke: isForgeIn ? "#ea580c" : isForgeOut ? "#16a34a" : "#022c22",
+          strokeWidth: "2"
+        }), obj.label && /*#__PURE__*/React.createElement(ObjLabel, {
+          text: obj.label,
+          x: px + 9,
+          y: py - 9,
+          kind: "point"
+        }));
+      }
+      if (obj.type === "line") {
+        const g = getGeom(obj, state.objects);
+        if (!g) return null;
+        const {
+            p1,
+            p2
+          } = g,
+          dx = p2.x - p1.x,
+          dy = p2.y - p1.y,
+          len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 1e-6) return null;
+        const ux = dx / len,
+          uy = dy / len,
+          ext = 5000;
+        const mid = {
+          x: (p1.x + p2.x) / 2,
+          y: (p1.y + p2.y) / 2
+        };
+        const strokeColor = accent || (isForgeOut ? COL.forgeOut : COL.line);
+        // During forge marking: disable pointer events on lines so points behind are reachable
+        const forgeMarking = forgeMode && (forgePhase === "mark_inputs" || forgePhase === "mark_outputs");
+        return /*#__PURE__*/React.createElement("g", {
+          key: obj.id,
+          opacity: opacity,
+          onMouseEnter: () => !forgeMarking && setHovered(obj.id),
+          onMouseLeave: () => setHovered(null),
+          style: forgeMarking ? {
+            pointerEvents: "none"
+          } : {}
+        }, /*#__PURE__*/React.createElement("line", {
+          x1: p1.x - ux * ext,
+          y1: p1.y - uy * ext,
+          x2: p1.x + ux * ext,
+          y2: p1.y + uy * ext,
+          stroke: "transparent",
+          strokeWidth: "14",
+          style: {
+            cursor: "pointer"
+          }
+        }), /*#__PURE__*/React.createElement("line", {
+          x1: p1.x - ux * ext,
+          y1: p1.y - uy * ext,
+          x2: p1.x + ux * ext,
+          y2: p1.y + uy * ext,
+          stroke: strokeColor,
+          strokeWidth: sel || hov || isForgeOut ? 2.5 : 1.5,
+          strokeDasharray: faint ? "8 5" : "none"
+        }), obj.label && /*#__PURE__*/React.createElement(ObjLabel, {
+          text: obj.label,
+          x: mid.x + 10,
+          y: mid.y - 10,
+          kind: "line"
+        }));
+      }
+      if (obj.type === "circle") {
+        const g = getGeom(obj, state.objects);
+        if (!g) return null;
+        const {
+          center,
+          radius
+        } = g;
+        if (radius < 1) return null;
+        const strokeColor = accent || (isForgeOut ? COL.forgeOut : COL.circle);
+        const forgeMarking = forgeMode && (forgePhase === "mark_inputs" || forgePhase === "mark_outputs");
+        return /*#__PURE__*/React.createElement("g", {
+          key: obj.id,
+          opacity: opacity,
+          onMouseEnter: () => !forgeMarking && setHovered(obj.id),
+          onMouseLeave: () => setHovered(null),
+          style: forgeMarking ? {
+            pointerEvents: "none"
+          } : {}
+        }, /*#__PURE__*/React.createElement("circle", {
+          cx: center.x,
+          cy: center.y,
+          r: radius,
+          fill: "none",
+          stroke: "transparent",
+          strokeWidth: "14",
+          style: {
+            cursor: "pointer"
+          }
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: center.x,
+          cy: center.y,
+          r: radius,
+          fill: "none",
+          stroke: strokeColor,
+          strokeWidth: sel || hov || isForgeOut ? 2.5 : 1.5,
+          strokeDasharray: faint ? "8 5" : "none"
+        }), obj.label && /*#__PURE__*/React.createElement(ObjLabel, {
+          text: obj.label,
+          x: center.x + radius * 0.68,
+          y: center.y - radius * 0.68,
+          kind: "circle"
+        }));
+      }
+      return null;
+    });
+  };
+
+  // Preview ghost
+  const renderPreview = () => {
+    if (!mouse || !pending.length) return null;
+    const fp = pending[0];
+    const fc = fp.type === "point" ? {
+      x: fp.x,
+      y: fp.y
+    } : {
+      x: fp.computedX ?? 0,
+      y: fp.computedY ?? 0
+    };
+    if (tool === TOOLS.REGLE) {
+      const dx = mouse.x - fc.x,
+        dy = mouse.y - fc.y,
+        len = Math.sqrt(dx * dx + dy * dy);
+      if (len < 2) return null;
+      const ux = dx / len,
+        uy = dy / len;
+      return /*#__PURE__*/React.createElement("line", {
+        x1: fc.x - ux * 5000,
+        y1: fc.y - uy * 5000,
+        x2: fc.x + ux * 5000,
+        y2: fc.y + uy * 5000,
+        stroke: "#60a5fa",
+        strokeWidth: "1",
+        strokeDasharray: "8 5",
+        opacity: "0.35"
+      });
+    }
+    if (tool === TOOLS.COMPAS) {
+      const r = d2(fc, mouse);
+      if (r < 2) return null;
+      return /*#__PURE__*/React.createElement("circle", {
+        cx: fc.x,
+        cy: fc.y,
+        r: r,
+        fill: "none",
+        stroke: "#60a5fa",
+        strokeWidth: "1",
+        strokeDasharray: "8 5",
+        opacity: "0.35"
+      });
+    }
+    return null;
+  };
+  const GS = 40;
+  const selObj = state.objects.find(o => o.id === selId);
+  const VL = {
+    visible: "Visible",
+    faint: "Pâle",
+    hidden: "Caché"
+  };
+  const VN = {
+    visible: "→ Pâle",
+    faint: "→ Caché",
+    hidden: "→ Visible"
+  };
+  const TL = {
+    point: "Point",
+    intersection: "Intersection",
+    line: "Droite",
+    circle: "Cercle"
+  };
+
+  // ============================================================
+  // FORGE PANEL UI
+  // ============================================================
+  const renderForgePanel = () => {
+    if (!forgeMode || !showForgePanel) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "panel-floating forge-panel"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "forge-title"
+    }, "\u2692 Mode Forge"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        marginLeft: "auto",
+        fontSize: 10,
+        color: "#7c3aed",
+        fontFamily: "monospace"
+      }
+    }, forgeSteps.length, " \xE9tape(s)")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4,
+        marginBottom: 12
+      }
+    }, ["record", "mark_inputs", "mark_outputs", "confirm"].map((ph, i) => {
+      const labels = ["1. Construire", "2. Entrées", "3. Sorties", "4. Nommer"];
+      const active = forgePhase === ph;
+      const done = ["record", "mark_inputs", "mark_outputs", "confirm"].indexOf(forgePhase) > i;
+      return /*#__PURE__*/React.createElement("div", {
+        key: ph,
+        style: {
+          flex: 1,
+          textAlign: "center",
+          fontSize: 9,
+          fontWeight: 600,
+          padding: "3px 2px",
+          borderRadius: 5,
+          fontFamily: "monospace",
+          background: active ? "#5b21b6" : done ? "#2e1065" : "#1a1035",
+          color: active ? "#e9d5ff" : done ? "#7c3aed" : "#4c1d95",
+          border: `1px solid ${active ? "#7c3aed" : "#2e1065"}`
+        }
+      }, done ? "✓ " : "", labels[i]);
+    })), forgePhase === "record" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 10,
+        color: "#a78bfa",
+        marginBottom: 8,
+        lineHeight: 1.5
+      }
+    }, "Utilise les outils habituels pour construire ta s\xE9quence sur le canvas."), forgeSteps.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "forge-steps"
+    }, forgeSteps.map(s => {
+      const pfx = s.type === "point" ? "· " : s.type === "line" ? "— " : s.type === "circle" ? "○ " : "✕ ";
+      return /*#__PURE__*/React.createElement("div", {
+        key: s.id,
+        className: "forge-step"
+      }, pfx, /*#__PURE__*/React.createElement("b", null, s.label), " ", /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "#5b21b6"
+        }
+      }, "(", s.type, ")"));
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "forge-btns",
+      style: {
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "forge-cancel",
+      onClick: cancelForge
+    }, "Annuler"), /*#__PURE__*/React.createElement("button", {
+      className: "forge-go",
+      onClick: advanceToMarkInputs,
+      disabled: forgeSteps.length === 0
+    }, "Suivant \u2192 Entr\xE9es"))), forgePhase === "mark_inputs" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 10,
+        color: "#fb923c",
+        marginBottom: 8,
+        lineHeight: 1.5
+      }
+    }, /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: "#fdba74"
+      }
+    }, "Clique les objets d'entr\xE9e"), " (param\xE8tres de l'outil).", /*#__PURE__*/React.createElement("br", null), "Ex : les deux points A et B pour une m\xE9diatrice."), /*#__PURE__*/React.createElement("div", {
+      className: "forge-steps"
+    }, forgeInputIds.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "#7c3aed",
+        fontSize: 10
+      }
+    }, "Aucune entr\xE9e s\xE9lectionn\xE9e") : forgeInputIds.map(id => {
+      const o = state.objects.find(x => x.id === id) || forgeSteps.find(s => s.id === id);
+      return /*#__PURE__*/React.createElement("div", {
+        key: id,
+        style: {
+          color: "#fb923c",
+          fontSize: 10
+        }
+      }, "\u25B6 ", /*#__PURE__*/React.createElement("b", null, o?.label || id), " (", o?.type, ")");
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "forge-btns",
+      style: {
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "forge-cancel",
+      onClick: () => setForgePhase("record")
+    }, "\u2190 Retour"), /*#__PURE__*/React.createElement("button", {
+      className: "forge-go",
+      onClick: advanceToMarkOutputs,
+      disabled: forgeInputIds.length === 0
+    }, "Suivant \u2192 Sorties"))), forgePhase === "mark_outputs" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 10,
+        color: "#4ade80",
+        marginBottom: 8,
+        lineHeight: 1.5
+      }
+    }, /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: "#86efac"
+      }
+    }, "Clique les objets de sortie"), " (r\xE9sultats de l'outil).", /*#__PURE__*/React.createElement("br", null), "Ex : la droite m\xE9diatrice elle-m\xEAme."), /*#__PURE__*/React.createElement("div", {
+      className: "forge-steps"
+    }, forgeOutputIds.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: "#7c3aed",
+        fontSize: 10
+      }
+    }, "Aucune sortie s\xE9lectionn\xE9e") : forgeOutputIds.map(id => {
+      const o = state.objects.find(x => x.id === id) || forgeSteps.find(s => s.id === id);
+      return /*#__PURE__*/React.createElement("div", {
+        key: id,
+        style: {
+          color: "#4ade80",
+          fontSize: 10
+        }
+      }, "\u25C0 ", /*#__PURE__*/React.createElement("b", null, o?.label || id), " (", o?.type, ")");
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "forge-btns",
+      style: {
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "forge-cancel",
+      onClick: () => setForgePhase("mark_inputs")
+    }, "\u2190 Retour"), /*#__PURE__*/React.createElement("button", {
+      className: "forge-go",
+      onClick: () => setForgePhase("confirm"),
+      disabled: forgeOutputIds.length === 0
+    }, "Suivant \u2192 Nommer"))), forgePhase === "confirm" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "#a78bfa",
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#fb923c"
+      }
+    }, "\u25B6 Entr\xE9es :"), " ", forgeInputIds.map(id => {
+      const o = state.objects.find(x => x.id === id) || forgeSteps.find(s => s.id === id);
+      return o?.label || id;
+    }).join(", ")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#4ade80"
+      }
+    }, "\u25C0 Sorties :"), " ", forgeOutputIds.map(id => {
+      const o = state.objects.find(x => x.id === id) || forgeSteps.find(s => s.id === id);
+      return o?.label || id;
+    }).join(", "))), /*#__PURE__*/React.createElement("input", {
+      className: "forge-input",
+      value: forgeName,
+      onChange: e => setForgeName(e.target.value),
+      placeholder: "Nom de l'outil (ex : M\xE9diatrice)",
+      onKeyDown: e => {
+        if (e.key === "Enter") finalizeForge();
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "forge-btns"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "forge-cancel",
+      onClick: () => setForgePhase("mark_outputs")
+    }, "\u2190 Retour"), /*#__PURE__*/React.createElement("button", {
+      className: "forge-go",
+      onClick: finalizeForge,
+      disabled: !forgeName.trim()
+    }, "Forger \u2692"))));
+  };
+
+  // ============================================================
+  // FORGED TOOL APPLICATION BANNER
+  // ============================================================
+  const renderApplyBanner = () => {
+    if (!activeForgeTool) return null;
+    const inp = activeForgeTool.inputs[forgeToolPending.length];
+    const done = forgeToolPending.length;
+    const total = activeForgeTool.inputs.length;
+    const bgColor = forgeMode ? "rgba(55,20,100,.97)" : "rgba(120,53,15,.95)";
+    const borderColor = forgeMode ? "#7c3aed" : "#ea580c";
+    const nameColor = forgeMode ? "#c4b5fd" : "#fb923c";
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        top: 8,
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: bgColor,
+        border: `1px solid ${borderColor}`,
+        borderRadius: 12,
+        padding: "8px 16px",
+        fontSize: 11,
+        color: "#fed7aa",
+        pointerEvents: "none",
+        whiteSpace: "nowrap",
+        zIndex: 30,
+        fontFamily: "monospace"
+      }
+    }, forgeMode && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#a78bfa",
+        marginRight: 6
+      }
+    }, "\u2692 Forge \u2192"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: nameColor,
+        fontWeight: 700
+      }
+    }, "\u25C6 ", activeForgeTool.name), " — ", inp ? /*#__PURE__*/React.createElement(React.Fragment, null, "Clique ", /*#__PURE__*/React.createElement("b", null, inp.prompt || inp.type), " (", done + 1, "/", total, ")") : "✅ Application en cours…", "  ", forgeToolPending.map((b, i) => {
+      const o = state.objects.find(x => x.id === b.newId);
+      return /*#__PURE__*/React.createElement("span", {
+        key: i,
+        style: {
+          color: "#4ade80",
+          marginRight: 4
+        }
+      }, "\u2713", o?.label);
+    }));
+  };
+
+  // Pending badge
+  const renderPendingBadge = () => {
+    if (activeForgeTool || !pending.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "pending-badge"
+    }, tool === TOOLS.REGLE && `Droite : point ${pending[0]?.label} sélectionné — cliquez le 2ᵉ`, tool === TOOLS.COMPAS && `Compas : centre ${pending[0]?.label} — cliquez le point de rayon`, tool === TOOLS.INTERSECTION && `Intersection : « ${pending[0]?.label} » — cliquez le 2ᵉ objet`);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "app"
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "header"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand"
+  }, /*#__PURE__*/React.createElement(BoaLogo, {
+    size: 42,
+    pulse: boaPulse
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "brand-text"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand-name"
+  }, "Constructor"), /*#__PURE__*/React.createElement("div", {
+    className: "brand-sub"
+  }, "g\xE9om\xE9trie dynamique"))), /*#__PURE__*/React.createElement("div", {
+    className: "sep"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "toolbar"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `tool-btn c-gray${tool === TOOLS.SELECT && !activeForgeTool ? " active" : ""}`,
+    onClick: () => {
+      setActiveForgeTool(null);
+      setForgeToolPending([]);
+      switchTool(TOOLS.SELECT);
+    },
+    title: "Mode S\xE9lection"
+  }, "\u2196 ", /*#__PURE__*/React.createElement("span", {
+    className: "tool-badge"
+  }, "Sel.")), /*#__PURE__*/React.createElement("div", {
+    className: "vsep"
+  }), /*#__PURE__*/React.createElement("button", {
+    className: `tool-btn c-blue${tool === TOOLS.POINT ? " active" : ""}`,
+    onClick: () => switchTool(TOOLS.POINT),
+    title: "Point libre A, B, C\u2026"
+  }, "\xB7 ", /*#__PURE__*/React.createElement("span", {
+    className: "tool-badge"
+  }, "A,B\u2026")), /*#__PURE__*/React.createElement("button", {
+    className: `tool-btn c-slate${tool === TOOLS.REGLE ? " active" : ""}`,
+    onClick: () => switchTool(TOOLS.REGLE),
+    title: "R\xE8gle \u2014 droite (d)"
+  }, "\u27CB ", /*#__PURE__*/React.createElement("span", {
+    className: "tool-badge"
+  }, "(d)")), /*#__PURE__*/React.createElement("button", {
+    className: `tool-btn c-slate${tool === TOOLS.COMPAS ? " active" : ""}`,
+    onClick: () => switchTool(TOOLS.COMPAS),
+    title: "Compas \u2014 cercle (c)"
+  }, "\u25EF ", /*#__PURE__*/React.createElement("span", {
+    className: "tool-badge"
+  }, "(c)")), /*#__PURE__*/React.createElement("button", {
+    className: `tool-btn c-emerald${tool === TOOLS.INTERSECTION ? " active" : ""}`,
+    onClick: () => switchTool(TOOLS.INTERSECTION),
+    title: "Intersection"
+  }, "\u2715"), /*#__PURE__*/React.createElement("div", {
+    className: "vsep"
+  }), /*#__PURE__*/React.createElement("button", {
+    className: `forge-btn${forgeMode ? " active" : ""}`,
+    onClick: forgeMode ? () => setShowForgePanel(true) : startForge,
+    title: forgeMode ? "Afficher le panneau Forge" : "Entrer en mode Forge"
+  }, "\u2692 Forge", forgeMode ? " …" : ""), state.forgedTools.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "vsep"
+  }), state.forgedTools.map(ft => /*#__PURE__*/React.createElement("button", {
+    key: ft.id,
+    className: `tool-btn c-forged${activeForgeTool?.id === ft.id ? " active" : ""}`,
+    style: {
+      color: ft.color,
+      borderColor: activeForgeTool?.id === ft.id ? ft.color : "transparent"
+    },
+    onClick: () => {
+      if (activeForgeTool?.id === ft.id) {
+        // Cancel sub-tool: if in forge mode, stay in forge mode
+        setActiveForgeTool(null);
+        setForgeToolPending([]);
+        if (!forgeMode) switchTool(TOOLS.SELECT);else say(`Outil « ${ft.name} » annulé. Continue la Forge.`);
+      } else startApplyForgeTool(ft);
+    },
+    title: `${ft.name} — entrées: ${ft.inputs?.map(i => i.label).join(", ") || "?"} → sorties: ${ft.outputs?.map(o => o.label).join(", ") || "?"}`
+  }, "\u25C6 ", /*#__PURE__*/React.createElement("span", {
+    className: "tool-badge",
+    style: {
+      color: ft.color
+    }
+  }, ft.name)))), /*#__PURE__*/React.createElement("div", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "action-btns"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `ab${showRoadmap ? " active" : ""}`,
+    onClick: () => setShowRoadmap(v => !v),
+    title: "Feuille de route"
+  }, "\uD83D\uDDFA"), /*#__PURE__*/React.createElement("button", {
+    className: `ab${showHelp ? " active" : ""}`,
+    onClick: () => setShowHelp(v => !v),
+    title: "Aide"
+  }, "?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 20,
+      background: "#1e293b",
+      margin: "0 2px"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "ab",
+    onClick: exportJSON,
+    title: "Exporter JSON"
+  }, "\uD83D\uDCBE"), /*#__PURE__*/React.createElement("label", {
+    className: "ab",
+    style: {
+      cursor: "pointer"
+    },
+    title: "Importer JSON"
+  }, "\uD83D\uDCC2", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: ".json",
+    style: {
+      display: "none"
+    },
+    onChange: importJSON
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "ab",
+    onClick: exportSVG,
+    title: "Exporter SVG"
+  }, "\u2B21 SVG"), /*#__PURE__*/React.createElement("button", {
+    className: "ab",
+    onClick: exportJPG,
+    title: "Exporter JPG"
+  }, "\uD83D\uDCF7 JPG"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 20,
+      background: "#1e293b",
+      margin: "0 2px"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: `ab${!canUndo ? " disabled" : ""}`,
+    onClick: undo,
+    disabled: !canUndo,
+    title: "Annuler la derni\xE8re action (Ctrl+Z)",
+    style: {
+      opacity: canUndo ? 1 : 0.35,
+      cursor: canUndo ? "pointer" : "not-allowed"
+    }
+  }, "\u21A9 Annuler"), /*#__PURE__*/React.createElement("button", {
+    className: "ab danger",
+    title: "Effacer le canvas",
+    onClick: () => {
+      dispatchWithHistory({
+        type: "CLEAR"
+      });
+      setPending([]);
+      setSelId(null);
+      setActiveForgeTool(null);
+      say("Canvas effacé.");
+    }
+  }, "\uD83D\uDDD1"))), /*#__PURE__*/React.createElement("div", {
+    className: "body"
+  }, showRoadmap && /*#__PURE__*/React.createElement("aside", {
+    className: "roadmap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "roadmap-header"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "roadmap-title"
+  }, "\u26A1 Feuille de route")), /*#__PURE__*/React.createElement("div", {
+    className: "roadmap-body"
+  }, ROADMAP.map(lv => /*#__PURE__*/React.createElement("div", {
+    key: lv.level
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "level-header"
+  }, lv.title), lv.challenges.map(ch => {
+    const st = chStatus(ch);
+    const icon = st === "ok" ? "✅" : st === "forge" ? "⚒" : "🔒";
+    return /*#__PURE__*/React.createElement("div", {
+      key: ch.id,
+      className: `challenge ${st}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "challenge-top"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "challenge-icon"
+    }, icon), /*#__PURE__*/React.createElement("span", {
+      className: "challenge-name"
+    }, ch.name), /*#__PURE__*/React.createElement("button", {
+      className: "hint-btn",
+      onClick: () => say(ch.hint),
+      title: "Indice"
+    }, "\uD83D\uDCA1")), /*#__PURE__*/React.createElement("div", {
+      className: "challenge-desc"
+    }, ch.desc));
+  }))), state.forgedTools.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "lib-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lib-title"
+  }, "\uD83D\uDCDA Biblioth\xE8que"), state.forgedTools.map(ft => /*#__PURE__*/React.createElement("div", {
+    key: ft.id,
+    className: "lib-item",
+    style: {
+      cursor: "pointer"
+    },
+    onClick: () => startApplyForgeTool(ft),
+    title: `Appliquer « ${ft.name} »`
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: ft.color,
+      fontSize: 14
+    }
+  }, "\u25C6"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "lib-item-name"
+  }, ft.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "#475569",
+      fontFamily: "monospace"
+    }
+  }, ft.inputs?.map(i => i.label).join(", ") || "?", " \u2192 ", ft.outputs?.map(o => o.label).join(", ") || "?")), /*#__PURE__*/React.createElement("span", {
+    className: "lib-item-count"
+  }, ft.steps.length, " \xE9tapes")))))), /*#__PURE__*/React.createElement("div", {
+    className: "canvas-area"
+  }, /*#__PURE__*/React.createElement("svg", {
+    ref: svgRef,
+    className: "canvas-svg",
+    onClick: handleClick,
+    onMouseDown: handleMouseDown,
+    onMouseMove: handleMouseMove,
+    onMouseUp: handleMouseUp,
+    onMouseLeave: () => setMouse(null),
+    onContextMenu: handleCtx,
+    style: {
+      cursor: isPanning ? "grabbing" : activeForgeTool ? "crosshair" : tool === TOOLS.SELECT ? "default" : "crosshair"
+    }
+  }, /*#__PURE__*/React.createElement("defs", null, (() => {
+    const cellPx = GS * zoom;
+    const bigPx = GS * 5 * zoom;
+    const offX = (pan.x % cellPx + cellPx) % cellPx;
+    const offY = (pan.y % cellPx + cellPx) % cellPx;
+    const bOffX = (pan.x % bigPx + bigPx) % bigPx;
+    const bOffY = (pan.y % bigPx + bigPx) % bigPx;
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("pattern", {
+      id: "gm",
+      width: cellPx,
+      height: cellPx,
+      x: offX,
+      y: offY,
+      patternUnits: "userSpaceOnUse"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: `M ${cellPx} 0 L 0 0 0 ${cellPx}`,
+      fill: "none",
+      stroke: "#1c2431",
+      strokeWidth: "0.5"
+    })), /*#__PURE__*/React.createElement("pattern", {
+      id: "GM",
+      width: bigPx,
+      height: bigPx,
+      x: bOffX,
+      y: bOffY,
+      patternUnits: "userSpaceOnUse"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: `M ${bigPx} 0 L 0 0 0 ${bigPx}`,
+      fill: "none",
+      stroke: "#374151",
+      strokeWidth: "1"
+    })));
+  })()), /*#__PURE__*/React.createElement("rect", {
+    width: "100%",
+    height: "100%",
+    fill: "#030712"
+  }), /*#__PURE__*/React.createElement("rect", {
+    width: "100%",
+    height: "100%",
+    fill: "url(#gm)"
+  }), /*#__PURE__*/React.createElement("rect", {
+    width: "100%",
+    height: "100%",
+    fill: "url(#GM)"
+  }), /*#__PURE__*/React.createElement("g", {
+    transform: `translate(${pan.x},${pan.y}) scale(${zoom})`
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "-6000",
+    y1: "0",
+    x2: "6000",
+    y2: "0",
+    stroke: "#1e3a5f",
+    strokeWidth: "1",
+    opacity: "0.5"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "0",
+    y1: "-6000",
+    x2: "0",
+    y2: "6000",
+    stroke: "#1e3a5f",
+    strokeWidth: "1",
+    opacity: "0.5"
+  }), renderObjs(), renderPreview(), pending.map(p => {
+    const cx = p.type === "point" ? p.x : p.computedX ?? 0;
+    const cy = p.type === "point" ? p.y : p.computedY ?? 0;
+    return /*#__PURE__*/React.createElement("circle", {
+      key: `ph_${p.id}`,
+      cx: cx,
+      cy: cy,
+      r: 11,
+      fill: "none",
+      stroke: COL.sel,
+      strokeWidth: "2",
+      strokeDasharray: "5 3",
+      opacity: "0.8"
+    });
+  }))), forgeMode && /*#__PURE__*/React.createElement("div", {
+    className: "forge-ring"
+  }), activeForgeTool && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      border: "2px dashed #ea580c",
+      pointerEvents: "none",
+      zIndex: 5,
+      opacity: 0.5
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "status-bar"
+  }, (zoom * 100).toFixed(0), "% \xB7 ", state.objects.length, " objet(s)", mouse && ` · (${mouse.x.toFixed(0)}, ${mouse.y.toFixed(0)})`, forgeMode && ` · ⚒ FORGE (${forgeSteps.length} étapes)`, activeForgeTool && ` · ◆ ${activeForgeTool.name} (${forgeToolPending.length}/${activeForgeTool.inputs.length})`), renderApplyBanner(), renderPendingBadge(), selId && selObj && !activeForgeTool && /*#__PURE__*/React.createElement("div", {
+    className: "panel-floating selection-panel"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-label",
+    style: {
+      color: "#60a5fa"
+    }
+  }, TL[selObj.type] || selObj.type), /*#__PURE__*/React.createElement("div", {
+    className: "panel-value"
+  }, selObj.label || "—"), /*#__PURE__*/React.createElement("button", {
+    className: "panel-btn normal",
+    onClick: () => openLabel(selObj.id)
+  }, "\u270F\uFE0F Renommer"), /*#__PURE__*/React.createElement("button", {
+    className: "panel-btn normal",
+    onClick: () => cycleVis(selObj)
+  }, "\uD83D\uDC41 ", VL[selObj.visibility], " ", VN[selObj.visibility]), /*#__PURE__*/React.createElement("button", {
+    className: "panel-btn danger",
+    onClick: () => {
+      dispatchWithHistory({
+        type: "DEL",
+        id: selId
+      });
+      setSelId(null);
+      say("Objet supprimé avec ses dépendants.");
+    }
+  }, "\uD83D\uDDD1 Supprimer"), selObj.parentIds?.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "panel-parents"
+  }, "parents : ", selObj.parentIds.map(pid => state.objects.find(o => o.id === pid)?.label || pid).join(", "))), renderForgePanel())), /*#__PURE__*/React.createElement("div", {
+    className: `boa-bar${boaPulse ? " pulse" : ""}`
+  }, /*#__PURE__*/React.createElement(BoaLogo, {
+    size: 28,
+    pulse: boaPulse
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "boa-msg"
+  }, boa), /*#__PURE__*/React.createElement("div", {
+    className: "oracle-tag"
+  }, "Oracle")), ctxMenu && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "ctx-overlay",
+    onClick: () => setCtxMenu(null)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "ctx-menu",
+    style: {
+      top: ctxMenu.y,
+      left: ctxMenu.x
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ctx-header"
+  }, ctxMenu.obj ? `${TL[ctxMenu.obj.type] || ctxMenu.obj.type} ${ctxMenu.obj.label}` : "Canvas"), ctxMenu.obj && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "ctx-item",
+    onClick: () => cycleVis(ctxMenu.obj)
+  }, "\uD83D\uDC41 Visibilit\xE9 \u2192 ", ctxMenu.obj.visibility === "visible" ? "Pâle" : ctxMenu.obj.visibility === "faint" ? "Caché" : "Visible"), /*#__PURE__*/React.createElement("button", {
+    className: "ctx-item",
+    onClick: () => {
+      openLabel(ctxMenu.obj.id);
+      setCtxMenu(null);
+    }
+  }, "\u270F\uFE0F Renommer"), /*#__PURE__*/React.createElement("button", {
+    className: "ctx-item danger",
+    onClick: () => {
+      dispatchWithHistory({
+        type: "DEL",
+        id: ctxMenu.obj.id
+      });
+      setCtxMenu(null);
+      say("Objet supprimé.");
+    }
+  }, "\uD83D\uDDD1 Supprimer")), /*#__PURE__*/React.createElement("button", {
+    className: "ctx-item",
+    onClick: () => setCtxMenu(null)
+  }, "\u2715 Fermer"))), pickMenu && /*#__PURE__*/React.createElement(React.Fragment, null,
+    /*#__PURE__*/React.createElement("div", {
+      className: "ctx-overlay",
+      onClick: () => setPickMenu(null)
+    }),
+    /*#__PURE__*/React.createElement("div", {
+      className: "ctx-menu",
+      style: { top: pickMenu.y, left: pickMenu.x, minWidth: 200 }
+    },
+      /*#__PURE__*/React.createElement("div", {
+        className: "ctx-header",
+        style: { color: "#a78bfa" }
+      }, "Plusieurs objets ici — lequel ?"),
+      pickMenu.candidates.map(obj => {
+        const icon = obj.type==="point" ? "·" : obj.type==="intersection" ? "✕" : obj.type==="line" ? "⟋" : "◯";
+        const typeColor = (obj.type==="point"||obj.type==="intersection") ? "#60a5fa" : "#94a3b8";
+        const isIn  = forgeInputIds.includes(obj.id);
+        const isOut = forgeOutputIds.includes(obj.id);
+        return /*#__PURE__*/React.createElement("button", {
+          key: obj.id,
+          className: "ctx-item",
+          style: { borderLeft: isIn ? "3px solid #fb923c" : isOut ? "3px solid #4ade80" : "3px solid transparent" },
+          onClick: () => { pickMenu.onPick(obj); setPickMenu(null); }
+        },
+          /*#__PURE__*/React.createElement("span", { style: { color: typeColor, marginRight: 6, fontWeight: "bold" } }, icon),
+          /*#__PURE__*/React.createElement("span", { style: { fontWeight: "bold" } }, obj.label),
+          /*#__PURE__*/React.createElement("span", { style: { color: "#475569", marginLeft: 6, fontSize: 10 } },
+            TL[obj.type] || obj.type,
+            isIn && " ▶ entrée",
+            isOut && " ◄ sortie"
+          )
+        );
+      }),
+      /*#__PURE__*/React.createElement("button", {
+        className: "ctx-item",
+        onClick: () => setPickMenu(null)
+      }, "✕ Annuler")
+    )
+  ), labelEdit && (() => {
+    const obj = state.objects.find(o => o.id === labelEdit.id);
+    if (!obj) {
+      setLabelEdit(null);
+      return null;
+    }
+    const ph = {
+      point: "Ex : A, B, M…",
+      intersection: "Ex : A, B…",
+      line: "Ex : (d), (Δ)…",
+      circle: "Ex : (c), (ω)…"
+    }[obj.type] || "";
+    return /*#__PURE__*/React.createElement("div", {
+      className: "modal-overlay"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "modal"
+    }, /*#__PURE__*/React.createElement("h3", null, "Renommer l'objet"), /*#__PURE__*/React.createElement("p", null, TL[obj.type], " \xB7 ", obj.id), /*#__PURE__*/React.createElement("input", {
+      ref: labelRef,
+      className: "modal-input",
+      value: labelEdit.value,
+      onChange: e => setLabelEdit(v => ({
+        ...v,
+        value: e.target.value
+      })),
+      placeholder: ph,
+      onKeyDown: e => {
+        if (e.key === "Enter") commitLabel();
+        if (e.key === "Escape") setLabelEdit(null);
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "modal-btns"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn-cancel",
+      onClick: () => setLabelEdit(null)
+    }, "Annuler"), /*#__PURE__*/React.createElement("button", {
+      className: "btn-ok",
+      onClick: commitLabel
+    }, "Valider"))));
+  })(), showHelp && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: e => {
+      if (e.target === e.currentTarget) setShowHelp(false);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    style: {
+      width: 460,
+      maxHeight: "82vh",
+      overflowY: "auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      margin: 0
+    }
+  }, "Guide du Constructor"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-cancel",
+    style: {
+      padding: "4px 10px"
+    },
+    onClick: () => setShowHelp(false)
+  }, "\u2715")), [["🖱 Navigation", "Molette : zoom. Alt + glisser : panoramique."], ["· Point → A,B,C…", "Place un point libre, nommé automatiquement A, B … Z, puis A'…"], ["⟋ Règle → (d),(d₁)…", "Deux points → droite infinie nommée (d), (d₁)…"], ["◯ Compas → (c),(c₁)…", "Centre puis point de rayon → cercle nommé (c), (c₁)…"], ["✕ Intersection", "Deux droites/cercles → points d'intersection nommés comme des points."], ["⚒ Forge — 4 étapes", "1. Construis la séquence · 2. Marque les entrées (orange) · 3. Marque les sorties (vert) · 4. Nomme et forge. Un bouton est créé dans la barre."], ["◆ Utiliser un outil forgé", "Clique son bouton dans la barre → clique les objets d'entrée dans l'ordre indiqué → la construction est rejouée automatiquement."], ["👁 Visibilité", "Clic droit → alterner Visible / Pâle / Caché."], ["✏️ Renommer", "Double-clic sur un objet ou clic droit → Renommer."], ["💾 Export", "JSON : état complet. SVG : image vectorielle."], ["↩ Annuler (Ctrl+Z)", "Annule la dernière action : ajout, suppression, déplacement, changement de visibilité… Disponible aussi via le bouton ↩ dans la barre."]].map(([t, c]) => /*#__PURE__*/React.createElement("div", {
+    key: t,
+    className: "help-section"
+  }, /*#__PURE__*/React.createElement("h4", null, t), /*#__PURE__*/React.createElement("p", null, c))))));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+
+
+</script>
+<style>
+/* Pulse animation for Boa */
+@keyframes boaPulse{0%,100%{filter:drop-shadow(0 0 2px #7c3aed)}50%{filter:drop-shadow(0 0 8px #a78bfa) drop-shadow(0 0 14px #5b21b6)}}
+.boa-pulse{animation:boaPulse .5s ease-in-out}
+</style>
+</body>
+</html>

@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solides 3D — Explorateur Géométrique</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #080a0f;
+  --panel: #0d0f18;
+  --border: #1a1d2e;
+  --accent: #5eead4;
+  --accent2: #818cf8;
+  --text: #e2e8f0;
+  --muted: #3d4460;
+  --sub: #64748b;
+  --hover: #13162a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── LEFT SIDEBAR ── */
+#sidebar {
+  width: 255px;
+  min-width: 255px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10;
+}
+
+#logo {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#logo h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+#logo p {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#solid-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0 12px;
+}
+
+#solid-list::-webkit-scrollbar { width: 3px; }
+#solid-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.cat-label {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 16px 5px;
+}
+
+.solid-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: #4a5568;
+  border-left: 2px solid transparent;
+  transition: color .12s, background .12s, border-color .12s;
+  gap: 6px;
+}
+
+.solid-item:hover { background: var(--hover); color: #94a3b8; border-left-color: #1e2640; }
+.solid-item.active { color: var(--accent); background: rgba(94,234,212,0.06); border-left-color: var(--accent); }
+.solid-item .tag { margin-left: auto; font-size: 8.5px; color: var(--muted); letter-spacing: .03em; }
+
+/* ── CANVAS ── */
+#main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(94,234,212,0.04) 0%, transparent 70%),
+              linear-gradient(180deg, #06080d 0%, #0a0b12 100%);
+}
+
+#main canvas { display: block; cursor: grab; }
+#main canvas:active { cursor: grabbing; }
+
+#main::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#overlay-name {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.08);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+#hint {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .07em;
+  z-index: 2;
+  text-align: right;
+  line-height: 1.8;
+}
+
+/* ── RIGHT CONTROLS ── */
+#controls {
+  width: 228px;
+  min-width: 228px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#controls::-webkit-scrollbar { width: 3px; }
+#controls::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sect { display: flex; flex-direction: column; gap: 10px; }
+
+.sect-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 7px;
+}
+
+.ctrl { display: flex; flex-direction: column; gap: 5px; }
+
+.ctrl-lbl {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  color: var(--sub);
+}
+
+.ctrl-lbl .val { color: var(--accent); font-size: 10px; }
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 11px; height: 11px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 7px rgba(94,234,212,.5);
+  transition: transform .1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.35); }
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+}
+
+.swatch {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .1s, border-color .1s;
+}
+
+.swatch:hover { transform: scale(1.2); }
+.swatch.on { border-color: rgba(255,255,255,.8); transform: scale(1.1); }
+
+.pill-btn {
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--sub);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .13s;
+}
+
+.pill-btn:hover { background: var(--hover); border-color: var(--accent2); color: var(--text); }
+.pill-btn.on { border-color: var(--accent2); background: rgba(129,140,248,.08); color: var(--accent2); }
+
+.pill-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background .13s, box-shadow .13s;
+  flex-shrink: 0;
+}
+
+.pill-btn.on .pill-dot { background: var(--accent2); box-shadow: 0 0 6px rgba(129,140,248,.7); }
+
+.info-card {
+  background: rgba(94,234,212,.03);
+  border: 1px solid rgba(94,234,212,.1);
+  border-radius: 7px;
+  padding: 10px 11px;
+  font-size: 10px;
+  line-height: 1.9;
+  color: var(--sub);
+}
+
+.info-card b { color: var(--text); font-weight: 500; }
+.info-card .hi { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div id="logo">
+    <h1>Solides 3D</h1>
+    <p>Explorateur géométrique</p>
+  </div>
+  <div id="solid-list"></div>
+</aside>
+
+<div id="main">
+  <div id="overlay-name"></div>
+  <div id="hint">Glisser : rotation<br>Molette : zoom</div>
+</div>
+
+<aside id="controls">
+  <div class="sect">
+    <div class="sect-title">Rendu des faces</div>
+    <div class="ctrl">
+      <div class="ctrl-lbl">Opacité <span class="val" id="vOpacity">75%</span></div>
+      <input type="range" id="sOpacity" min="0" max="100" value="75">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-lbl">Brillance <span class="val" id="vShine">60</span></div>
+      <input type="range" id="sShine" min="0" max="200" value="60">
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="sect-title">Couleur</div>
+    <div class="swatches" id="swatches"></div>
+  </div>
+
+  <div class="sect">
+    <div class="sect-title">Rotation</div>
+    <button class="pill-btn on" id="btnAuto">
+      <span class="pill-dot"></span>Rotation automatique
+    </button>
+    <div class="ctrl">
+      <div class="ctrl-lbl">Vitesse <span class="val" id="vSpeed">1.0×</span></div>
+      <input type="range" id="sSpeed" min="1" max="40" value="10">
+    </div>
+  </div>
+
+  <div class="sect">
+    <div class="sect-title">Informations</div>
+    <div class="info-card" id="infoCard">—</div>
+  </div>
+</aside>
+
+<script>
+// ──────────────────────────────────────
+// GEOMETRY HELPERS
+// ──────────────────────────────────────
+function ring(n, r, y) {
+  var pts = [];
+  for (var i = 0; i < n; i++) {
+    var a = 2 * Math.PI * i / n - Math.PI / 2;
+    pts.push(new THREE.Vector3(r * Math.cos(a), y, r * Math.sin(a)));
+  }
+  return pts;
+}
+
+function buildGeo(tris) {
+  var pos = [];
+  for (var i = 0; i < tris.length; i++) {
+    var a = tris[i][0], b = tris[i][1], c = tris[i][2];
+    pos.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+function makePrism(n, r, h) {
+  r = r || 1.2; h = h || 0.85;
+  var T = ring(n, r, h), B = ring(n, r, -h), tris = [];
+  for (var i = 1; i < n - 1; i++) {
+    tris.push([T[0], T[i+1], T[i]]);
+    tris.push([B[0], B[i], B[i+1]]);
+  }
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    tris.push([T[i], B[j], B[i]]);
+    tris.push([T[i], T[j], B[j]]);
+  }
+  return buildGeo(tris);
+}
+
+function makeAntiprism(n, r, h) {
+  r = r || 1.2; h = h || 0.75;
+  var T = ring(n, r, h);
+  var off = Math.PI / n;
+  var B = [];
+  for (var i = 0; i < n; i++) {
+    var a = 2 * Math.PI * i / n - Math.PI / 2 + off;
+    B.push(new THREE.Vector3(r * Math.cos(a), -h, r * Math.sin(a)));
+  }
+  var tris = [];
+  for (var i = 1; i < n - 1; i++) {
+    tris.push([T[0], T[i+1], T[i]]);
+    tris.push([B[0], B[i], B[i+1]]);
+  }
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    tris.push([T[i], B[i], T[j]]);
+    tris.push([B[i], B[j], T[j]]);
+  }
+  return buildGeo(tris);
+}
+
+function makePyramid(n, r, h) {
+  r = r || 1.15; h = h || 1.6;
+  var base = ring(n, r, -h / 2);
+  var apex = new THREE.Vector3(0, h / 2, 0);
+  var tris = [];
+  for (var i = 1; i < n - 1; i++) tris.push([base[0], base[i], base[i+1]]);
+  for (var i = 0; i < n; i++) tris.push([apex, base[(i+1)%n], base[i]]);
+  return buildGeo(tris);
+}
+
+function makeBipyramid(n, r, h) {
+  r = r || 1.15; h = h || 1.2;
+  var eq = ring(n, r, 0);
+  var T = new THREE.Vector3(0, h, 0);
+  var Bo = new THREE.Vector3(0, -h, 0);
+  var tris = [];
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    tris.push([T, eq[i], eq[j]]);
+    tris.push([Bo, eq[j], eq[i]]);
+  }
+  return buildGeo(tris);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SOLIDES DE KEPLER-POINSOT — COORDONNÉES ET FACES EXACTES
+// Source : Wenninger "Polyhedron Models" + Coxeter "Regular Polytopes"
+// ══════════════════════════════════════════════════════════════════════════════
+
+var PHI = (1 + Math.sqrt(5)) / 2;  // nombre d'or φ ≈ 1.618
+
+function v3(x, y, z) { return new THREE.Vector3(x, y, z); }
+
+// Construit une BufferGeometry à partir d'un tableau de triangles [[V3,V3,V3],...]
+function buildGeoFromTris(tris) {
+  var pos = [];
+  for (var i = 0; i < tris.length; i++) {
+    var t = tris[i];
+    pos.push(t[0].x, t[0].y, t[0].z,
+             t[1].x, t[1].y, t[1].z,
+             t[2].x, t[2].y, t[2].z);
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+// Normalise tous les triangles au rayon r
+function scaleTris(tris, r) {
+  var maxR = 0;
+  for (var i = 0; i < tris.length; i++)
+    for (var k = 0; k < 3; k++) maxR = Math.max(maxR, tris[i][k].length());
+  var s = r / maxR;
+  for (var i = 0; i < tris.length; i++)
+    for (var k = 0; k < 3; k++) tris[i][k].multiplyScalar(s);
+  return tris;
+}
+
+// Trie n points dans l'ordre angulaire CCW autour de leur barycentre
+function sortCCW(pts) {
+  var C = v3(0,0,0);
+  for (var i = 0; i < pts.length; i++) C.add(pts[i]);
+  C.divideScalar(pts.length);
+  var u = pts[0].clone().sub(C).normalize();
+  var tmp = pts[1] ? pts[1].clone().sub(C).normalize() : v3(0,1,0);
+  var n = new THREE.Vector3().crossVectors(u, tmp).normalize();
+  // Si u et tmp sont colinéaires, choisir un axe différent
+  if (n.length() < 0.001) { n.set(0,1,0); if (Math.abs(u.dot(n)) > 0.9) n.set(1,0,0); }
+  var vv = new THREE.Vector3().crossVectors(n, u).normalize();
+  return pts.slice().sort(function(a, b) {
+    var da = a.clone().sub(C), db = b.clone().sub(C);
+    return Math.atan2(da.dot(vv), da.dot(u)) - Math.atan2(db.dot(vv), db.dot(u));
+  });
+}
+
+// Triangule un PENTAGRAMME {5/2} : 5 sommets ordonnés CCW.
+// La connectivité étoilée relie les sommets en sautant 1 : 0→2→4→1→3→0.
+// On décompose en 5 triangles depuis le centre C (dans le plan de la face).
+// Résultat : creux pentagonal au centre, 5 pointes triangulaires acérées.
+function pentagramTris(pts5) {
+  var C = v3(0,0,0);
+  for (var i = 0; i < 5; i++) C.add(pts5[i]);
+  C.divideScalar(5);
+  // ordre étoilé {5/2}
+  var ord = [0,2,4,1,3];
+  var tris = [];
+  for (var i = 0; i < 5; i++) {
+    var a = pts5[ord[i]].clone();
+    var b = pts5[ord[(i+1)%5]].clone();
+    tris.push([C.clone(), a, b]);
+  }
+  return tris;
+}
+
+// Triangule un pentagone ordinaire {5} en fan depuis pts5[0]
+function pentagonTris(pts5) {
+  var tris = [];
+  for (var i = 1; i < 4; i++)
+    tris.push([pts5[0].clone(), pts5[i].clone(), pts5[i+1].clone()]);
+  return tris;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BASES DE SOMMETS
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Icosaèdre : 12 sommets = (0, ±1, ±φ) et permutations cycliques
+//   numérotation ici :
+//   0:(0,1,φ)  1:(0,1,-φ)  2:(0,-1,φ)  3:(0,-1,-φ)
+//   4:(1,φ,0)  5:(1,-φ,0)  6:(-1,φ,0)  7:(-1,-φ,0)
+//   8:(φ,0,1)  9:(φ,0,-1) 10:(-φ,0,1) 11:(-φ,0,-1)
+//
+// Dodécaèdre : 20 sommets = (±1,±1,±1) ∪ (0,±1/φ,±φ) ∪ permutations cycliques
+//   numérotation :
+//    0:(1,1,1)   1:(1,1,-1)   2:(1,-1,1)   3:(1,-1,-1)
+//    4:(-1,1,1)  5:(-1,1,-1)  6:(-1,-1,1)  7:(-1,-1,-1)
+//    8:(0,1/φ,φ) 9:(0,1/φ,-φ) 10:(0,-1/φ,φ) 11:(0,-1/φ,-φ)
+//   12:(1/φ,φ,0) 13:(1/φ,-φ,0) 14:(-1/φ,φ,0) 15:(-1/φ,-φ,0)
+//   16:(φ,0,1/φ) 17:(φ,0,-1/φ) 18:(-φ,0,1/φ) 19:(-φ,0,-1/φ)
+
+function icoVerts() {
+  var p = PHI;
+  return [
+    v3( 0, 1, p), v3( 0, 1,-p), v3( 0,-1, p), v3( 0,-1,-p),
+    v3( 1, p, 0), v3( 1,-p, 0), v3(-1, p, 0), v3(-1,-p, 0),
+    v3( p, 0, 1), v3( p, 0,-1), v3(-p, 0, 1), v3(-p, 0,-1)
+  ];
+}
+
+function dodecVerts() {
+  var p = PHI, ip = 1/PHI;
+  return [
+    v3( 1, 1, 1), v3( 1, 1,-1), v3( 1,-1, 1), v3( 1,-1,-1),
+    v3(-1, 1, 1), v3(-1, 1,-1), v3(-1,-1, 1), v3(-1,-1,-1),
+    v3( 0,ip, p), v3( 0,ip,-p), v3( 0,-ip, p), v3( 0,-ip,-p),
+    v3(ip, p, 0), v3(ip,-p, 0), v3(-ip, p, 0), v3(-ip,-p, 0),
+    v3( p, 0,ip), v3( p, 0,-ip), v3(-p, 0,ip), v3(-p, 0,-ip)
+  ];
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SOLIDES DE KEPLER-POINSOT — coordonnées et faces vérifiées
+//
+// Numérotation des 12 sommets de l'icosaèdre (arête = 2, r = √(1+φ²)) :
+//  V0=(0,1,φ)  V1=(0,1,-φ)  V2=(0,-1,φ)  V3=(0,-1,-φ)
+//  V4=(1,φ,0)  V5=(1,-φ,0)  V6=(-1,φ,0)  V7=(-1,-φ,0)
+//  V8=(φ,0,1)  V9=(φ,0,-1) V10=(-φ,0,1) V11=(-φ,0,-1)
+//
+// Adjacences de l'icosaèdre (voisins directs, arête = 2) :
+//  V0 : V2 V4 V6 V8 V10
+//  V1 : V3 V4 V6 V9 V11
+//  V2 : V0 V5 V7 V8 V10
+//  V3 : V1 V5 V7 V9 V11
+//  V4 : V0 V1 V6 V8 V9
+//  V5 : V2 V3 V7 V8 V9
+//  V6 : V0 V1 V4 V10 V11
+//  V7 : V2 V3 V5 V10 V11
+//  V8 : V0 V2 V4 V5 V9
+//  V9 : V1 V3 V4 V5 V11
+// V10 : V0 V2 V6 V7 V11
+// V11 : V1 V3 V6 V7 V9
+//
+// Les 20 faces de l'icosaèdre (triangles d'arête 2, tous vérifiés) :
+//  [0,4,8] [0,8,2] [0,2,10] [0,10,6] [0,6,4]   ← "calotte nord"
+//  [3,9,1] [3,1,11] [3,11,7] [3,7,5] [3,5,9]   ← "calotte sud"
+//  [4,1,9] [4,9,8] [8,9,5] [8,5,2] [2,5,7]
+//  [2,7,10] [10,7,11] [10,11,6] [6,11,1] [6,1,4]
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── 1. Petit dodécaèdre étoilé {5/2, 5} ─────────────────────────────────────
+// 12 sommets (icosaèdre), 12 faces = pentagrammes {5/2}.
+// Chaque face = les 5 voisins d'un sommet de l'icosaèdre,
+// ordonnés en pentagone {5} (arêtes à d≈3.236), puis reliés en {5/2}
+// (saut d'un sommet, arêtes à d=2.0 = arêtes de l'icosaèdre).
+// Table calculée algorithmiquement et vérifiée.
+function makeSmallStellatedDodecahedron() {
+  var V = icoVerts();
+  // 12 faces : pour chaque pivot Vi, ses 5 voisins ordonnés en pentagone {5}.
+  // L'ordre donne les arêtes du dodécaèdre dual (d≈3.236 entre consécutifs).
+  var F = [
+    [ 2, 4,10, 8, 6],  // pivot V0
+    [ 3, 4,11, 9, 6],  // pivot V1
+    [ 0, 5,10, 8, 7],  // pivot V2
+    [ 1, 5,11, 9, 7],  // pivot V3
+    [ 0, 1, 8, 6, 9],  // pivot V4  (reordered CCW)
+    [ 2, 3, 8, 7, 9],  // pivot V5
+    [ 0, 1,10, 4,11],  // pivot V6
+    [ 2, 3,10, 5,11],  // pivot V7
+    [ 0, 5, 4, 2, 9],  // pivot V8
+    [ 1, 5, 4, 3, 8],  // pivot V9
+    [ 0, 7, 6, 2,11],  // pivot V10
+    [ 1, 7, 6, 3,10]   // pivot V11
+  ];
+  var tris = [];
+  for (var f = 0; f < F.length; f++) {
+    var pts = F[f].map(function(i) { return V[i].clone(); });
+    // Triangulation pentagramme {5/2} : relier en sautant un sommet
+    // ordre étoilé dans pts : 0→2→4→1→3→0
+    var pt = pentagramTris(pts);
+    for (var i = 0; i < pt.length; i++) tris.push(pt[i]);
+  }
+  scaleTris(tris, 1.35);
+  return buildGeoFromTris(tris);
+}
+
+// ── 2. Grand dodécaèdre étoilé {5/2, 3} ─────────────────────────────────────
+// 20 sommets (dodécaèdre), 12 faces = pentagrammes {5/2}.
+// Les 12 faces sont les 12 faces du dodécaèdre, chacune ordonnée en pentagone
+// {5} (arêtes à d≈1.236), puis triangulée en {5/2} (saut d'un sommet,
+// arêtes à d≈2.0). Table des faces calculée algorithmiquement et vérifiée.
+function makeGreatStellatedDodecahedron() {
+  var ip = 1/PHI, p = PHI;
+  var VD = [
+    v3( 1, 1, 1), v3( 1, 1,-1), v3( 1,-1, 1), v3( 1,-1,-1),
+    v3(-1, 1, 1), v3(-1, 1,-1), v3(-1,-1, 1), v3(-1,-1,-1),
+    v3( 0,ip, p), v3( 0,ip,-p), v3( 0,-ip, p), v3( 0,-ip,-p),
+    v3(ip, p, 0), v3(ip,-p, 0), v3(-ip, p, 0), v3(-ip,-p, 0),
+    v3( p, 0,ip), v3( p, 0,-ip), v3(-p, 0,ip), v3(-p, 0,-ip)
+  ];
+  // 12 faces du dodécaèdre, sommets ordonnés en pentagone {5} (arête≈1.236).
+  // Vérifiées algorithmiquement.
+  var F = [
+    [ 0, 8, 4,14,12],
+    [ 0, 8,10, 2,16],
+    [ 0,12, 1,17,16],
+    [ 1, 9, 5,14,12],
+    [ 1, 9,11, 3,17],
+    [ 2,10, 6,15,13],
+    [ 2,13, 3,17,16],
+    [ 3,11, 7,15,13],
+    [ 4, 8,10, 6,18],
+    [ 4,14, 5,19,18],
+    [ 5, 9,11, 7,19],
+    [ 6,15, 7,19,18]
+  ];
+  var tris = [];
+  for (var f = 0; f < F.length; f++) {
+    var pts = F[f].map(function(i) { return VD[i].clone(); });
+    // Triangulation pentagramme {5/2} : dans l'ordre du pentagone {5},
+    // relier en sautant un sommet → arêtes à d≈2.0
+    var pt = pentagramTris(pts);
+    for (var i = 0; i < pt.length; i++) tris.push(pt[i]);
+  }
+  scaleTris(tris, 1.4);
+  return buildGeoFromTris(tris);
+}
+
+// ── 3. Grand dodécaèdre {5, 5/2} ────────────────────────────────────────────
+// 12 sommets (icosaèdre), 12 faces pentagonales ordinaires {5}.
+// Chaque face = les 5 voisins d'un sommet de l'icosaèdre (triés CCW dans leur plan).
+// Ces 12 pentagones se traversent mutuellement → auto-intersections.
+// Table calculée algorithmiquement (vérifiée).
+function makeGreatDodecahedron() {
+  var V = icoVerts();
+  var F = [
+    [ 6,10, 2, 8, 4],  // pivot V0
+    [ 4, 9, 3,11, 6],  // pivot V1
+    [ 5, 8, 0,10, 7],  // pivot V2
+    [ 7,11, 1, 9, 5],  // pivot V3
+    [ 1, 6, 0, 8, 9],  // pivot V4
+    [ 9, 8, 2, 7, 3],  // pivot V5
+    [11,10, 0, 4, 1],  // pivot V6
+    [ 3, 5, 2,10,11],  // pivot V7
+    [ 9, 4, 0, 2, 5],  // pivot V8
+    [ 5, 3, 1, 4, 8],  // pivot V9
+    [ 7, 2, 0, 6,11],  // pivot V10
+    [10, 6, 1, 3, 7]   // pivot V11
+  ];
+  var tris = [];
+  for (var f = 0; f < F.length; f++) {
+    var pts = F[f].map(function(i) { return V[i].clone(); });
+    // Les sommets sont déjà triés CCW vu depuis le sommet-pivot
+    var pt = pentagonTris(pts);
+    for (var i = 0; i < pt.length; i++) tris.push(pt[i]);
+  }
+  scaleTris(tris, 1.35);
+  return buildGeoFromTris(tris);
+}
+
+// ── 4. Grand icosaèdre {3, 5/2} ──────────────────────────────────────────────
+// 12 sommets (icosaèdre), 20 faces triangulaires.
+// Chaque face relie 3 sommets mutuellement à distance ≈ 3.236 (diagonale courte).
+// Table calculée algorithmiquement : tous les triplets (i,j,k) tels que
+// dist(Vi,Vj) ≈ dist(Vj,Vk) ≈ dist(Vi,Vk) ≈ 3.236. Exactement 20 trouvés.
+function makeGreatIcosahedron() {
+  var V = icoVerts();
+  var F = [
+    [ 0, 1, 5], [ 0, 1, 7], [ 0, 5,11], [ 0, 7, 9], [ 0, 9,11],
+    [ 1, 5,10], [ 1, 7, 8], [ 1, 8,10], [ 2, 3, 4], [ 2, 3, 6],
+    [ 2, 4,11], [ 2, 6, 9], [ 2, 9,11], [ 3, 4,10], [ 3, 6, 8],
+    [ 3, 8,10], [ 4, 5,10], [ 4, 5,11], [ 6, 7, 8], [ 6, 7, 9]
+  ];
+  var tris = [];
+  for (var f = 0; f < F.length; f++) {
+    tris.push([V[F[f][0]].clone(), V[F[f][1]].clone(), V[F[f][2]].clone()]);
+  }
+  scaleTris(tris, 1.4);
+  return buildGeoFromTris(tris);
+}
+
+// ── Stella octangula — 2 tétraèdres interpénétrés ────────────────────────────
+// Premier "composé" décrit par Kepler (1611). Géométriquement exact.
+function makeStellaOctangula() {
+  var s = 1.0;
+  var T1 = [v3( s, s, s), v3( s,-s,-s), v3(-s, s,-s), v3(-s,-s, s)];
+  var T2 = [v3(-s,-s,-s), v3(-s, s, s), v3( s,-s, s), v3( s, s,-s)];
+  function tetraTris(v) {
+    return [
+      [v[0].clone(),v[2].clone(),v[1].clone()],
+      [v[0].clone(),v[1].clone(),v[3].clone()],
+      [v[0].clone(),v[3].clone(),v[2].clone()],
+      [v[1].clone(),v[2].clone(),v[3].clone()]
+    ];
+  }
+  var tris = tetraTris(T1).concat(tetraTris(T2));
+  scaleTris(tris, 1.4);
+  return buildGeoFromTris(tris);
+}
+
+// ── Étoilement du dodécaèdre (1er ordre) ─────────────────────────────────────
+// On place une pyramide pentagonale sur chaque face du dodécaèdre.
+// L'apex de chaque pyramide est au sommet voisin de l'icosaèdre dual,
+// soit à distance = inradius × (φ-1) au-dessus de la face.
+function makeStellatedDodecahedron() {
+  var dGeo = new THREE.DodecahedronGeometry(1.0, 0);
+  var dPos = dGeo.attributes.position;
+  var tris = [];
+  for (var f = 0; f < 12; f++) {
+    var seen = [];
+    for (var q = 0; q < 9; q++) {
+      var idx = f * 9 + q;
+      var p = v3(dPos.getX(idx), dPos.getY(idx), dPos.getZ(idx));
+      var dup = false;
+      for (var s = 0; s < seen.length; s++)
+        if (p.distanceTo(seen[s]) < 1e-5) { dup = true; break; }
+      if (!dup) seen.push(p);
+    }
+    seen = sortCCW(seen);
+    var C = v3(0,0,0);
+    for (var i = 0; i < 5; i++) C.add(seen[i]);
+    C.divideScalar(5);
+    var apex = C.clone().normalize().multiplyScalar(C.length() * (1 + 1/PHI));
+    for (var i = 0; i < 5; i++) {
+      var a = seen[i].clone(), b = seen[(i+1)%5].clone();
+      tris.push([apex.clone(), a, b]);
+    }
+  }
+  scaleTris(tris, 1.4);
+  return buildGeoFromTris(tris);
+}
+
+// ── Étoilement de l'icosaèdre (1er ordre) ────────────────────────────────────
+// Pyramide triangulaire sur chaque face. L'apex = sommet du dodécaèdre dual,
+// à distance = circumradius_dodecahedron / circumradius_icosahedron depuis le centre de face.
+function makeStellatedIcosahedron() {
+  var iGeo = new THREE.IcosahedronGeometry(1.0, 0);
+  var iPos = iGeo.attributes.position;
+  var n = iPos.count / 3;
+  var tris = [];
+  for (var f = 0; f < n; f++) {
+    var i0 = f * 3;
+    var A = v3(iPos.getX(i0),   iPos.getY(i0),   iPos.getZ(i0));
+    var B = v3(iPos.getX(i0+1), iPos.getY(i0+1), iPos.getZ(i0+1));
+    var C = v3(iPos.getX(i0+2), iPos.getY(i0+2), iPos.getZ(i0+2));
+    var ctr = A.clone().add(B).add(C).divideScalar(3);
+    // Apex = centre de face étiré radialement jusqu'à la surface du dodécaèdre dual
+    var apex = ctr.clone().normalize().multiplyScalar(1.0 / ctr.length() * 0.85);
+    tris.push([apex.clone(), A.clone(), B.clone()]);
+    tris.push([apex.clone(), B.clone(), C.clone()]);
+    tris.push([apex.clone(), C.clone(), A.clone()]);
+  }
+  scaleTris(tris, 1.4);
+  return buildGeoFromTris(tris);
+}
+
+// ── Composé de 5 tétraèdres ───────────────────────────────────────────────────
+// Les 20 sommets du dodécaèdre se partitionnent exactement en 5 groupes de 4,
+// chaque groupe formant un tétraèdre régulier (arête = 2√2 ≈ 2.828).
+// Partition trouvée algorithmiquement (exact cover sur les 10 tétraèdres possibles).
+// Vérifiée : chaque sommet du dodécaèdre appartient à exactement 1 tétraèdre.
+function makeCompound5Tetrahedra() {
+  var ip = 1/PHI, p = PHI;
+  var VD = [
+    v3( 1, 1, 1), v3( 1, 1,-1), v3( 1,-1, 1), v3( 1,-1,-1),   //  0- 3
+    v3(-1, 1, 1), v3(-1, 1,-1), v3(-1,-1, 1), v3(-1,-1,-1),   //  4- 7
+    v3( 0,ip, p), v3( 0,ip,-p), v3( 0,-ip, p), v3( 0,-ip,-p), //  8-11
+    v3(ip, p, 0), v3(ip,-p, 0), v3(-ip, p, 0), v3(-ip,-p, 0), // 12-15
+    v3( p, 0,ip), v3( p, 0,-ip), v3(-p, 0,ip), v3(-p, 0,-ip)  // 16-19
+  ];
+  // Partition exacte des 20 sommets en 5 tétraèdres réguliers (arête 2√2).
+  // Vérifiée : dist entre toute paire dans un groupe = 2.828.
+  var groups = [
+    [ 0, 3, 5, 6],   // (1,1,1)(1,-1,-1)(-1,1,-1)(-1,-1,1)
+    [ 1, 8,13,19],   // (1,1,-1)(0,ip,p)(ip,-p,0)(-p,0,-ip)
+    [ 2,11,12,18],   // (1,-1,1)(0,-ip,-p)(ip,p,0)(-p,0,ip)
+    [ 4, 9,15,16],   // (-1,1,1)(0,ip,-p)(-ip,-p,0)(p,0,ip)
+    [ 7,10,14,17]    // (-1,-1,-1)(0,-ip,p)(-ip,p,0)(p,0,-ip)
+  ];
+  function tetraTrisG(v) {
+    return [
+      [v[0].clone(), v[1].clone(), v[2].clone()],
+      [v[0].clone(), v[2].clone(), v[3].clone()],
+      [v[0].clone(), v[3].clone(), v[1].clone()],
+      [v[1].clone(), v[3].clone(), v[2].clone()]
+    ];
+  }
+  var tris = [];
+  for (var g = 0; g < groups.length; g++) {
+    var verts = groups[g].map(function(i) { return VD[i]; });
+    var t = tetraTrisG(verts);
+    for (var i = 0; i < t.length; i++) tris.push(t[i]);
+  }
+  scaleTris(tris, 1.4);
+  return buildGeoFromTris(tris);
+}
+
+// ──────────────────────────────────────
+// CATALOG
+// ──────────────────────────────────────
+var CATALOG = [
+  {
+    cat: "Solides de Platon",
+    items: [
+      { name:"Tétraèdre",          faces:4,   edges:6,   verts:4,   desc:"4 triangles équilatéraux",   geo:function(){ return new THREE.TetrahedronGeometry(1.5, 0); } },
+      { name:"Cube (Hexaèdre)",    faces:6,   edges:12,  verts:8,   desc:"6 carrés",                   geo:function(){ return new THREE.BoxGeometry(1.7, 1.7, 1.7); } },
+      { name:"Octaèdre",           faces:8,   edges:12,  verts:6,   desc:"8 triangles équilatéraux",   geo:function(){ return new THREE.OctahedronGeometry(1.5, 0); } },
+      { name:"Dodécaèdre",         faces:12,  edges:30,  verts:20,  desc:"12 pentagones réguliers",    geo:function(){ return new THREE.DodecahedronGeometry(1.35, 0); } },
+      { name:"Icosaèdre",          faces:20,  edges:30,  verts:12,  desc:"20 triangles équilatéraux",  geo:function(){ return new THREE.IcosahedronGeometry(1.45, 0); } }
+    ]
+  },
+  {
+    cat: "Solides d'Archimède",
+    items: [
+      { name:"Cuboctaèdre",        faces:14,  edges:24,  verts:12,  desc:"8 tri. + 6 carr.",           geo:function(){ return new THREE.OctahedronGeometry(1.5, 1); } },
+      { name:"Tétraèdre tronqué",  faces:7,   edges:18,  verts:12,  desc:"4 hex. + 4 tri.",            geo:function(){ return new THREE.TetrahedronGeometry(1.4, 1); } },
+      { name:"Octaèdre tronqué",   faces:14,  edges:36,  verts:24,  desc:"6 carr. + 8 hex.",           geo:function(){ return new THREE.OctahedronGeometry(1.5, 1); } },
+      { name:"Icosaèdre tronqué",  faces:32,  edges:90,  verts:60,  desc:"Ballon de football",         geo:function(){ return new THREE.IcosahedronGeometry(1.4, 1); } },
+      { name:"Icosidodécaèdre",    faces:32,  edges:60,  verts:30,  desc:"20 tri. + 12 pent.",         geo:function(){ return new THREE.IcosahedronGeometry(1.5, 1); } }
+    ]
+  },
+  {
+    cat: "Prismes",
+    items: [
+      { name:"Prisme triangulaire",  faces:5,  edges:9,  verts:6,  desc:"Base triangulaire",    geo:function(){ return makePrism(3, 1.3, 0.95); } },
+      { name:"Prisme carré",         faces:6,  edges:12, verts:8,  desc:"Base carrée",           geo:function(){ return makePrism(4, 1.2, 0.85); } },
+      { name:"Prisme pentagonal",    faces:7,  edges:15, verts:10, desc:"Base pentagonale",      geo:function(){ return makePrism(5, 1.2, 0.85); } },
+      { name:"Prisme hexagonal",     faces:8,  edges:18, verts:12, desc:"Base hexagonale",       geo:function(){ return makePrism(6, 1.2, 0.85); } },
+      { name:"Prisme octogonal",     faces:10, edges:24, verts:16, desc:"Base octogonale",       geo:function(){ return makePrism(8, 1.2, 0.85); } }
+    ]
+  },
+  {
+    cat: "Antiprismes",
+    items: [
+      { name:"Antiprisme carré",       faces:10, edges:16, verts:8,  desc:"Antiprisme à 4 côtés",  geo:function(){ return makeAntiprism(4, 1.25, 0.7); } },
+      { name:"Antiprisme pentagonal",  faces:12, edges:20, verts:10, desc:"Antiprisme à 5 côtés",  geo:function(){ return makeAntiprism(5, 1.2, 0.7); } },
+      { name:"Antiprisme hexagonal",   faces:14, edges:24, verts:12, desc:"Antiprisme à 6 côtés",  geo:function(){ return makeAntiprism(6, 1.2, 0.7); } },
+      { name:"Antiprisme octogonal",   faces:18, edges:32, verts:16, desc:"Antiprisme à 8 côtés",  geo:function(){ return makeAntiprism(8, 1.2, 0.65); } }
+    ]
+  },
+  {
+    cat: "Pyramides",
+    items: [
+      { name:"Pyramide triangulaire",  faces:4, edges:6,  verts:4, desc:"= Tétraèdre",      geo:function(){ return makePyramid(3, 1.25, 1.8); } },
+      { name:"Pyramide carrée",        faces:5, edges:8,  verts:5, desc:"Base carrée",       geo:function(){ return makePyramid(4, 1.15, 1.6); } },
+      { name:"Pyramide pentagonale",   faces:6, edges:10, verts:6, desc:"Base pentagonale",  geo:function(){ return makePyramid(5, 1.1, 1.5); } },
+      { name:"Pyramide hexagonale",    faces:7, edges:12, verts:7, desc:"Base hexagonale",   geo:function(){ return makePyramid(6, 1.1, 1.4); } }
+    ]
+  },
+  {
+    cat: "Bipyramides",
+    items: [
+      { name:"Bipyramide triangulaire",  faces:6,  edges:9,  verts:5, desc:"Double pyramide tri.",  geo:function(){ return makeBipyramid(3, 1.3, 1.2); } },
+      { name:"Bipyramide carrée",        faces:8,  edges:12, verts:6, desc:"= Octaèdre",            geo:function(){ return makeBipyramid(4, 1.2, 1.2); } },
+      { name:"Bipyramide pentagonale",   faces:10, edges:15, verts:7, desc:"Double pyr. pent.",     geo:function(){ return makeBipyramid(5, 1.15, 1.1); } },
+      { name:"Bipyramide hexagonale",    faces:12, edges:18, verts:8, desc:"Double pyr. hex.",      geo:function(){ return makeBipyramid(6, 1.1, 1.0); } }
+    ]
+  },
+  {
+    cat: "Solides de Kepler-Poinsot",
+    items: [
+      {
+        name: "Petit dodécaèdre étoilé",
+        faces: 12, edges: 30, verts: 12,
+        desc: "{5/2,5} — 12 pentagrammes — Kepler 1619",
+        geo: function() { return makeSmallStellatedDodecahedron(); }
+      },
+      {
+        name: "Grand dodécaèdre étoilé",
+        faces: 12, edges: 30, verts: 20,
+        desc: "{5/2,3} — 12 pentagrammes allongés — Kepler 1619",
+        geo: function() { return makeGreatStellatedDodecahedron(); }
+      },
+      {
+        name: "Grand dodécaèdre",
+        faces: 12, edges: 30, verts: 12,
+        desc: "{5,5/2} — 12 pentagones auto-intersectants — Poinsot 1809",
+        geo: function() { return makeGreatDodecahedron(); }
+      },
+      {
+        name: "Grand icosaèdre",
+        faces: 20, edges: 30, verts: 12,
+        desc: "{3,5/2} — 20 triangles auto-intersectants — Poinsot 1809",
+        geo: function() { return makeGreatIcosahedron(); }
+      }
+    ]
+  },
+  {
+    cat: "Solides étoilés & Composés",
+    items: [
+      {
+        name: "Stella octangula",
+        faces: 8, edges: 12, verts: 8,
+        desc: "2 tétraèdres interpénétrés — Kepler 1611",
+        geo: function() { return makeStellaOctangula(); }
+      },
+      {
+        name: "Dodécaèdre étoilé (1er)",
+        faces: 12, edges: 30, verts: 32,
+        desc: "Pyramide sur chaque face du dodécaèdre",
+        geo: function() { return makeStellatedDodecahedron(); }
+      },
+      {
+        name: "Icosaèdre étoilé (1er)",
+        faces: 20, edges: 30, verts: 32,
+        desc: "Pyramide sur chaque face de l'icosaèdre",
+        geo: function() { return makeStellatedIcosahedron(); }
+      },
+      {
+        name: "Composé de 5 tétraèdres",
+        faces: 20, edges: 30, verts: 20,
+        desc: "5 tétraèdres inscrits dans un dodécaèdre",
+        geo: function() { return makeCompound5Tetrahedra(); }
+      }
+    ]
+  },
+  {
+    cat: "Surfaces & Géodésiques",
+    items: [
+      { name:"Sphère",           faces:"∞",  edges:"∞",  verts:"∞", desc:"Sphère lisse",            geo:function(){ return new THREE.SphereGeometry(1.4, 48, 36); } },
+      { name:"Géodésique ×2",   faces:80,   edges:120,  verts:42,  desc:"Icosaèdre subdivisé ×2",  geo:function(){ return new THREE.IcosahedronGeometry(1.4, 2); } },
+      { name:"Géodésique ×3",   faces:180,  edges:270,  verts:92,  desc:"Icosaèdre subdivisé ×3",  geo:function(){ return new THREE.IcosahedronGeometry(1.4, 3); } },
+      { name:"Tore",             faces:"∞",  edges:"∞",  verts:"∞", desc:"Surface toroïdale",       geo:function(){ return new THREE.TorusGeometry(1.0, 0.42, 32, 64); } },
+      { name:"Nœud torique",    faces:"∞",  edges:"∞",  verts:"∞", desc:"Tore en nœud trèfle",     geo:function(){ return new THREE.TorusKnotGeometry(0.85, 0.28, 128, 16); } },
+      { name:"Cône",             faces:"∞",  edges:2,    verts:2,   desc:"Cône circulaire droit",   geo:function(){ return new THREE.ConeGeometry(1.15, 2.2, 32, 1, true); } },
+      { name:"Cylindre",         faces:"∞",  edges:3,    verts:"∞", desc:"Cylindre circulaire",     geo:function(){ return new THREE.CylinderGeometry(1.0, 1.0, 2.0, 32); } }
+    ]
+  }
+];
+
+// ──────────────────────────────────────
+// THREE.JS SETUP
+// ──────────────────────────────────────
+var mainEl = document.getElementById('main');
+var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 0);
+mainEl.appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(42, 1, 0.01, 200);
+camera.position.set(0, 0, 5.5);
+
+// Lights
+scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+var dL1 = new THREE.DirectionalLight(0x5eead4, 1.4); dL1.position.set(3, 5, 4); scene.add(dL1);
+var dL2 = new THREE.DirectionalLight(0x818cf8, 0.9); dL2.position.set(-4, -2, -3); scene.add(dL2);
+var dL3 = new THREE.DirectionalLight(0xf472b6, 0.35); dL3.position.set(0, -4, 2); scene.add(dL3);
+
+// Rotation group
+var group = new THREE.Group();
+scene.add(group);
+
+// State
+var faceMesh = null;
+var wireFront = null; // arêtes avant-plan (depthTest ON)
+var wireBack  = null; // arêtes arrière-plan (depthTest OFF)
+var activeColor = '#5eead4';
+var faceOpacity = 0.75;
+var shininess = 60;
+var autoRot = true;
+var rotSpd = 1.0;
+
+// ──────────────────────────────────────
+// SHADERS POUR ARÊTES EN POINTILLÉS
+// ──────────────────────────────────────
+//
+// Principe :
+//   - wireFront : depthTest ON  → arêtes visibles en avant-plan, trait plein
+//   - wireBack  : depthTest OFF → arêtes derrière les faces, pointillés fins
+//
+// Le vertex shader calcule la distance parcourue le long du segment
+// (attribut lineDistance). Le fragment shader utilise cette distance
+// pour alterner plein/transparent (pointillés).
+// Pour wireFront le pattern est plein (dashRatio=1), pour wireBack pointillé.
+
+// Geometry helper : ajoute l'attribut lineDistance à un WireframeGeometry
+function addLineDistances(geo) {
+  var pos = geo.attributes.position;
+  var n = pos.count;
+  var dists = new Float32Array(n);
+  // Les LineSegments sont des paires de sommets : (0,1), (2,3), ...
+  for (var i = 0; i < n; i += 2) {
+    dists[i] = 0;
+    var dx = pos.getX(i+1) - pos.getX(i);
+    var dy = pos.getY(i+1) - pos.getY(i);
+    var dz = pos.getZ(i+1) - pos.getZ(i);
+    dists[i+1] = Math.sqrt(dx*dx + dy*dy + dz*dz);
+  }
+  geo.setAttribute('lineDistance', new THREE.BufferAttribute(dists, 1));
+  return geo;
+}
+
+var VERT_SHADER = [
+  'attribute float lineDistance;',
+  'varying float vLineDistance;',
+  'void main() {',
+  '  vLineDistance = lineDistance;',
+  '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+  '}'
+].join('\n');
+
+// Fragment shader pointillé
+// dashSize  : longueur du tiret (en unités monde)
+// gapSize   : longueur du blanc
+// dashRatio : 1.0 = plein, 0.0 = invisible (on l'utilise pas, on passe dashSize/gapSize)
+var FRAG_SHADER = [
+  'uniform vec3  uColor;',
+  'uniform float uOpacity;',
+  'uniform float uDashSize;',
+  'uniform float uGapSize;',
+  'uniform float uDashed;',   // 0.0 = trait plein, 1.0 = pointillés
+  'varying float vLineDistance;',
+  'void main() {',
+  '  if (uDashed > 0.5) {',
+  '    float period = uDashSize + uGapSize;',
+  '    float pos = mod(vLineDistance, period);',
+  '    if (pos > uDashSize) discard;',
+  '  }',
+  '  gl_FragColor = vec4(uColor, uOpacity);',
+  '}'
+].join('\n');
+
+function makeDashedMaterial(col, opacity, dashed) {
+  var c = new THREE.Color(col);
+  return new THREE.ShaderMaterial({
+    vertexShader:   VERT_SHADER,
+    fragmentShader: FRAG_SHADER,
+    uniforms: {
+      uColor:    { value: new THREE.Vector3(c.r, c.g, c.b) },
+      uOpacity:  { value: opacity },
+      uDashSize: { value: dashed ? 0.04 : 1000.0 },
+      uGapSize:  { value: dashed ? 0.06 : 0.0 },
+      uDashed:   { value: dashed ? 1.0 : 0.0 }
+    },
+    transparent: true,
+    depthTest:   !dashed,
+    depthWrite:  false
+  });
+}
+
+function updateDashedUniforms(mat, col, opacity) {
+  var c = new THREE.Color(col);
+  mat.uniforms.uColor.value.set(c.r, c.g, c.b);
+  mat.uniforms.uOpacity.value = opacity;
+  mat.needsUpdate = true;
+}
+
+// Opacité des arêtes selon l'opacité des faces
+// front : toujours bien visible (trait plein)
+// back  : proportionnel à la transparence, pointillé
+function wireOpacities(faceOp) {
+  var t = 1.0 - faceOp;
+  return {
+    front: 0.18 + t * 0.72,   // 0.18 → 0.90
+    back:  0.10 + t * 0.38    // 0.10 → 0.48  (pointillés toujours subtils)
+  };
+}
+
+// ──────────────────────────────────────
+// LOAD SOLID
+// ──────────────────────────────────────
+function loadSolid(def) {
+  if (faceMesh)  { group.remove(faceMesh);  faceMesh.geometry.dispose();  faceMesh.material.dispose();  faceMesh = null; }
+  if (wireFront) { group.remove(wireFront); wireFront.geometry.dispose(); wireFront.material.dispose(); wireFront = null; }
+  if (wireBack)  { group.remove(wireBack);  wireBack.geometry.dispose();  wireBack.material.dispose();  wireBack = null; }
+
+  var geo = def.geo();
+  geo.computeVertexNormals();
+
+  // ── Faces ──
+  var mat = new THREE.MeshPhongMaterial({
+    color: new THREE.Color(activeColor),
+    transparent: true,
+    opacity: faceOpacity,
+    side: THREE.DoubleSide,
+    shininess: shininess,
+    specular: new THREE.Color(0x222222)
+  });
+  faceMesh = new THREE.Mesh(geo, mat);
+  faceMesh.renderOrder = 0;
+  group.add(faceMesh);
+
+  // Couleur des arêtes = couleur + éclaircie
+  var wcol = new THREE.Color(activeColor);
+  wcol.lerp(new THREE.Color(0xffffff), 0.5);
+
+  // Geometry partagée pour les deux passes (avec distances)
+  var wgeo = addLineDistances(new THREE.WireframeGeometry(geo));
+  var ops  = wireOpacities(faceOpacity);
+
+  wireBack = new THREE.LineSegments(wgeo, makeDashedMaterial(wcol, ops.back, true));
+  wireBack.renderOrder = 1;
+  group.add(wireBack);
+
+  wireFront = new THREE.LineSegments(wgeo, makeDashedMaterial(wcol, ops.front, false));
+  wireFront.renderOrder = 2;
+  group.add(wireFront);
+
+  document.getElementById('overlay-name').textContent = def.name.toUpperCase();
+  document.getElementById('infoCard').innerHTML =
+    '<b>' + def.name + '</b><br>' +
+    '<span class="hi">Faces</span>&nbsp;&nbsp;&nbsp; ' + def.faces + '<br>' +
+    '<span class="hi">Arêtes</span>&nbsp; ' + def.edges + '<br>' +
+    '<span class="hi">Sommets</span> ' + def.verts + '<br>' +
+    '<span style="color:#3d4460;font-size:9px">' + def.desc + '</span>';
+}
+
+function refreshMaterials() {
+  if (!faceMesh) return;
+  var ops  = wireOpacities(faceOpacity);
+  var wcol = new THREE.Color(activeColor);
+  wcol.lerp(new THREE.Color(0xffffff), 0.5);
+
+  faceMesh.material.color.set(activeColor);
+  faceMesh.material.opacity = faceOpacity;
+  faceMesh.material.shininess = shininess;
+  faceMesh.material.needsUpdate = true;
+
+  updateDashedUniforms(wireBack.material,  wcol, ops.back);
+  updateDashedUniforms(wireFront.material, wcol, ops.front);
+}
+
+// ──────────────────────────────────────
+// BUILD SIDEBAR
+// ──────────────────────────────────────
+var listEl = document.getElementById('solid-list');
+var firstEl = null, firstDef = null;
+
+for (var ci = 0; ci < CATALOG.length; ci++) {
+  var cat = CATALOG[ci];
+  var lbl = document.createElement('div');
+  lbl.className = 'cat-label';
+  lbl.textContent = cat.cat;
+  listEl.appendChild(lbl);
+
+  for (var si = 0; si < cat.items.length; si++) {
+    (function(def) {
+      var el = document.createElement('div');
+      el.className = 'solid-item';
+      el.innerHTML = def.name + '<span class="tag">' + def.faces + 'F</span>';
+      el.addEventListener('click', function() {
+        document.querySelectorAll('.solid-item').forEach(function(e) { e.classList.remove('active'); });
+        el.classList.add('active');
+        loadSolid(def);
+      });
+      listEl.appendChild(el);
+      if (!firstEl) { firstEl = el; firstDef = def; }
+    })(cat.items[si]);
+  }
+}
+
+// ──────────────────────────────────────
+// COLOR SWATCHES
+// ──────────────────────────────────────
+var COLORS = [
+  '#5eead4','#818cf8','#f472b6','#fbbf24','#38bdf8','#a78bfa',
+  '#fb923c','#4ade80','#e879f9','#f87171','#94a3b8','#f0abfc'
+];
+
+var swatchesEl = document.getElementById('swatches');
+COLORS.forEach(function(c) {
+  var sw = document.createElement('div');
+  sw.className = 'swatch' + (c === activeColor ? ' on' : '');
+  sw.style.background = c;
+  sw.addEventListener('click', function() {
+    swatchesEl.querySelectorAll('.swatch').forEach(function(s) { s.classList.remove('on'); });
+    sw.classList.add('on');
+    activeColor = c;
+    refreshMaterials();
+  });
+  swatchesEl.appendChild(sw);
+});
+
+// ──────────────────────────────────────
+// CONTROLS
+// ──────────────────────────────────────
+var sOpacity = document.getElementById('sOpacity');
+sOpacity.addEventListener('input', function() {
+  faceOpacity = sOpacity.value / 100;
+  document.getElementById('vOpacity').textContent = sOpacity.value + '%';
+  refreshMaterials();
+});
+
+var sShine = document.getElementById('sShine');
+sShine.addEventListener('input', function() {
+  shininess = +sShine.value;
+  document.getElementById('vShine').textContent = sShine.value;
+  refreshMaterials();
+});
+
+var sSpeed = document.getElementById('sSpeed');
+sSpeed.addEventListener('input', function() {
+  rotSpd = sSpeed.value / 10;
+  document.getElementById('vSpeed').textContent = rotSpd.toFixed(1) + '×';
+});
+
+var btnAuto = document.getElementById('btnAuto');
+btnAuto.addEventListener('click', function() {
+  autoRot = !autoRot;
+  btnAuto.classList.toggle('on', autoRot);
+});
+
+
+// ──────────────────────────────────────
+// MOUSE / TOUCH ORBIT
+// ──────────────────────────────────────
+var dragging = false, prevXY = { x: 0, y: 0 };
+
+renderer.domElement.addEventListener('mousedown', function(e) {
+  dragging = true;
+  prevXY = { x: e.clientX, y: e.clientY };
+});
+
+window.addEventListener('mouseup', function() { dragging = false; });
+
+window.addEventListener('mousemove', function(e) {
+  if (!dragging) return;
+  var dx = e.clientX - prevXY.x, dy = e.clientY - prevXY.y;
+  group.rotation.y += dx * 0.011;
+  group.rotation.x += dy * 0.011;
+  prevXY = { x: e.clientX, y: e.clientY };
+  if (Math.abs(dx) + Math.abs(dy) > 2) {
+    autoRot = false;
+    btnAuto.classList.remove('on');
+  }
+});
+
+renderer.domElement.addEventListener('touchstart', function(e) {
+  if (e.touches.length !== 1) return;
+  dragging = true;
+  prevXY = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+
+window.addEventListener('touchend', function() { dragging = false; });
+
+window.addEventListener('touchmove', function(e) {
+  if (!dragging || e.touches.length !== 1) return;
+  var dx = e.touches[0].clientX - prevXY.x, dy = e.touches[0].clientY - prevXY.y;
+  group.rotation.y += dx * 0.011;
+  group.rotation.x += dy * 0.011;
+  prevXY = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+
+renderer.domElement.addEventListener('wheel', function(e) {
+  camera.position.z = Math.max(2, Math.min(14, camera.position.z + e.deltaY * 0.005));
+}, { passive: true });
+
+// ──────────────────────────────────────
+// RESIZE
+// ──────────────────────────────────────
+function onResize() {
+  var w = mainEl.clientWidth, h = mainEl.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ──────────────────────────────────────
+// ANIMATION LOOP
+// ──────────────────────────────────────
+var clock = new THREE.Clock();
+(function loop() {
+  requestAnimationFrame(loop);
+  var dt = clock.getDelta();
+  if (autoRot && !dragging) {
+    group.rotation.y += 0.38 * rotSpd * dt;
+    group.rotation.x += 0.09 * rotSpd * dt;
+  }
+  renderer.render(scene, camera);
+})();
+
+// ──────────────────────────────────────
+// INIT
+// ──────────────────────────────────────
+firstEl.click();
+</script>
+</body>
+</html>
