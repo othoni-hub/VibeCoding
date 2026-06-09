@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i-CONIC - Laboratoire Interactif de Géométrie</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Style personnalisé pour les curseurs */
+        input[type="range"] {
+            accent-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-slate-900 border-b border-slate-800 p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <div class="flex items-baseline gap-2">
+                    <h1 class="text-3xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
+                        i-CONIC
+                    </h1>
+                    <span class="text-xs text-slate-400 font-medium hidden sm:inline">|</span>
+                    <p class="text-sm font-medium text-slate-300 italic hidden sm:inline">
+                        Interface Canonique pour l'Optique, la Navigation et l'Illustration des Coniques
+                    </p>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5 sm:hidden">Interface Canonique pour l'Optique, la Navigation et l'Illustration des Coniques</p>
+                <p class="text-xs text-blue-400/80 font-mono mt-0.5">Visualisation géométrique & dynamique — Niveau L3 / Master</p>
+            </div>
+            <div class="flex rounded-lg bg-slate-800 p-1 border border-slate-700">
+                <button id="btn-ellipse" onclick="setFamily('ellipse')" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-600 text-white shadow">
+                    Ellipse
+                </button>
+                <button id="btn-parabola" onclick="setFamily('parabola')" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-white">
+                    Parabole
+                </button>
+                <button id="btn-hyperbola" onclick="setFamily('hyperbola')" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-white">
+                    Hyperbole
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="space-y-6 lg:col-span-1">
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-md space-y-4">
+                <h2 class="text-lg font-semibold text-blue-400 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <span>⚙️</span> Paramètres géométriques
+                </h2>
+                
+                <div id="controls-ab" class="space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <label for="param-a" class="text-slate-300">Demi-axe principal (<span class="italic font-serif">a</span>) :</label>
+                            <span id="val-a" class="font-mono text-blue-400 font-bold">120</span>
+                        </div>
+                        <input type="range" id="param-a" min="50" max="200" value="120" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <label for="param-b" class="text-slate-300">Demi-axe secondaire (<span class="italic font-serif">b</span>) :</label>
+                            <span id="val-b" class="font-mono text-blue-400 font-bold">80</span>
+                        </div>
+                        <input type="range" id="param-b" min="30" max="180" value="80" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <div id="controls-p" class="space-y-4 hidden">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <label for="param-p" class="text-slate-300">Paramètre (<span class="italic font-serif">p</span>) :</label>
+                            <span id="val-p" class="font-mono text-blue-400 font-bold">60</span>
+                        </div>
+                        <input type="range" id="param-p" min="20" max="150" value="60" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-slate-800">
+                    <div class="flex justify-between text-sm">
+                        <label for="param-t" class="text-slate-300">Position du point <span class="italic font-serif">M</span> (<span class="italic font-serif">t</span>) :</label>
+                        <span id="val-t" class="font-mono text-emerald-400 font-bold">0.00</span>
+                    </div>
+                    <input type="range" id="param-t" min="-3.14" max="3.14" step="0.05" value="0.7" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-md space-y-3">
+                <h2 class="text-lg font-semibold text-emerald-400 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <span>📊</span> Données et invariants
+                </h2>
+                <div class="space-y-2 text-sm font-mono text-slate-300">
+                    <div class="flex justify-between p-1.5 bg-slate-950/50 rounded"><span class="text-slate-500">Équation :</span> <span id="math-eq" class="text-white text-right"></span></div>
+                    <div class="flex justify-between p-1.5 bg-slate-950/50 rounded"><span class="text-slate-500">Excentricité (e) :</span> <span id="math-e" class="text-indigo-400 font-bold"></span></div>
+                    <div class="flex justify-between p-1.5 bg-slate-950/50 rounded"><span class="text-slate-500">Foyers :</span> <span id="math-foci" class="text-orange-400"></span></div>
+                    <div class="flex justify-between p-1.5 bg-slate-950/50 rounded"><span class="text-slate-500">Lieu d'Orthoptie :</span> <span id="math-monge" class="text-purple-400"></span></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-md">
+                <h3 class="text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">Légende des tracés</h3>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-blue-500 rounded-full"></div> <span>Conique</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-emerald-500 rounded-full"></div> <span>Tangente en M</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-orange-500 rounded-full"></div> <span>Foyers / Rayons</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-red-500 rounded"></div> <span>Directrice(s)</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-purple-500 rounded-full"></div> <span>Cercle/Lieu Monge</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-yellow-500 rounded"></div> <span>Asymptotes</span></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-2 flex flex-col bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-md h-[650px] relative">
+            <div class="absolute top-6 left-6 z-10 bg-slate-950/80 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-md text-xs text-slate-400">
+                💡 <span class="hidden md:inline">Glissez le curseur "M(t)" ou utilisez les curseurs de géométrie pour voir les transformations.</span>
+                <span class="inline md:hidden">Ajustez les curseurs ci-dessous.</span>
+            </div>
+            
+            <div class="flex-1 w-full h-full relative overflow-hidden rounded-lg bg-slate-950 border border-slate-800">
+                <canvas id="geometry-canvas" class="absolute top-0 left-0 w-full h-full block"></canvas>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 text-center py-4 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center px-6 gap-2">
+        <div>Départements de Mathématiques — Laboratoire Numérique d'Algèbre Bilinéaire.</div>
+        <div class="text-slate-400 text-[11px] bg-slate-950/40 px-3 py-1 rounded border border-slate-800/60 font-mono">
+            Créé par Olivier Thöni, vibe-codé avec l'aide de Gemini 3.5
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('geometry-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // État de l'application
+        let currentFamily = 'ellipse'; 
+        let state = {
+            a: 120,
+            b: 80,
+            p: 60,
+            t: 0.7
+        };
+
+        // Éléments d'interface
+        const pA = document.getElementById('param-a');
+        const pB = document.getElementById('param-b');
+        const pP = document.getElementById('param-p');
+        const pT = document.getElementById('param-t');
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        pA.addEventListener('input', (e) => { state.a = parseFloat(e.target.value); document.getElementById('val-a').innerText = state.a; draw(); });
+        pB.addEventListener('input', (e) => { state.b = parseFloat(e.target.value); document.getElementById('val-b').innerText = state.b; draw(); });
+        pP.addEventListener('input', (e) => { state.p = parseFloat(e.target.value); document.getElementById('val-p').innerText = state.p; draw(); });
+        pT.addEventListener('input', (e) => { state.t = parseFloat(e.target.value); document.getElementById('val-t').innerText = state.t.toFixed(2); draw(); });
+
+        function setFamily(family) {
+            currentFamily = family;
+            
+            ['ellipse', 'parabola', 'hyperbola'].forEach(f => {
+                const btn = document.getElementById(`btn-${f}`);
+                if(f === family) {
+                    btn.className = "px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-600 text-white shadow";
+                } else {
+                    btn.className = "px-4 py-2 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-white";
+                }
+            });
+
+            if(family === 'parabola') {
+                document.getElementById('controls-ab').classList.add('hidden');
+                document.getElementById('controls-p').classList.remove('hidden');
+                pT.min = "-4"; pT.max = "4"; pT.value = "1.5"; state.t = 1.5;
+            } else {
+                document.getElementById('controls-ab').classList.remove('hidden');
+                document.getElementById('controls-p').classList.add('hidden');
+                if(family === 'ellipse') {
+                    pT.min = "-3.14"; pT.max = "3.14"; pT.value = "0.7"; state.t = 0.7;
+                } else { 
+                    pT.min = "-2"; pT.max = "2"; pT.value = "0.5"; state.t = 0.5;
+                }
+            }
+            document.getElementById('val-t').innerText = state.t.toFixed(2);
+            draw();
+        }
+
+        function draw() {
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const cx = width / 2;
+            const cy = height / 2;
+            
+            drawGrid(cx, cy, width, height);
+
+            if (currentFamily === 'ellipse') {
+                drawEllipse(cx, cy);
+            } else if (currentFamily === 'parabola') {
+                drawParabola(cx, cy);
+            } else if (currentFamily === 'hyperbola') {
+                drawHyperbola(cx, cy);
+            }
+        }
+
+        function drawGrid(cx, cy, w, h) {
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for(let x = cx % 40; x < w; x += 40) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for(let y = cy % 40; y < h; y += 40) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+        }
+
+        function drawEllipse(cx, cy) {
+            const { a, b, t } = state;
+            const c = Math.sqrt(Math.abs(a*a - b*b));
+            const e = a >= b ? c / a : 0;
+
+            document.getElementById('math-eq').innerHTML = `x²/(${a}²) + y²/(${b}²) = 1`;
+            document.getElementById('math-e').innerText = e.toFixed(3);
+            document.getElementById('math-foci').innerText = `F(${c.toFixed(0)}, 0), F'(-${c.toFixed(0)}, 0)`;
+            document.getElementById('math-monge').innerText = `Cercle R = ${Math.sqrt(a*a+b*b).toFixed(1)}`;
+
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.arc(cx, cy, Math.sqrt(a*a + b*b), 0, 2*Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if(e > 0) {
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+                const dX = (a*a) / c;
+                ctx.beginPath(); ctx.moveTo(cx + dX, 0); ctx.lineTo(cx + dX, cy*2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx - dX, 0); ctx.lineTo(cx - dX, cy*2); ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for(let angle = 0; angle <= 2*Math.PI + 0.1; angle += 0.05) {
+                let x = cx + a * Math.cos(angle);
+                let y = cy + b * Math.sin(angle);
+                if(angle === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath(); ctx.arc(cx + c, cy, 5, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx - c, cy, 5, 0, 2*Math.PI); ctx.fill();
+
+            const mx = a * Math.cos(t);
+            const my = b * Math.sin(t);
+            
+            ctx.strokeStyle = 'rgba(249, 115, 22, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(cx - c, cy); ctx.lineTo(cx + mx, cy + my); ctx.lineTo(cx + c, cy);
+            ctx.stroke();
+
+            const tx = -a * Math.sin(t);
+            const ty = b * Math.cos(t);
+            
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + mx - tx*10, cy + my - ty*10);
+            ctx.lineTo(cx + mx + tx*10, cy + my + ty*10);
+            ctx.stroke();
+
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath(); ctx.arc(cx + mx, cy + my, 6, 0, 2*Math.PI); ctx.fill();
+        }
+
+        function drawParabola(cx, cy) {
+            const { p, t } = state;
+            const originX = cx - 100;
+
+            document.getElementById('math-eq').innerHTML = `y² = 2 · ${p} · x`;
+            document.getElementById('math-e').innerText = "1.000 (Parabole)";
+            document.getElementById('math-foci').innerText = `F(${(p/2).toFixed(0)}, 0)`;
+            document.getElementById('math-monge').innerText = `Directrice x = -${(p/2).toFixed(0)}`;
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(originX - p/2, 0);
+            ctx.lineTo(originX - p/2, cy*2);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            let first = true;
+            for(let yVal = -300; yVal <= 300; yVal += 5) {
+                let xVal = (yVal * yVal) / (2 * p);
+                if(first) {
+                    ctx.moveTo(originX + xVal, cy + yVal);
+                    first = false;
+                } else {
+                    ctx.lineTo(originX + xVal, cy + yVal);
+                }
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath(); ctx.arc(originX + p/2, cy, 5, 0, 2*Math.PI); ctx.fill();
+
+            const my = t * 60; 
+            const mx = (my * my) / (2 * p);
+
+            ctx.strokeStyle = 'rgba(249, 115, 22, 0.4)';
+            ctx.beginPath();
+            ctx.moveTo(originX + p/2, cy); 
+            ctx.lineTo(originX + mx, cy + my); 
+            ctx.lineTo(originX - p/2, cy + my); 
+            ctx.stroke();
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(originX + mx - my*5, cy + my - p*5);
+            ctx.lineTo(originX + mx + my*5, cy + my + p*5);
+            ctx.stroke();
+
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath(); ctx.arc(originX + mx, cy + my, 6, 0, 2*Math.PI); ctx.fill();
+        }
+
+        function drawHyperbola(cx, cy) {
+            const { a, b, t } = state;
+            const c = Math.sqrt(a*a + b*b);
+            const e = c / a;
+
+            document.getElementById('math-eq').innerHTML = `x²/(${a}²) - y²/(${b}²) = 1`;
+            document.getElementById('math-e').innerText = e.toFixed(3);
+            document.getElementById('math-foci').innerText = `F(${c.toFixed(0)}, 0), F'(-${c.toFixed(0)}, 0)`;
+            
+            if(a > b) {
+                document.getElementById('math-monge').innerText = `Cercle R = ${Math.sqrt(a*a-b*b).toFixed(1)}`;
+            } else {
+                document.getElementById('math-monge').innerText = `Lieu vide (a < b)`;
+            }
+
+            if(a > b) {
+                ctx.strokeStyle = 'rgba(168, 85, 247, 0.3)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.arc(cx, cy, Math.sqrt(a*a - b*b), 0, 2*Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            ctx.strokeStyle = 'rgba(234, 179, 8, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, cy - (b/a)*cx); ctx.lineTo(cx*2, cy + (b/a)*cx); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, cy + (b/a)*cx); ctx.lineTo(cx*2, cy - (b/a)*cx); ctx.stroke();
+
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            let first = true;
+            for(let u = -2.5; u <= 2.5; u += 0.05) {
+                let xVal = a * Math.cosh(u);
+                let yVal = b * Math.sinh(u);
+                if(first) { ctx.moveTo(cx + xVal, cy + yVal); first = false; }
+                else ctx.lineTo(cx + xVal, cy + yVal);
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            first = true;
+            for(let u = -2.5; u <= 2.5; u += 0.05) {
+                let xVal = -a * Math.cosh(u);
+                let yVal = b * Math.sinh(u);
+                if(first) { ctx.moveTo(cx + xVal, cy + yVal); first = false; }
+                else ctx.lineTo(cx + xVal, cy + yVal);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath(); ctx.arc(cx + c, cy, 5, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx - c, cy, 5, 0, 2*Math.PI); ctx.fill();
+
+            const mx = a * Math.cosh(t);
+            const my = b * Math.sinh(t);
+
+            ctx.strokeStyle = 'rgba(249, 115, 22, 0.3)';
+            ctx.beginPath(); ctx.moveTo(cx - c, cy); ctx.lineTo(cx + mx, cy + my); ctx.lineTo(cx + c, cy);
+            ctx.stroke();
+
+            const tx = a * Math.sinh(t);
+            const ty = b * Math.cosh(t);
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + mx - tx*5, cy + my - ty*5);
+            ctx.lineTo(cx + mx + tx*5, cy + my + ty*5);
+            ctx.stroke();
+
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath(); ctx.arc(cx + mx, cy + my, 6, 0, 2*Math.PI); ctx.fill();
+        }
+
+        setTimeout(() => {
+            resizeCanvas();
+        }, 100);
+    </script>
+</body>
+</html>
