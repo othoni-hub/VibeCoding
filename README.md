@@ -53,9 +53,13 @@ Arbre fractal avec paramètres
 Visualiseur intéractif de coniques
 
 [Retour en haut](#VibeCoding)
-<li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li> :
+
 ## PAGNOL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li> :
+<img width="450" height="470" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
 
-Timeline sur les oeuvres proncipales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup>
+Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup>
+
+[Retour en haut](#VibeCoding)
+
