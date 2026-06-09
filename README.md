@@ -5,6 +5,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ## Table des matières
 - [L'appli *Constructor*](#Constructor)
+- [L'appli *S.Y.S.M.O*](#S.Y.S.M.O Solarium 3D)
 
 ## Constructor
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> : 
@@ -18,4 +19,13 @@ Puis, on "forge", en 1er niveau, l'outil "Médiatrice", à partir duquel on peut
 Puis, en 3ème niveau, on pourra fabriquer la "médiane", etc.
 
 [Retour en haut](#VibeCoding)
+
+## S.Y.S.M.O Solarium 3D
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/" target="_blank" rel="noopener noreferrer">Constructor </a></li> :
+
+<img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/66394ea5-1f07-464c-b875-370fe3ede90d" />
+
+Vue animée du Système Solaire
+
 
