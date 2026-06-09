@@ -15,3 +15,5 @@ Au départ, 4 outils : "droite", "point", "cercle", "intersection".
 Puis, on "forge", en 1er niveau, l'outil "Médiatrice", à partir duquel on peut fabriquer, en 2ème niveau, l'outil "milieu", l'outil "cercle circonscrit", etc.
 Puis, en 3ème niveau, on pourra fabriquer la "médiane", etc.
 
+[Retour en haut](#VibeCoding)
+
