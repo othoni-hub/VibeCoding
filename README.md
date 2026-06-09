@@ -1,5 +1,6 @@
 # VibeCoding
 Applications "single page" pédagogiques ou autres, vibe-codées par Olivier Thöni
+
 avec l'aide de Gemini 3.5 ou de Claude Sonnet 4.6
 
 ## Table des matières
