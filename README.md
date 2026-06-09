@@ -10,6 +10,8 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *i-CONIC*](#i-CONIC)
 
 ## Constructor
+[Gemini 3.5]
+
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> : 
 
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/701d0511-2c2b-4f0c-ae28-d48cebc8b799" />
@@ -23,7 +25,7 @@ Puis, en 3ème niveau, on pourra fabriquer la "médiane", etc.
 [Retour en haut](#VibeCoding)
 
 ## Solarium
-
+[Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/" target="_blank" rel="noopener noreferrer">Solarium 3D </a></li> :
 
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/66394ea5-1f07-464c-b875-370fe3ede90d" />
@@ -33,7 +35,7 @@ Vue animée du Système Solaire
 [Retour en haut](#VibeCoding)
 
 ## ArbreFractal
-
+[Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ArbreFractal/" target="_blank" rel="noopener noreferrer">Arbre Fractal </a></li> :
 
 <img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/f18cdd00-020d-4254-8924-208ecba1e9c5" />
@@ -43,7 +45,7 @@ Arbre fractal avec paramètres
 [Retour en haut](#VibeCoding)
 
 ## i-CONIC
-
+[Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li> :
 
 <img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/9fba1a70-5368-4aec-aee4-1cb47b8c7d4b" />
