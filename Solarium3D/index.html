@@ -8,7 +8,7 @@
         #ui { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.85); padding: 15px; border-radius: 8px; z-index: 10; border: 1px solid #00d4ff; }
         #popup { display: none; position: absolute; background: rgba(20,20,20,0.95); padding: 15px; border: 1px solid #00d4ff; border-radius: 8px; color: white; width: 250px; }
         h1 { margin: 0 0 10px 0; font-size: 1.2em; color: #00d4ff; letter-spacing: 2px; }
-        button { cursor: pointer; background: #00d4ff; border: none; padding: 6px 12px; border-radius: 4px; margin-top: 10px; font-weight: bold; }
+        button { cursor: pointer; background: #00d4ff; border: none; padding: 6px 12px; border-radius: 4px; margin-top: 10px; font-weight: bold; display: block; width: 100%; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -18,13 +18,14 @@
 <div id="ui">
     <h1>S.Y.S.M.O.</h1>
     Vitesse: <input type="range" id="speed" min="0" max="1000" value="1"> <span id="val">1</span> j/min<br>
-    <button onclick="focusedPlanet = null">Vue d'ensemble</button>
+    <button onclick="focusedPlanet = null; centeredPlanet = null; controls.target.set(0,0,0);">Vue d'ensemble</button>
 </div>
 
 <div id="popup">
     <h2 id="pName" style="color:#00d4ff; margin-top:0;"></h2>
     <div id="pData" style="margin-bottom:10px;"></div>
-    <button onclick="setFocus()">Suivre cette planète</button>
+    <button onclick="setFocus()">Suivre (Caméra)</button>
+    <button onclick="setCenter()">Centrer (Référentiel)</button>
     <button onclick="document.getElementById('popup').style.display='none'" style="background:#555">Fermer</button>
 </div>
 
@@ -32,12 +33,14 @@
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.shadowMap.enabled = true; // Ombres activées
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    scene.add(new THREE.AmbientLight(0x444444));
-    const sunLight = new THREE.PointLight(0xffffff, 2, 1000);
+    scene.add(new THREE.AmbientLight(0x222222)); // Lumière ambiante faible
+    const sunLight = new THREE.PointLight(0xffffff, 2, 2000); // Source de lumière
+    sunLight.castShadow = true;
     scene.add(sunLight);
 
     const planets = [
@@ -51,52 +54,64 @@
         {name: "Neptune", color: 0x6081FF, dist: 250, size: 3.5, period: 60190, rot: 0.6, mass: "17.1 M⊕"}
     ];
 
-    let speed = 1, focusedPlanet = null;
+    let speed = 1, focusedPlanet = null, centeredPlanet = null;
     
-    // Initialisation des planètes et de leurs traînées
+    // Lune en MeshStandardMaterial pour qu'elle reçoive les ombres
+    let moon = { angle: 0, dist: 6, mesh: new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshStandardMaterial({color: 0xDDDDDD})), trailPoints: [] };
+    moon.mesh.castShadow = true; moon.mesh.receiveShadow = true;
+    scene.add(moon.mesh);
+    const moonTrail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xDDDDDD, transparent: true, opacity: 0.3 }));
+    scene.add(moonTrail);
+
     const planetMeshes = planets.map(p => {
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 32, 32), new THREE.MeshStandardMaterial({ color: p.color }));
+        mesh.castShadow = true; mesh.receiveShadow = true;
         scene.add(mesh);
-        
-        // Traînées : liste de points
-        const trailPoints = [];
-        const trailGeom = new THREE.BufferGeometry();
-        const trailMat = new THREE.LineBasicMaterial({ color: p.color, transparent: true, opacity: 0.5 });
-        const trail = new THREE.Line(trailGeom, trailMat);
-        scene.add(trail);
-
-        return { ...p, mesh, angle: Math.random() * Math.PI * 2, trailPoints, trail };
+        return { ...p, mesh, angle: Math.random() * Math.PI * 2, absPos: new THREE.Vector3(), trailPoints: [], trail: new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: p.color, transparent: true, opacity: 0.4 })) };
     });
+    planetMeshes.forEach(p => scene.add(p.trail));
 
     const sun = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
     scene.add(sun);
     camera.position.set(200, 200, 200);
 
-    function setFocus() {
-        const name = document.getElementById('pName').innerText;
-        focusedPlanet = planetMeshes.find(p => p.name === name);
-        document.getElementById('popup').style.display = 'none';
-    }
+    function setFocus() { focusedPlanet = planetMeshes.find(p => p.name === document.getElementById('pName').innerText); document.getElementById('popup').style.display = 'none'; }
+    function setCenter() { centeredPlanet = planetMeshes.find(p => p.name === document.getElementById('pName').innerText); document.getElementById('popup').style.display = 'none'; }
 
     function animate() {
         requestAnimationFrame(animate);
-        
+        const earth = planetMeshes.find(p => p.name === "Terre");
+        const offset = centeredPlanet ? centeredPlanet.absPos.clone() : new THREE.Vector3(0,0,0);
+
         planetMeshes.forEach(p => {
             p.angle += (2 * Math.PI / p.period) * (speed / 60);
-            p.mesh.position.x = Math.cos(p.angle) * p.dist;
-            p.mesh.position.z = Math.sin(p.angle) * p.dist;
+            p.absPos.set(Math.cos(p.angle) * p.dist, 0, Math.sin(p.angle) * p.dist);
+            p.mesh.position.copy(p.absPos.clone().sub(offset));
             
-            // Mise à jour de la traînée
             p.trailPoints.push(p.mesh.position.clone());
             if (p.trailPoints.length > 200) p.trailPoints.shift();
             p.trail.geometry.setFromPoints(p.trailPoints);
         });
+
+        if(earth) {
+            moon.angle += (2 * Math.PI / 27) * (speed / 60);
+            const moonAbs = new THREE.Vector3(earth.absPos.x + Math.cos(moon.angle) * moon.dist, 0, earth.absPos.z + Math.sin(moon.angle) * moon.dist);
+            moon.mesh.position.copy(moonAbs.clone().sub(offset));
+            moon.trailPoints.push(moon.mesh.position.clone());
+            if (moon.trailPoints.length > 100) moon.trailPoints.shift();
+            moonTrail.geometry.setFromPoints(moon.trailPoints);
+        }
+
+        // Soleil et Lumière synchronisés
+        sun.position.copy(new THREE.Vector3(0,0,0).sub(offset));
+        sunLight.position.copy(sun.position);
 
         if (focusedPlanet) controls.target.copy(focusedPlanet.mesh.position);
         controls.update();
         renderer.render(scene, camera);
     }
 
+    // ... (Reste du code de gestion du clic inchangé)
     window.addEventListener('click', (e) => {
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
