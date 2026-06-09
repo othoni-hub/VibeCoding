@@ -5,7 +5,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ## Table des matières
 - [L'appli *Constructor*](#Constructor)
-- [L'appli *S.Y.S.M.O*](#S.Y.S.M.O Solarium 3D)  
+- [L'appli *S.Y.S.M.O*](#S.Y.S.M.O-Solarium-3D)  
 
 ## Constructor
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> : 
