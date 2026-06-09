@@ -8,6 +8,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *i-CONIC*](#i-CONIC)
+- [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
 
 ## Constructor
 [*Vibe-Codé* avec Gemini 3.5]
@@ -17,10 +18,8 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/701d0511-2c2b-4f0c-ae28-d48cebc8b799" />
 
 
-Le Boa Constructor est une application sous forme de jeu de plateau, au croisement de MineCraft et du bouton "Créer un nouvel outil" de Geogebra, destiné à faire acquérir des compétences en pensée computationnelle, tout en consolidant les définitions des outils de la géométrie.
-Au départ, 4 outils : "droite", "point", "cercle", "intersection".
-Puis, on "forge", en 1er niveau, l'outil "Médiatrice", à partir duquel on peut fabriquer, en 2ème niveau, l'outil "milieu", l'outil "cercle circonscrit", etc.
-Puis, en 3ème niveau, on pourra fabriquer la "médiane", etc.
+Le Boa Constructor est une application sous forme de jeu de plateau, au croisement de la forge de MineCraft et du bouton "Créer un nouvel outil" de Geogebra, destiné à faire acquérir des compétences en pensée computationnelle, tout en consolidant les définitions des outils de la géométrie.
+
 
 [Retour en haut](#VibeCoding)
 
@@ -57,7 +56,7 @@ Visualiseur intéractif de coniques
 ## PAGNOL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li> :
-<img width="450" height="470" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
 
 Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup>
 
