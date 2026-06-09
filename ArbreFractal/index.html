@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fractal Tree Studio - F.R.A.C.T.A.L.</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(23, 32, 53, 0.85);
+            --accent-color: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --btn-gradient: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Zone Canvas - Prend tout l'espace */
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+            height: 100vh;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Bouton pour escamoter le panneau (Desktop par défaut) */
+        #toggle-panel-btn {
+            position: absolute;
+            top: 20px;
+            left: 420px;
+            z-index: 100;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+        }
+
+        #toggle-panel-btn svg {
+            transition: transform 0.4s;
+            fill: currentColor;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Panneau de contrôle latéral (Desktop par défaut) */
+        #controls-panel {
+            width: 400px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            overflow-y: auto;
+            z-index: 10;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(0);
+            flex-shrink: 0;
+        }
+
+        /* États Masqués sur Desktop */
+        body.panel-hidden #controls-panel {
+            transform: translateX(-100%);
+        }
+        body.panel-hidden #toggle-panel-btn {
+            left: 20px;
+        }
+        body.panel-hidden #toggle-panel-btn svg {
+            transform: rotate(180deg);
+        }
+
+        /* Éléments internes du menu */
+        .acronym-badge {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: #60a5fa;
+            letter-spacing: 0.05em;
+            margin-top: 0.4rem;
+            line-height: 1.3;
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 800; background: linear-gradient(45deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 0.8rem; color: var(--text-muted); }
+        .control-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .color-pickers { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        label span { color: var(--accent-color); font-family: monospace; }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+        }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; }
+
+        #generate-btn {
+            background: var(--btn-gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+
+        .checkbox-group { flex-direction: row; align-items: center; gap: 0.75rem; cursor: pointer; }
+        input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent-color); }
+        footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.65rem; color: rgba(156, 163, 175, 0.6); text-align: center; }
+        footer strong { color: rgba(243, 244, 246, 0.8); }
+
+        /* ======================================================= */
+        /* CONFIGURATION RESPONSIVE (MOBILE FIRST / MEDIA QUERIES) */
+        /* ======================================================= */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Le canvas en haut, le menu en bas */
+            }
+
+            #canvas-container {
+                height: 60vh; /* L'arbre prend le haut de l'écran */
+                width: 100vw;
+            }
+
+            /* Le panneau devient une feuille rétractable par le bas */
+            #controls-panel {
+                width: 100vw;
+                height: 45vh; /* Les contrôles prennent le bas */
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                border-right: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 20px 20px 0 0;
+                padding: 1.5rem;
+                transform: translateY(0);
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+            }
+
+            /* Changement de comportement du bouton toggle sur mobile */
+            #toggle-panel-btn {
+                left: auto !important;
+                right: 20px;
+                top: calc(55vh - 22px); /* Se cale pile à la frontière du menu */
+                transform: rotate(90deg); /* Oriente la flèche vers le bas */
+            }
+
+            /* États masqués sur Mobile (Le menu glisse vers le bas) */
+            body.panel-hidden #controls-panel {
+                transform: translateY(100%);
+            }
+            body.panel-hidden #toggle-panel-btn {
+                top: auto !important;
+                bottom: 20px;
+                transform: rotate(-90deg); /* Oriente la flèche vers le haut */
+            }
+
+            /* Gain de place sur mobile pour éviter de trop scroller */
+            .acronym-badge, footer, hr {
+                display: none; /* On cache le superflu sur petit écran */
+            }
+            
+            h1 { font-size: 1.2rem; }
+            .subtitle { font-size: 0.75rem; margin-bottom: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="toggle-panel-btn" title="Masquer / Afficher les paramètres">
+        <svg viewBox="0 0 24 24">
+            <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+        </svg>
+    </button>
+
+    <div id="controls-panel">
+        <div>
+            <h1>Fractal Tree Studio</h1>
+            <p class="subtitle">Vibe-coding d'écosystème mathématique</p>
+            <div class="acronym-badge">
+                <strong>F.R.A.C.T.A.L.</strong> : Fractal Recursive Algent Canvas Tree Animator & Laboratory
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1);">
+
+        <button id="generate-btn">Générer l'Arbre</button>
+
+        <div class="color-pickers">
+            <div class="control-group">
+                <label>Couleur Tronc</label>
+                <input type="color" id="param-colorStart" value="#5c4033">
+            </div>
+            <div class="control-group">
+                <label>Couleur Feuilles</label>
+                <input type="color" id="param-colorEnd" value="#10b981">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="param-maxGen">Générations (Profondeur)<span id="val-maxGen">8</span></label>
+            <input type="range" id="param-maxGen" min="1" max="11" value="8" step="1">
+        </div>
+
+        <div class="control-group">
+            <label for="param-branches">Branches par nœud<span id="val-branches">2</span></label>
+            <input type="range" id="param-branches" min="1" max="4" value="2" step="1">
+        </div>
+
+        <div class="control-group">
+            <label for="param-angle">Angle d'écartement<span id="val-angle">30°</span></label>
+            <input type="range" id="param-angle" min="0" max="180" value="30" step="1">
+        </div>
+
+        <div class="control-group">
+            <label for="param-ratio">Rapport de réduction<span id="val-ratio">0.75</span></label>
+            <input type="range" id="param-ratio" min="0.4" max="0.85" value="0.75" step="0.01">
+        </div>
+
+        <div class="control-group">
+            <label for="param-length">Longueur du tronc<span id="val-length">120px</span></label>
+            <input type="range" id="param-length" min="40" max="200" value="120" step="5">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1);">
+
+        <div class="control-group">
+            <label for="param-wind">Intensité du vent dominant<span id="val-wind">15</span></label>
+            <input type="range" id="param-wind" min="-50" max="50" value="15" step="1">
+        </div>
+
+        <div class="control-group">
+            <label for="param-growthProb">Probabilité de pousse (Chaos)<span id="val-growthProb">100%</span></label>
+            <input type="range" id="param-growthProb" min="50" max="100" value="100" step="1">
+        </div>
+
+        <div class="control-group checkbox-group">
+            <input type="checkbox" id="param-animateWind" checked>
+            <label style="cursor:pointer;" for="param-animateWind">Animer le vent (Dynamique)</label>
+        </div>
+
+        <footer>
+            Créé par <strong>Olivier Thöni</strong><br>
+            vibe-codé avec l’aide de Gemini 3.5
+        </footer>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="treeCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('treeCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        const toggleBtn = document.getElementById('toggle-panel-btn');
+        const generateBtn = document.getElementById('generate-btn');
+
+        const inputs = {
+            maxGen: document.getElementById('param-maxGen'),
+            branches: document.getElementById('param-branches'),
+            angle: document.getElementById('param-angle'),
+            ratio: document.getElementById('param-ratio'),
+            length: document.getElementById('param-length'),
+            wind: document.getElementById('param-wind'),
+            growthProb: document.getElementById('param-growthProb'),
+            animateWind: document.getElementById('param-animateWind'),
+            colorStart: document.getElementById('param-colorStart'),
+            colorEnd: document.getElementById('param-colorEnd')
+        };
+
+        let activeConfig = {};
+
+        function saveConfig() {
+            activeConfig = {
+                maxGen: parseInt(inputs.maxGen.value),
+                numBranches: parseInt(inputs.branches.value),
+                spreadAngle: parseFloat(inputs.angle.value),
+                ratio: parseFloat(inputs.ratio.value),
+                length: parseFloat(inputs.length.value),
+                growthProb: parseFloat(inputs.growthProb.value) / 100,
+                rgbStart: hexToRgb(inputs.colorStart.value),
+                rgbEnd: hexToRgb(inputs.colorEnd.value)
+            };
+        }
+
+        // Gestion parfaite du redimensionnement et du clic Toggle
+        function handleToggle() {
+            document.body.classList.toggle('panel-hidden');
+            // Petit intervalle pour laisser l'animation CSS se finir proprement avant le resize
+            setTimeout(resizeCanvas, 400);
+        }
+
+        toggleBtn.addEventListener('click', handleToggle);
+        generateBtn.addEventListener('click', saveConfig);
+
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        // Sécurité pour les claviers virtuels mobiles qui déclenchent des resize intempestifs
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 200);
+        });
+        
+        resizeCanvas();
+
+        let time = 0;
+
+        function updateLabels() {
+            document.getElementById('val-maxGen').textContent = inputs.maxGen.value;
+            document.getElementById('val-branches').textContent = inputs.branches.value;
+            document.getElementById('val-angle').textContent = inputs.angle.value + '°';
+            document.getElementById('val-ratio').textContent = inputs.ratio.value;
+            document.getElementById('val-length').textContent = inputs.length.value + 'px';
+            document.getElementById('val-wind').textContent = inputs.wind.value;
+            document.getElementById('val-growthProb').textContent = inputs.growthProb.value + '%';
+        }
+
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', updateLabels);
+        });
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 };
+        }
+
+        function interpolateColor(color1, color2, factor) {
+            const r = Math.round(color1.r + (color2.r - color1.r) * factor);
+            const g = Math.round(color1.g + (color2.g - color1.g) * factor);
+            const b = Math.round(color1.b + (color2.b - color1.b) * factor);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function drawBranch(x1, y1, length, angle, gen, config, windForce) {
+            if (gen > config.maxGen) return;
+            if (gen > 0 && Math.random() > config.growthProb) return;
+
+            const x2 = x1 + Math.lengthDirX(length, angle);
+            const y2 = y1 + Math.lengthDirY(length, angle);
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            
+            // Épaisseur légèrement ajustée pour le rendu mobile
+            ctx.lineWidth = Math.max(1, (config.maxGen - gen) * 1.5);
+            
+            const ratioGen = gen / config.maxGen;
+            ctx.strokeStyle = interpolateColor(config.rgbStart, config.rgbEnd, ratioGen);
+            
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            const currentWind = (windForce * (Math.PI / 180) * 0.1) * (gen / config.maxGen);
+
+            if (config.numBranches === 1) {
+                drawBranch(x2, y2, length * config.ratio, angle + currentWind, gen + 1, config, windForce);
+            } else {
+                const totalSpread = config.spreadAngle * (Math.PI / 180);
+                const startAngle = angle - totalSpread / 2;
+                const angleStep = config.numBranches > 1 ? totalSpread / (config.numBranches - 1) : 0;
+
+                for (let i = 0; i < config.numBranches; i++) {
+                    const nextAngle = startAngle + (angleStep * i) + currentWind;
+                    drawBranch(x2, y2, length * config.ratio, nextAngle, gen + 1, config, windForce);
+                }
+            }
+        }
+
+        Math.lengthDirX = (length, angle) => length * Math.cos(angle);
+        Math.lengthDirY = (length, angle) => length * Math.sin(angle);
+
+        function animate() {
+            time += 0.02;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            let windForce = parseFloat(inputs.wind.value);
+            if (inputs.animateWind.checked) {
+                windForce = windForce + Math.sin(time) * 10 + Math.cos(time * 2.5) * 4;
+            }
+
+            // Sur mobile, l'arbre s'ancre un peu plus haut pour ne pas être masqué par le bouton toggle inférieur
+            const isMobile = window.innerWidth <= 768;
+            const startX = canvas.width / 2;
+            const startY = canvas.height - (isMobile ? 20 : 40);
+            const startAngle = -Math.PI / 2;
+
+            let seed = 42;
+            const originalRandom = Math.random;
+            Math.random = function() {
+                let x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            };
+
+            if (activeConfig.length) {
+                drawBranch(startX, startY, activeConfig.length, startAngle, 0, activeConfig, windForce);
+            }
+
+            Math.random = originalRandom;
+            requestAnimationFrame(animate);
+        }
+
+        // Init
+        updateLabels();
+        saveConfig();
+        animate();
+    </script>
+</body>
+</html>
