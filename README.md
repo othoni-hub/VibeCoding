@@ -6,7 +6,8 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 ## Table des matières
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
-- [L'appli *Arbre Fractal*](#ArbreFractal) 
+- [L'appli *Arbre Fractal*](#ArbreFractal)
+- [L'appli *i-CONIC*](#i-CONIC)
 
 ## Constructor
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> : 
@@ -41,3 +42,12 @@ Arbre fractal avec paramètres
 
 [Retour en haut](#VibeCoding)
 
+## i-CONIC
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li> :
+
+<img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/9fba1a70-5368-4aec-aee4-1cb47b8c7d4b" />
+
+Visualiseur intéractif de coniques
+
+[Retour en haut](#VibeCoding)
