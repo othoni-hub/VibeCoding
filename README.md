@@ -2,7 +2,8 @@
 Applications "single page" pédagogiques ou autres, vibe-codées par Olivier Thöni
 
 [TOC]
-# <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/">Constructor</a></li : 
+# Constructor
+<li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/">Constructor</a></li : 
 
 <img width="472" height="360" alt="image" src="https://github.com/user-attachments/assets/701d0511-2c2b-4f0c-ae28-d48cebc8b799" />
 
