@@ -2,7 +2,7 @@
 Applications "single page" pédagogiques ou autres, vibe-codées par Olivier Thöni
 
 ## Table des matières
-- [Constructor](#Constructor)
+- [L'appli *Constructor*](#Constructor)
 
 ## Constructor
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> : 
