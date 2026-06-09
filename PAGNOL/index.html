@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcel Pagnol : Le Temps des Secrets Littéraires</title>
+    <!-- Intégration de polices sympas pour les élèves -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #e27225;        /* Ocre chaleureux de Provence */
+            --primary-dark: #b34f13;
+            --secondary: #7c5cb7;      /* Violet lavande */
+            --bg-canvas: #fffaf1;      /* Crème doux */
+            --bg-card: #ffffff;
+            --text-main: #2d241e;
+            --text-muted: #6e6158;
+            --accent-green: #2e7d32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 1.5rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 1rem;
+        }
+
+        .acronym-container {
+            margin-bottom: 1rem;
+        }
+
+        .acronym-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.8rem;
+            color: var(--primary);
+            letter-spacing: 4px;
+            line-height: 1;
+        }
+
+        .acronym-meaning {
+            font-size: 0.95rem;
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.2rem;
+        }
+
+        header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* --- TIMELINE DESIGN --- */
+        .timeline-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto 5rem auto;
+            padding: 1rem 0;
+        }
+
+        /* Ligne verticale */
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 10px;
+        }
+
+        /* Conteneurs des items */
+        .timeline-item {
+            padding: 15px 30px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+            margin-bottom: 1rem;
+        }
+
+        /* Alternance gauche / droite */
+        .left { left: 0; text-align: right; }
+        .right { left: 50%; text-align: left; }
+
+        /* Les boutons / puces interactifs sur la ligne */
+        .timeline-dot {
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            background-color: var(--bg-canvas);
+            border: 4px solid var(--primary);
+            top: 28px;
+            border-radius: 50%;
+            z-index: 2;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .left .timeline-dot { right: -12px; }
+        .right .timeline-dot { left: -12px; --primary: var(--secondary); } /* La couleur change à mi-parcours */
+
+        /* Boutons de titres funs et cliquables */
+        .timeline-button {
+            display: inline-block;
+            background-color: var(--bg-card);
+            border: 3px solid var(--primary);
+            padding: 0.8rem 1.2rem;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 var(--primary);
+            transition: all 0.2s ease;
+            text-align: left;
+            max-width: 100%;
+        }
+
+        .right .timeline-button { border-color: var(--secondary); box-shadow: 0 6px 0 var(--secondary); }
+
+        .timeline-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--primary);
+        }
+        .right .timeline-button:active { box-shadow: 0 2px 0 var(--secondary); }
+
+        .btn-year {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .btn-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        /* --- MODAL / POP-UP DE LECTURE --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(45, 36, 30, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .book-card {
+            background: var(--bg-card);
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            border-radius: 24px;
+            border: 4px solid var(--primary);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active .book-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            background-color: #f3f4f6;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .book-header {
+            margin-bottom: 1.2rem;
+            padding-right: 2rem;
+        }
+
+        .book-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            line-height: 1.2;
+        }
+
+        .book-year {
+            display: inline-block;
+            background-color: #fef3c7;
+            color: var(--primary-dark);
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-top: 0.4rem;
+        }
+
+        .info-tags {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            background: #fffbeb;
+            padding: 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+            border: 1px dashed var(--primary);
+        }
+
+        .info-tags strong {
+            color: var(--accent-green);
+        }
+
+        .section-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin: 1rem 0 0.4rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .book-summary {
+            font-size: 0.95rem;
+            text-align: justify;
+            color: var(--text-main);
+            background: #fafafa;
+            padding: 0.8rem;
+            border-radius: 12px;
+        }
+
+        .book-teaser {
+            font-size: 0.95rem;
+            font-style: italic;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary), #e65100);
+            padding: 1.2rem;
+            border-radius: 16px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2rem;
+        }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media screen and (max-width: 600px) {
+            .timeline-container::after { left: 20px; }
+            .timeline-item { width: 100%; padding-left: 45px; padding-right: 0; }
+            .left { text-align: left; left: 0; }
+            .right { left: 0; }
+            .timeline-dot { left: 8px !important; right: auto !important; top: 24px; }
+            .timeline-button { width: 100%; }
+            header h1 { font-size: 1.8rem; }
+            .acronym-title { font-size: 2.2rem; }
+            .acronym-meaning { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="acronym-container">
+            <div class="acronym-title">P.A.G.N.O.L.</div>
+            <div class="acronym-meaning">Parcours Autobiographique, Genres, Narrations et Oeuvres Littéraires</div>
+        </div>
+        <h1>Provence & Littérature</h1>
+        <p>Clique sur une œuvre pour ouvrir sa fiche de lecture !</p>
+    </header>
+
+    <main>
+        <!-- Notre frise chronologique -->
+        <div class="timeline-container" id="timeline"></div>
+    </main>
+
+    <!-- La boîte de dialogue modale (pop-up) cachée par défaut -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="book-card">
+            <button class="close-modal" id="closeBtn">&times;</button>
+            <div class="book-header">
+                <h2 class="book-title" id="popTitle">Titre du Livre</h2>
+                <span class="book-year" id="popYear">1935</span>
+            </div>
+            
+            <div class="info-tags">
+                <div>🎬 <strong>Personnages :</strong> <span id="popChars">...</span></div>
+                <div>📍 <strong>Lieux principaux :</strong> <span id="popPlaces">...</span></div>
+            </div>
+
+            <h3 class="section-label">📝 Le résumé de l'histoire (50 mots)</h3>
+            <p class="book-summary" id="popSummary">...</p>
+
+            <h3 class="section-label">☀️ Pourquoi tu vas adorer (4ème de couverture)</h3>
+            <p class="book-teaser" id="popTeaser">...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Imaginé par Olivier Thöni, et vibe-codé avec l’aide de Gemini 3.5</p>
+    </footer>
+
+    <script>
+        // Data précieuse : Les 10 chefs-d'œuvre calibrés 3ème
+        const oeuvres = [
+            {
+                id: 1, title: "Marius", year: "1929",
+                chars: "Marius, César, Fanny, Panisse", places: "Le Bar de la Marine, Le Vieux-Port de Marseille",
+                summary: "À Marseille, le jeune Marius est déchiré entre son amour profond pour Fanny, la petite marchande de coquillages, et son désir obsessionnel de prendre le large pour explorer le monde. Son père, César, tente de le retenir, mais l'appel mystique de la mer et des bateaux est trop fort.",
+                teaser: "Laisse-toi embarquer par l'accent du Midi et l'ambiance mythique du Vieux-Port ! Derrière la célèbre partie de cartes et les répliques humoristiques de César se cache un drame amoureux déchirant et universel. Marius est le symbole de la jeunesse face à ses choix : faut-il écouter sa raison et rester auprès de ceux qu'on aime, ou tout plaquer pour suivre ses rêves d'aventure ? Une pièce vibrante, drôle et bouleversante qui te fera passer du rire aux larmes en un clin d'œil."
+            },
+            {
+                id: 2, title: "Fanny", year: "1931",
+                chars: "Fanny, César, Panisse, Marius", places: "Marseille",
+                summary: "Marius est parti en mer. Fanny, restée seule, découvre qu'elle attend un enfant de lui. Pour sauver l'honneur de sa famille et offrir un avenir à son bébé, elle accepte d'épouser le riche et mûr Honoré Panisse, sous la bénédiction de César qui veut protéger son futur petit-fils.",
+                teaser: "Tu as aimé Marius ? Découvre la suite de cette fresque marseillaise captivante. Ici, c'est Fanny qui porte toute la force de l'histoire. Face au sacrifice, au qu'en-dira-t-on et aux secrets de famille, les personnages font preuve d'une humanité et d'une noblesse extraordinaires. Quand le destin ramène soudainement les voyageurs, les cœurs se déchirent à nouveau. Une leçon de vie poignante sur la responsabilité, l'amour véritable et la survie face aux tempêtes de l'existence."
+            },
+            {
+                id: 3, title: "César", year: "1936",
+                chars: "César, Césariot, Fanny, Marius", places: "Marseille, Toulon",
+                summary: "Vingt ans plus tard. Au décès de Panisse, Césariot découvre la vérité : son vrai père est Marius, devenu un modeste garagiste à Toulon. Le jeune homme décide alors de le rencontrer en secret, provoquant d'ultimes et émouvantes retrouvailles familiales orchestrées par le patriarche César.",
+                teaser: "Le grand final de la célèbre trilogie ! Pagnol nous offre des retrouvailles au sommet après deux décennies de non-dits. C'est l'heure de la vérité pour Césariot, un jeune homme de ton âge qui cherche ses racines. Entre quiproquos, révélations chocs et émotion pure, ce volet boucle magistralement la saga. Tu découvriras un César vieillissant mais toujours aussi volcanique, et tu comprendras enfin si le véritable amour peut survivre au temps qui passe et aux erreurs de jeunesse."
+            },
+            {
+                id: 4, title: "Topaze", year: "1928",
+                chars: "Topaze, Régis Castel-Benac, Suzy Courtois", places: "Pension Muche à Paris",
+                summary: "Topaze est un enseignant d'une honnêteté naïve et exemplaire. Licencié injustement pour son intégrité, il est recruté par des politiciens véreux qui l'utilisent comme prête-nom pour leurs affaires louches. Mais Topaze va vite comprendre les rouages de la corruption et surpasser ses maîtres en cynisme.",
+                teaser: "Et si un prof modèle devenait le roi des escrocs ? C'est la métamorphose incroyable et jubilatoire de Topaze ! Pagnol signe ici une satire féroce et ultra-moderne de notre société, de l'argent et de la politique. On adore voir ce personnage timide et exploité se réveiller pour donner une leçon magistrale à ceux qui l'ont méprisé. Une comédie piquante et rythmée, idéale pour réfléchir avec humour sur la réussite, la morale et la frontière parfois bien mince entre le bien et le mal."
+            },
+            {
+                id: 5, title: "La Femme du boulanger", year: "1938",
+                chars: "Aimable (le boulanger), Aurélie, Le Marquis", places: "Un petit village de Haute-Provence",
+                summary: "Aurélie, la jeune et belle épouse du boulanger Aimable, s'enfuit avec un berger. Désespéré, le boulanger refuse catégoriquement de pétrir et de cuire le pain tant que sa femme n'est pas revenue. Tout le village se mobilise alors pour retrouver la fugitive afin de sauver ses repas.",
+                teaser: "Imagine un village entier privé de pain à cause d'un chagrin d'amour ! Cette comédie provençale cache une magnifique histoire de pardon et de solidarité humaine. Derrière l'humour des situations et les disputes des villageois, Pagnol dessine le portrait d'un homme brisé par la peine, incarné à l'écran par l'immense Raimu. Un chef-d'œuvre de tendresse où la gourmandise et l'amour s'unissent pour nous rappeler que la rancune ne nourrit jamais son homme. Un pur régal de lecture !"
+            },
+            {
+                id: 6, title: "La Gloire de mon père", year: "1957",
+                chars: "Marcel, Joseph, Augustine, L'oncle Jules", places: "Marseille, La Bastide Neuve, Le Garlaban",
+                summary: "Le jeune Marcel passe ses vacances d'été dans les collines de Provence. Il observe avec admiration son père, Joseph, instituteur de la République. Lors d'une partie de chasse mémorable, Joseph réalise un doublé de bartavelles légendaire, gagnant ainsi une gloire éternelle aux yeux de son fils.",
+                teaser: "Le livre parfait pour ton année de 3ème et l'étude de l'autobiographie ! Entre dans les souvenirs d'enfance de Pagnol et laisse-toi envelopper par l'odeur du thym et du romarin. C'est le récit universel des grandes vacances, de la complicité familiale et de l'enfance heureuse. Tu riras des rivalités amusantes entre le père instituteur et l'oncle croyant, et tu vibreras lors de la fameuse chasse aux bartavelles. Une œuvre lumineuse qui donne une envie irrésistible de partir explorer les collines."
+            },
+            {
+                id: 7, title: "Le Château de ma mère", year: "1957",
+                chars: "Marcel, Augustine, Joseph, Lili des Bellons", places: "Les collines, Le canal de Marseille",
+                summary: "Pour raccourcir le long chemin vers la bastide, la famille Pagnol traverse clandestinement les parcs de grands châteaux. Cette aventure répétée terrifie Augustine et s'achève par la confrontation avec un garde pointilleux, marquant la fin de l'insouciance enfantine et rendant hommage à la figure maternelle.",
+                teaser: "La suite directe de La Gloire de mon père, encore plus rythmée et touchante. Tu découvriras l'amitié indéfectible entre Marcel et Lili, un vrai petit aventurier des collines. La traversée secrète des châteaux apporte un vrai suspense, transformant chaque voyage en expédition commano ! Mais ce livre est surtout une immense déclaration d'amour d'un fils à sa mère. La fin, pleine de nostalgie, t'aidera à comprendre la puissance du temps qui passe. Un immense classique à ne pas rater."
+            },
+            {
+                id: 8, title: "Le Temps des secrets", year: "1960",
+                chars: "Marcel, Isabelle Cassignol, Lili des Bellons", places: "Les collines, Le lycée Thiers",
+                summary: "C'est l'été des amours naissantes et des petites trahisons. Marcel tombe sous le charme d'Isabelle, une jeune fille snob qui lui impose des défis absurdes, lui faisant délaisser son ami Lili. Puis vient le temps de la rentrée en sixième au lycée, scellant la fin définitive de l'enfance.",
+                teaser: "Bienvenue dans l'âge des premiers battements de cœur et des grands bouleversements ! Pagnol raconte ici la transition délicate entre l'enfance et l'adolescence, une période que tu traverses toi-même. Tu vas adorer voir Marcel s'inventer des vies pour plaire à la mystérieuse Isabelle, quitte à être un peu ridicule. Entre secrets de garrigue et découverte du monde des grands au collège, ce récit drôle et piquant montre avec beaucoup de justesse comment on grandit en apprenant de ses erreurs."
+            },
+            {
+                id: 9, title: "Jean de Florette", year: "1962",
+                chars: "Jean de Florette, Le Papet, Ugolin", places: "Le village fictif des Bastides Blanches",
+                summary: "Jean de Florette, citadin idéaliste et bossu, hérite d'une ferme en Provence et s'y installe pour élever des lapins. Mais ses voisins jaloux, le Papet et Ugolin, bouchent la seule source d'eau du domaine pour le ruiner et racheter sa terre à bas prix, provoquant un drame absolu.",
+                teaser: "Plonge au cœur d'une tragédie provençale sombre et fascinante, digne des plus grands romans d'aventure. C'est la lutte acharnée d'un homme courageux et optimiste contre la nature sauvage et la cruauté humaine. Le duo machiavélique formé par le Papet et Ugolin te glacera le sang tant leur secret est lourd. Pagnol quitte ici la pure comédie pour nous offrir une réflexion puissante sur la cupidité, l'injustice et la terre. Un suspense insoutenable qui te hantera longtemps après la dernière page."
+            },
+            {
+                id: 10, title: "Manon des sources", year: "1962",
+                chars: "Manon, Ugolin, Le Papet, L'instituteur", places: "Les Bastides Blanches, Les grottes du massif",
+                summary: "Devenue grande, Manon vit sauvageonne dans les collines. Découvrant le crime du Papet et d'Ugolin qui a causé la perte de son père Jean, elle décide de se venger en détournant la source qui alimente tout le village. La vérité éclate enfin, entraînant le terrible châtiment des coupables.",
+                teaser: "L'heure de la vengeance a sonné ! Dans ce final grandiose, Manon incarne une justice implacable et sauvage. Le village entier est puni par où il a péché : le manque d'eau. C'est un roman captivant où les secrets du passé ressurgissent de façon spectaculaire et tragique, notamment pour le Papet. Entre révélations bouleversantes et rédemption, Pagnol signe un chef-d'œuvre absolu sur le destin. Tu ne pourras plus lâcher ce livre avant d'avoir vu la vérité éclater au grand jour !"
+            }
+        ];
+
+        // Génération automatique de l'interface graphique
+        const timeline = document.getElementById('timeline');
+        const modal = document.getElementById('modalOverlay');
+        const closeBtn = document.getElementById('closeBtn');
+
+        oeuvres.sort((a,b) => a.year - b.year).forEach((book, index) => {
+            const position = index % 2 === 0 ? 'left' : 'right';
+            
+            const item = document.createElement('div');
+            item.className = `timeline-item ${position}`;
+            
+            item.innerHTML = `
+                <div class="timeline-dot"></div>
+                <button class="timeline-button" data-id="${book.id}">
+                    <span class="btn-year">${book.year}</span>
+                    <span class="btn-title">${book.title}</span>
+                </button>
+            `;
+            timeline.appendChild(item);
+        });
+
+        // Logique d'affichage au clic (tactile friendly)
+        timeline.addEventListener('click', (e) => {
+            const button = e.target.closest('.timeline-button');
+            if (!button) return;
+
+            const bookId = button.getAttribute('data-id');
+            const targetBook = oeuvres.find(b => b.id == bookId);
+
+            if (targetBook) {
+                document.getElementById('popTitle').innerText = targetBook.title;
+                document.getElementById('popYear').innerText = targetBook.year;
+                document.getElementById('popChars').innerText = targetBook.chars;
+                document.getElementById('popPlaces').innerText = targetBook.places;
+                document.getElementById('popSummary').innerText = targetBook.summary;
+                document.getElementById('popTeaser').innerText = targetBook.teaser;
+
+                modal.classList.add('active');
+            }
+        });
+
+        // Fermeture de la pop-up
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+        
+        // Ferme aussi si on clique à côté de la carte
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
