@@ -115,6 +115,19 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 
 ---
 
+#### PredateursProies
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/PrédateursProies/" target="_blank" rel="noopener noreferrer">Prédateurs - Proies : Lotka-Voltera </a></li>
+
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/c9028662-00ee-46f2-81f7-fc4464ffd0e1" />
+
+
+Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-Voltera
+***destination :*** Mathématiques CPGE-ECG
+
+[Retour en haut](#VibeCoding)
+---
+
 #### TCL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/TCL/" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
