@@ -56,7 +56,7 @@ Visualiseur intéractif de coniques
 
 #### BRIQUE
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/BRIQUE/" target="_blank" rel="noopener noreferrer">BRIQUE </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/BRIQUE/brique.html" target="_blank" rel="noopener noreferrer">BRIQUE </a></li>
 <img width="300" height="220" alt="image" src="https://github.com/user-attachments/assets/96de829f-d209-48ce-b2ae-dbf1de6d817d" />
 
 
