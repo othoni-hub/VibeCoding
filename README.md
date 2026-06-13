@@ -71,7 +71,7 @@ Mur de calcul additif.
 
 #### Spirographe
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/Spirograph/" target="_blank" rel="noopener noreferrer">Spirographe </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/Spirograph/Spirographe.html" target="_blank" rel="noopener noreferrer">Spirographe </a></li>
 <img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/8396fd48-924c-46dc-9a60-67b3abc13323" />
 
 
