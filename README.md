@@ -4,7 +4,7 @@ Applications "single page" pédagogiques ou autres, vibe-codées par Olivier Th�
 avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ## Table des matières
-### Mathématiques
+### --Mathématiques--
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *BRIQUE*](#BRIQUE)
