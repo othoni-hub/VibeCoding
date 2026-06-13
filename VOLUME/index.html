@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLUME - Atelier Pousser/Tirer 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: sans-serif; user-select: none; }
+        canvas { display: block; }
+        .tool-active { border-color: #3b82f6; background-color: #eff6ff; transform: scale(1.02); }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <div id="ui" class="absolute top-4 left-4 z-10 w-80 bg-white/95 backdrop-blur shadow-2xl rounded-2xl p-5 border border-slate-200 flex flex-col gap-4 max-h-[92vh] overflow-y-auto">
+        <div>
+            <h1 class="text-2xl font-black text-blue-600 tracking-wider flex items-center gap-2">
+                📦 VOLUME
+            </h1>
+            <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-tight leading-tight mt-1">
+                <span class="text-blue-500">V</span>isualisation d'<span class="text-blue-500">O</span>bjets par <span class="text-blue-500">L</span>ogique d'<span class="text-blue-500">U</span>nion, de <span class="text-blue-500">M</span>odification et d'<span class="text-blue-500">E</span>xtrusion
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+            <button id="btn-undo" onclick="triggerUndo()" disabled class="flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-400 cursor-not-allowed transition shadow-sm">
+                ↩️ Annuler
+            </button>
+            <button id="btn-redo" onclick="triggerRedo()" disabled class="flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-400 cursor-not-allowed transition shadow-sm">
+                ↪️ Rétablir
+            </button>
+        </div>
+
+        <hr class="border-slate-200">
+
+        <div>
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">1. Action de l'outil</span>
+            <div class="grid grid-cols-3 gap-2 mt-1.5">
+                <button id="btn-add" onclick="setAction('add')" class="tool-active flex flex-col items-center p-2 rounded-xl border-2 border-slate-200 hover:border-blue-400 transition text-xs font-medium text-slate-700">
+                    <span class="text-lg">🪵</span> Extruder
+                </button>
+                <button id="btn-subtract" onclick="setAction('subtract')" class="flex flex-col items-center p-2 rounded-xl border-2 border-slate-200 hover:border-blue-400 transition text-xs font-medium text-slate-700">
+                    <span class="text-lg">🎯</span> Défoncer
+                </button>
+                <button id="btn-slice" onclick="setAction('slice')" class="flex flex-col items-center p-2 rounded-xl border-2 border-slate-200 hover:border-blue-400 transition text-xs font-medium text-slate-700">
+                    <span class="text-lg">🪓</span> Trancher
+                </button>
+            </div>
+        </div>
+
+        <div id="section-shapes">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">2. Forme de la mèche</span>
+            <div class="grid grid-cols-2 gap-2 mt-1.5">
+                <button id="shape-box" onclick="setShape('box')" class="tool-active p-2 rounded-xl border border-slate-200 text-left text-xs font-medium flex items-center gap-2 bg-slate-50">🟩 Prisme (Cube)</button>
+                <button id="shape-cylinder" onclick="setShape('cylinder')" class="p-2 rounded-xl border border-slate-200 text-left text-xs font-medium flex items-center gap-2 bg-slate-50">🧪 Cylindre</button>
+                <button id="shape-pyramid" onclick="setShape('pyramid')" class="p-2 rounded-xl border border-slate-200 text-left text-xs font-medium flex items-center gap-2 bg-slate-50">📐 Pyramide</button>
+                <button id="shape-cone" onclick="setShape('cone')" class="p-2 rounded-xl border border border-slate-200 text-left text-xs font-medium flex items-center gap-2 bg-slate-50">🍦 Cône</button>
+                <button id="shape-hemisphere" onclick="setShape('hemisphere')" class="p-2 rounded-xl border border border-slate-200 text-left text-xs font-medium flex items-center gap-2 bg-slate-50">🌗 Demi-Sphère</button>
+                <button id="shape-sphere" onclick="setShape('sphere')" class="p-2 rounded-xl border border border-slate-200 text-left text-xs font-medium flex items-center gap-2 bg-slate-50">🔮 Sphère</button>
+            </div>
+            
+            <div class="mt-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col gap-2">
+                <label class="text-[11px] font-medium text-slate-600 flex justify-between">
+                    <span>Largeur / Rayon :</span> <span id="val-radius">0.4</span>
+                </label>
+                <input type="range" id="param-radius" min="0.1" max="1.2" step="0.1" value="0.4" class="w-full accent-blue-500 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+
+        <div id="section-slice" class="hidden bg-amber-50 p-3 rounded-xl border border-amber-200 flex flex-col gap-2">
+            <span class="text-xs font-semibold text-amber-800 uppercase tracking-wider">🪓 Plan de coupe</span>
+            
+            <label class="text-[11px] font-medium text-amber-900 flex justify-between">Hauteur de coupe : <span id="val-sliceY">0.5</span></label>
+            <input type="range" id="param-sliceY" min="-1" max="3" step="0.1" value="0.5" class="w-full accent-amber-600 h-1 bg-amber-200 rounded-lg appearance-none">
+            
+            <label class="text-[11px] font-medium text-amber-900 flex justify-between">Inclinaison (Tangage) : <span id="val-sliceRot">0°</span></label>
+            <input type="range" id="param-sliceRot" min="-75" max="75" step="5" value="0" class="w-full accent-amber-600 h-1 bg-amber-200 rounded-lg appearance-none">
+            
+            <label class="text-[11px] font-medium text-amber-900 flex justify-between">Orientation (Axe Vert.) : <span id="val-sliceRotY">0°</span></label>
+            <input type="range" id="param-sliceRotY" min="-180" max="180" step="5" value="0" class="w-full accent-amber-600 h-1 bg-amber-200 rounded-lg appearance-none">
+            
+            <button onclick="applySlice()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs py-2 px-3 rounded-lg shadow mt-2 transition">
+                Trancher le bloc
+            </button>
+        </div>
+
+        <hr class="border-slate-200">
+
+        <button onclick="resetSculpture()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-xs py-2.5 rounded-xl transition">
+            🔄 Recommencer avec un bloc neuf
+        </button>
+        
+        <div class="text-[10px] text-slate-400 border-t border-slate-100 pt-2 flex flex-col gap-1">
+            <p class="font-bold text-slate-500">Mode d'emploi :</p>
+            <p>👉 <b>Sur le bloc :</b> Reste appuyé + glisse pour sculpter.</p>
+            <p>👉 <b>Dans le vide :</b> Reste appuyé + glisse pour tourner la vue.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
+        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js';
+        import { CSG } from 'https://cdn.skypack.dev/three-csg-ts@3.1.11';
+
+        let scene, camera, renderer, controls;
+        let mainMesh, livePreviewMesh, slicePlaneVisual;
+        
+        let currentAction = 'add'; 
+        let currentShape = 'box'; 
+        
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_HISTORY = 10;
+
+        let isDraggingTool = false;
+        let dragStartPoint = new THREE.Vector3();
+        let dragNormal = new THREE.Vector3();
+        let currentDragHeight = 0.1;
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        const sculptureMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4cc9f0,
+            roughness: 0.5,
+            metalness: 0.05,
+            flatShading: true,
+            side: THREE.DoubleSide
+        });
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fafc);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(4, 4, 5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 0.5, 0);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            dirLight.position.set(6, 10, 4);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            const grid = new THREE.GridHelper(10, 20, 0xcbd5e1, 0xe2e8f0);
+            grid.position.y = -0.001;
+            scene.add(grid);
+
+            resetSculpture();
+
+            // Visuel du plan de coupe (ambre semi-transparent)
+            const planeGeom = new THREE.PlaneGeometry(5, 5);
+            const planeMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+            slicePlaneVisual = new THREE.Mesh(planeGeom, planeMat);
+            slicePlaneVisual.visible = false;
+            scene.add(slicePlaneVisual);
+
+            window.addEventListener('resize', onWindowResize);
+            
+            renderer.domElement.addEventListener('mousedown', onMouseDown);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+
+            // Écouteurs pour mettre à jour le visuel du plan en temps réel
+            document.getElementById('param-sliceY').addEventListener('input', updateSlicePlaneVisual);
+            document.getElementById('param-sliceRot').addEventListener('input', updateSlicePlaneVisual);
+            document.getElementById('param-sliceRotY').addEventListener('input', updateSlicePlaneVisual);
+
+            updateSlicePlaneVisual();
+            animate();
+        }
+
+        // --- HISTORIQUE ---
+        function saveToHistory() {
+            undoStack.push(mainMesh.clone());
+            if (undoStack.length > MAX_HISTORY) {
+                const shifted = undoStack.shift();
+                shifted.geometry.dispose();
+            }
+            redoStack.forEach(mesh => mesh.geometry.dispose());
+            redoStack = [];
+            updateHistoryButtons();
+        }
+
+        window.triggerUndo = function() {
+            if (undoStack.length === 0) return;
+            redoStack.push(mainMesh.clone());
+            scene.remove(mainMesh);
+            mainMesh = undoStack.pop();
+            mainMesh.material = sculptureMaterial;
+            scene.add(mainMesh);
+            updateHistoryButtons();
+        }
+
+        window.triggerRedo = function() {
+            if (redoStack.length === 0) return;
+            undoStack.push(mainMesh.clone());
+            scene.remove(mainMesh);
+            mainMesh = redoStack.pop();
+            mainMesh.material = sculptureMaterial;
+            scene.add(mainMesh);
+            updateHistoryButtons();
+        }
+
+        function updateHistoryButtons() {
+            const undoBtn = document.getElementById('btn-undo');
+            const redoBtn = document.getElementById('btn-redo');
+
+            if (undoStack.length > 0) {
+                undoBtn.disabled = false;
+                undoBtn.className = "flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 cursor-pointer transition shadow-sm";
+            } else {
+                undoBtn.disabled = true;
+                undoBtn.className = "flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-400 cursor-not-allowed transition shadow-sm";
+            }
+
+            if (redoStack.length > 0) {
+                redoBtn.disabled = false;
+                redoBtn.className = "flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 cursor-pointer transition shadow-sm";
+            } else {
+                redoBtn.disabled = true;
+                redoBtn.className = "flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-400 cursor-not-allowed transition shadow-sm";
+            }
+        }
+
+        // --- GÉOMÉTRIE DES OUTILS ---
+        function createDynamicGeometry(shapeType, r, h, isSubtract) {
+            let geom;
+            const safeH = Math.max(0.05, Math.abs(h));
+
+            switch(shapeType) {
+                case 'box':
+                    geom = new THREE.BoxGeometry(r*2, safeH, r*2);
+                    geom.translate(0, isSubtract ? -safeH/2 : safeH/2, 0);
+                    break;
+                case 'cylinder':
+                    geom = new THREE.CylinderGeometry(r, r, safeH, 24);
+                    geom.translate(0, isSubtract ? -safeH/2 : safeH/2, 0);
+                    break;
+                case 'pyramid':
+                    geom = new THREE.ConeGeometry(r * 1.2, safeH, 4);
+                    geom.rotateY(Math.PI / 4);
+                    geom.translate(0, isSubtract ? -safeH/2 : safeH/2, 0);
+                    break;
+                case 'cone':
+                    geom = new THREE.ConeGeometry(r, safeH, 24);
+                    geom.translate(0, isSubtract ? -safeH/2 : safeH/2, 0);
+                    break;
+                case 'hemisphere':
+                    geom = new THREE.SphereGeometry(r, 24, 24);
+                    geom.scale(1, safeH / r, 1);
+                    if (isSubtract) geom.translate(0, -safeH * 0.01, 0);
+                    break;
+                case 'sphere':
+                    geom = new THREE.SphereGeometry(r, 24, 24);
+                    geom.scale(1, safeH / r, 1);
+                    geom.translate(0, isSubtract ? -safeH : safeH, 0);
+                    break;
+            }
+            return geom;
+        }
+
+        function getIntersectionData(e) {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const oldVisibility = slicePlaneVisual.visible;
+            slicePlaneVisual.visible = false;
+            
+            const intersects = raycaster.intersectObject(mainMesh);
+            slicePlaneVisual.visible = oldVisibility;
+
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                const normalMatrix = new THREE.Matrix3().getNormalMatrix(mainMesh.matrixWorld);
+                const worldNormal = hit.face.normal.clone().applyMatrix3(normalMatrix).normalize();
+                return { point: hit.point, normal: worldNormal, valid: true };
+            }
+            return { valid: false };
+        }
+
+        function onMouseDown(e) {
+            if (e.clientX < 340 && e.clientY < 650) return; 
+            if (currentAction === 'slice') return;
+
+            const hitData = getIntersectionData(e);
+            
+            if (hitData.valid) {
+                controls.enabled = false;
+                isDraggingTool = true;
+                
+                dragStartPoint.copy(hitData.point);
+                dragNormal.copy(hitData.normal);
+                currentDragHeight = 0.1;
+
+                const r = parseFloat(document.getElementById('param-radius').value);
+                const geom = createDynamicGeometry(currentShape, r, currentDragHeight, currentAction === 'subtract');
+                
+                const liveMat = new THREE.MeshBasicMaterial({
+                    color: currentAction === 'subtract' ? 0xef4444 : 0x22c55e,
+                    transparent: true,
+                    opacity: 0.5
+                });
+
+                livePreviewMesh = new THREE.Mesh(geom, liveMat);
+                livePreviewMesh.position.copy(dragStartPoint);
+
+                const upVector = new THREE.Vector3(0, 1, 0);
+                const quaternion = new THREE.Quaternion();
+                quaternion.setFromUnitVectors(upVector, dragNormal);
+                livePreviewMesh.setRotationFromQuaternion(quaternion);
+
+                scene.add(livePreviewMesh);
+            } else {
+                controls.enabled = true;
+            }
+        }
+
+        function onMouseMove(e) {
+            if (!isDraggingTool || !livePreviewMesh) return;
+
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const rayDirection = raycaster.ray.direction;
+            const denominator = rayDirection.dot(dragNormal);
+            
+            if (Math.abs(denominator) > 0.01) {
+                const t = (dragStartPoint.dot(dragNormal) - raycaster.ray.origin.dot(dragNormal)) / denominator;
+                const intersectionOnNormalAxis = raycaster.ray.origin.clone().add(rayDirection.clone().multiplyScalar(t));
+                
+                let dist = intersectionOnNormalAxis.distanceTo(dragStartPoint);
+                const offsetVector = intersectionOnNormalAxis.clone().sub(dragStartPoint);
+                if (offsetVector.dot(dragNormal) < 0) dist = 0.05; 
+
+                currentDragHeight = Math.min(3.0, Math.max(0.05, dist));
+
+                const r = parseFloat(document.getElementById('param-radius').value);
+                livePreviewMesh.geometry.dispose();
+                livePreviewMesh.geometry = createDynamicGeometry(currentShape, r, currentDragHeight, currentAction === 'subtract');
+            }
+        }
+
+        function onMouseUp(e) {
+            controls.enabled = true; 
+
+            if (!isDraggingTool) return;
+            isDraggingTool = false;
+
+            if (livePreviewMesh) {
+                saveToHistory();
+
+                const r = parseFloat(document.getElementById('param-radius').value);
+                const toolGeom = createDynamicGeometry(currentShape, r, currentDragHeight, currentAction === 'subtract');
+                const toolMesh = new THREE.Mesh(toolGeom, sculptureMaterial);
+                toolMesh.position.copy(livePreviewMesh.position);
+                toolMesh.quaternion.copy(livePreviewMesh.quaternion);
+
+                toolMesh.updateMatrixWorld();
+                mainMesh.updateMatrixWorld();
+
+                try {
+                    let resultMesh;
+                    if (currentAction === 'add') {
+                        resultMesh = CSG.union(mainMesh, toolMesh);
+                    } else {
+                        resultMesh = CSG.subtract(mainMesh, toolMesh);
+                    }
+
+                    scene.remove(mainMesh);
+                    mainMesh = resultMesh;
+                    mainMesh.material = sculptureMaterial;
+                    mainMesh.castShadow = true;
+                    mainMesh.receiveShadow = true;
+                    scene.add(mainMesh);
+                } catch (err) {
+                    console.log("Collision OK");
+                }
+
+                scene.remove(livePreviewMesh);
+                livePreviewMesh.geometry.dispose();
+                livePreviewMesh = null;
+            }
+        }
+
+        // --- TRANCHER LE BLOC (AVEC DOUBLE ROTATION) ---
+        window.applySlice = function() {
+            saveToHistory();
+
+            const posY = parseFloat(document.getElementById('param-sliceY').value);
+            const rotX = THREE.MathUtils.degToRad(parseFloat(document.getElementById('param-sliceRot').value));
+            const rotY = THREE.MathUtils.degToRad(parseFloat(document.getElementById('param-sliceRotY').value));
+
+            // Boîte de découpe géante
+            const cutterBoxGeom = new THREE.BoxGeometry(40, 40, 40);
+            cutterBoxGeom.translate(0, 20, 0); 
+
+            const cutterBoxMesh = new THREE.Mesh(cutterBoxGeom, sculptureMaterial);
+            cutterBoxMesh.position.set(0, posY, 0);
+            
+            // On applique d'abord l'orientation Y puis l'inclinaison X
+            cutterBoxMesh.rotation.set(0, rotY, 0);
+            cutterBoxMesh.rotateX(rotX);
+            
+            cutterBoxMesh.updateMatrixWorld();
+            mainMesh.updateMatrixWorld();
+
+            try {
+                const resultMesh = CSG.subtract(mainMesh, cutterBoxMesh);
+                scene.remove(mainMesh);
+                mainMesh = resultMesh;
+                mainMesh.material = sculptureMaterial;
+                scene.add(mainMesh);
+            } catch(e) {
+                alert("Déplacement mineur requis pour le calcul.");
+            }
+        }
+
+        // Met à jour la prévisualisation visuelle ambre du plan
+        function updateSlicePlaneVisual() {
+            if(!slicePlaneVisual) return;
+            
+            const posY = parseFloat(document.getElementById('param-sliceY').value);
+            const rotX = THREE.MathUtils.degToRad(parseFloat(document.getElementById('param-sliceRot').value));
+            const rotY = THREE.MathUtils.degToRad(parseFloat(document.getElementById('param-sliceRotY').value));
+
+            // Mise à jour des textes dynamiques dans le panneau HTML
+            document.getElementById('val-sliceY').innerText = posY;
+            document.getElementById('val-sliceRot').innerText = document.getElementById('param-sliceRot').value + "°";
+            document.getElementById('val-sliceRotY').innerText = document.getElementById('param-sliceRotY').value + "°";
+
+            slicePlaneVisual.position.set(0, posY, 0);
+            
+            // Réinitialise la rotation, applique l'axe vertical Y, puis incline à l'horizontale (Math.PI/2) + l'angle X
+            slicePlaneVisual.rotation.set(0, 0, 0);
+            slicePlaneVisual.rotation.y = rotY;
+            slicePlaneVisual.rotateX((Math.PI / 2) + rotX);
+        }
+
+        // --- UI SETTERS ---
+        window.setAction = function(action) {
+            currentAction = action;
+            document.getElementById('btn-add').className = action === 'add' ? 'tool-active flex flex-col items-center p-2 rounded-xl border-2 transition text-xs font-medium text-slate-700' : 'flex flex-col items-center p-2 rounded-xl border-2 border-slate-200 hover:border-blue-400 transition text-xs font-medium text-slate-700';
+            document.getElementById('btn-subtract').className = action === 'subtract' ? 'tool-active flex flex-col items-center p-2 rounded-xl border-2 transition text-xs font-medium text-slate-700' : 'flex flex-col items-center p-2 rounded-xl border-2 border-slate-200 hover:border-blue-400 transition text-xs font-medium text-slate-700';
+            document.getElementById('btn-slice').className = action === 'slice' ? 'tool-active flex flex-col items-center p-2 rounded-xl border-2 transition text-xs font-medium text-slate-700' : 'flex flex-col items-center p-2 rounded-xl border-2 border-slate-200 hover:border-blue-400 transition text-xs font-medium text-slate-700';
+
+            if(action === 'slice') {
+                document.getElementById('section-shapes').classList.add('hidden');
+                document.getElementById('section-slice').classList.remove('hidden');
+                slicePlaneVisual.visible = true;
+                updateSlicePlaneVisual();
+            } else {
+                document.getElementById('section-shapes').classList.remove('hidden');
+                document.getElementById('section-slice').classList.add('hidden');
+                slicePlaneVisual.visible = false;
+            }
+        };
+
+        window.setShape = function(shape) {
+            currentShape = shape;
+            ['box', 'cylinder', 'pyramid', 'cone', 'hemisphere', 'sphere'].forEach(s => {
+                document.getElementById(`shape-${s}`).classList.remove('tool-active', 'bg-blue-50');
+            });
+            document.getElementById(`shape-${shape}`).classList.add('tool-active', 'bg-blue-50');
+        };
+
+        window.resetSculpture = function() {
+            if(mainMesh) scene.remove(mainMesh);
+            
+            undoStack.forEach(m => m.geometry.dispose());
+            redoStack.forEach(m => m.geometry.dispose());
+            undoStack = [];
+            redoStack = [];
+            updateHistoryButtons();
+
+            const baseGeom = new THREE.BoxGeometry(2, 1.5, 2);
+            baseGeom.translate(0, 0.75, 0); 
+            mainMesh = new THREE.Mesh(baseGeom, sculptureMaterial);
+            mainMesh.castShadow = true;
+            mainMesh.receiveShadow = true;
+            scene.add(mainMesh);
+        };
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
