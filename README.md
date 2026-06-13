@@ -7,7 +7,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ## Table des matières
 ### _Mathématiques_
-- [L'appli *Constructor*](#--> Constructor)
+- [L'appli *Constructor*](# --> Constructor)
 - [L'appli *i-CONIC*](#--> i-CONIC)
 - [L'appli *BRIQUE*](#--> BRIQUE)
 - [L'appli *Spirographe*](#--> Spirographe)
