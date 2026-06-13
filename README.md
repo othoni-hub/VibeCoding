@@ -138,6 +138,7 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 
 Simulations de diverses lois de probabilité pour illustrer la convergence en loi (Théorème Central Limite)
+
 ***destination :*** Mathématiques CPGE-ECG
 
 [Retour en haut](#VibeCoding)
