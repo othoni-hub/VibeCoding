@@ -102,7 +102,7 @@ Simulation Urne de Polya
 
 #### EPIDEMIC
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/EPIDEMIC/" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/EPIDEMIC/" target="_blank" rel="noopener noreferrer">Propagation épidémique </a></li>
 
 <img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/c7767a2a-cc54-4f90-837a-e545d5138efc" />
 
