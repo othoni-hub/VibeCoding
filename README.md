@@ -21,6 +21,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 ### Jeux
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
+- [L'appli *POKER-Dés*](#POKER)
 
 --- 
 ---
@@ -204,4 +205,16 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 
 ---
 
+#### VOLUME
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/PPOKER/" target="_blank" rel="noopener noreferrer">POKER </a></li>
 
+
+<img width="200" height="270" alt="image" src="https://github.com/user-attachments/assets/ea9dd482-b9a1-4e8f-8dfb-77e2040231bb" />
+
+
+Simulateur de Poker-dés, banqueroute assurée
+
+***destination :*** adultes (jeu de hasard)
+
+[Retour en haut](#VibeCoding)
