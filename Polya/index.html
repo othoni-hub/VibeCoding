@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.A.J.O.R. - Simulateur d'Urne de Pólya</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body { font-family: var(--font-main); }
+        .mono { font-family: var(--font-mono); }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #6366f1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-container { position: relative; height: 320px; width: 100%; }
+    </style>
+</head>
+<body class="bg-[#020617] text-slate-200 min-h-screen flex flex-col">
+
+    <header class="border-b border-white/5 bg-slate-900/40 px-8 py-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="h-14 w-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/20">
+                    <i data-lucide="binary" class="text-white w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-tighter text-white flex items-center gap-2">
+                        M.A.J.O.R.
+                    </h1>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-semibold leading-none">
+                        Modélisation de l’Aléatoire et Jeux d’Optimisation des Renforcements
+                    </p>
+                </div>
+            </div>
+            <div class="hidden lg:block text-right">
+                <p class="text-xs text-slate-500 italic">Parcours Maths Appliquées - ESH</p>
+                <p class="text-sm font-medium text-slate-300">CPGE ECG — Simulation de Martingales</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+        
+        <aside class="lg:col-span-3 space-y-6">
+            <section class="glass rounded-3xl p-6 space-y-6">
+                <div class="flex items-center gap-2 border-b border-white/5 pb-3">
+                    <i data-lucide="settings-2" class="w-4 h-4 text-indigo-400"></i>
+                    <h2 class="text-sm font-bold uppercase tracking-wider">Paramètres</h2>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400 text-xs italic font-medium">Bleues initiales (b)</span>
+                            <span id="val-b" class="text-indigo-400 font-bold">5</span>
+                        </div>
+                        <input type="range" id="param-b" min="1" max="50" value="5" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400 italic font-medium">Vertes initiales (v)</span>
+                            <span id="val-v" class="text-emerald-400 font-bold">5</span>
+                        </div>
+                        <input type="range" id="param-v" min="1" max="50" value="5" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400 italic font-medium">Ajout par tirage (a)</span>
+                            <span id="val-a" class="text-amber-400 font-bold">2</span>
+                        </div>
+                        <input type="range" id="param-a" min="1" max="20" value="2" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="pt-4 border-t border-white/5">
+                        <div class="flex justify-between text-xs mb-2">
+                            <span class="text-slate-400 font-bold uppercase">Expériences</span>
+                            <span id="val-exp" class="text-white font-bold">30</span>
+                        </div>
+                        <input type="range" id="param-exp" min="1" max="50" value="30" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <button id="btn-run" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-3 cursor-pointer group">
+                    <i data-lucide="play" class="w-5 h-5 group-hover:scale-125 transition"></i>
+                    LANCER M.A.J.O.R.
+                </button>
+            </section>
+            
+            <div class="p-6 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl">
+                <h4 class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2 text-center">Urne en temps réel</h4>
+                <div id="urn-viz" class="h-24 overflow-hidden flex flex-wrap gap-1 items-center justify-center content-center opacity-60">
+                    </div>
+            </div>
+        </aside>
+
+        <div class="lg:col-span-9 space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass rounded-3xl p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-white leading-tight">Convergence de la Martingale</h3>
+                            <p class="text-xs text-slate-500 italic">Évolution des proportions Xn = Bn / (Bn + Vn)</p>
+                        </div>
+                        <div class="p-2 bg-white/5 rounded-lg">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-indigo-400"></i>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartTraj"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass rounded-3xl p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-white leading-tight">Distribution Limite</h3>
+                            <p class="text-xs text-slate-500 italic">Fréquences empiriques vs Densité Loi Bêta</p>
+                        </div>
+                        <div class="p-2 bg-white/5 rounded-lg">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartDens"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-3xl p-8">
+                <div class="grid md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2 space-y-3">
+                        <h4 class="text-sm font-bold text-indigo-400 uppercase tracking-widest italic">Focus Théorique</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Dans le modèle de Pólya avec ajout $a$, la proportion de boules bleues $X_n$ converge presque sûrement vers une variable aléatoire $X_\infty$ suivant une <strong>Loi Bêta</strong> $\mathcal{B}e\left(\frac{b}{a}, \frac{v}{a}\right)$. 
+                        </p>
+                        <p class="text-[10px] text-slate-500 mono bg-black/30 p-2 rounded-lg">
+                            f(x, α, β) = x^(α-1) * (1-x)^(β-1) / B(α, β) | α = b/a, β = v/a
+                        </p>
+                    </div>
+                    <div class="bg-indigo-600/10 border border-indigo-500/20 p-4 rounded-2xl text-center">
+                        <span class="block text-[10px] text-indigo-300 font-bold mb-1">Nombre total de tirages</span>
+                        <span class="text-4xl font-black text-white">100</span>
+                        <span class="block text-[10px] text-slate-500 mt-1 uppercase">Par trajectoire</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-6 text-center border-t border-white/5 mt-auto">
+        <p class="text-[10px] text-slate-500 font-medium tracking-widest uppercase">
+            Apllication créée par <span class="text-slate-300">Olivier Thöni</span>, et vibe-codée avec l’aide de <span class="text-indigo-400">Google Gemini 3.5</span>
+        </p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // UI Selectors
+        const pB = document.getElementById('param-b');
+        const pV = document.getElementById('param-v');
+        const pA = document.getElementById('param-a');
+        const pExp = document.getElementById('param-exp');
+        const vB = document.getElementById('val-b');
+        const vV = document.getElementById('val-v');
+        const vA = document.getElementById('val-a');
+        const vExp = document.getElementById('val-exp');
+        const btnRun = document.getElementById('btn-run');
+        const urnViz = document.getElementById('urn-viz');
+
+        const N_STEPS = 100;
+
+        // Math: Gamma/Beta
+        function gamma(z) {
+            const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+            if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
+            z -= 1; let x = p[0];
+            for (let i = 1; i < 9; i++) x += p[i] / (z + i);
+            let t = z + 7.5;
+            return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+        }
+
+        function betaDensity(x, a, b) {
+            if (x <= 0 || x >= 1) return 0;
+            const B = (gamma(a) * gamma(b)) / gamma(a + b);
+            return (Math.pow(x, a - 1) * Math.pow(1 - x, b - 1)) / B;
+        }
+
+        // Charts Init
+        const commonOptions = {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#475569', font: { size: 9 } } }
+            },
+            plugins: { legend: { display: false } }
+        };
+
+        const chartTraj = new Chart(document.getElementById('chartTraj'), {
+            type: 'line', data: { labels: Array.from({length: N_STEPS+1}, (_,i)=>i), datasets: [] },
+            options: { ...commonOptions, elements: { point: { radius: 0 } }, animation: { duration: 800 } }
+        });
+
+        const chartDens = new Chart(document.getElementById('chartDens'), {
+            data: {
+                labels: Array.from({length: 20}, (_,i)=>(i/20 + 0.025).toFixed(2)),
+                datasets: [
+                    { type: 'bar', label: 'Empirique', data: [], backgroundColor: 'rgba(16, 185, 129, 0.2)', borderColor: '#10b981', borderWidth: 1, barPercentage: 1, categoryPercentage: 1 },
+                    { type: 'line', label: 'Théorique', data: [], borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, tension: 0.3 }
+                ]
+            },
+            options: { ...commonOptions, plugins: { legend: { display: true, position: 'top', labels: { color: '#64748b', font: { size: 10 } } } } }
+        });
+
+        function updateUI() {
+            vB.innerText = pB.value; vV.innerText = pV.value; vA.innerText = pA.value; vExp.innerText = pExp.value;
+        }
+
+        function drawUrn(b, v) {
+            urnViz.innerHTML = '';
+            const total = parseInt(b) + parseInt(v);
+            const max = 150;
+            const ratio = total > max ? max / total : 1;
+            for(let i=0; i<Math.round(b*ratio); i++) urnViz.innerHTML += '<div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>';
+            for(let i=0; i<Math.round(v*ratio); i++) urnViz.innerHTML += '<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>';
+        }
+
+        function run() {
+            const b0 = parseInt(pB.value), v0 = parseInt(pV.value), a = parseInt(pA.value), exps = parseInt(pExp.value);
+            chartTraj.data.datasets = [];
+            const finals = [];
+
+            for(let e=0; e<exps; e++) {
+                let b = b0, v = v0;
+                let traj = [b/(b+v)];
+                for(let s=0; s<N_STEPS; s++){
+                    Math.random() < (b/(b+v)) ? b+=a : v+=a;
+                    traj.push(b/(b+v));
+                }
+                finals.push(traj[N_STEPS]);
+                chartTraj.data.datasets.push({
+                    data: traj, borderColor: `hsla(${Math.random()*360}, 70%, 60%, 0.4)`, borderWidth: 1
+                });
+            }
+            chartTraj.update();
+
+            // Histogram
+            const bins = 20;
+            const histo = Array(bins).fill(0);
+            finals.forEach(f => {
+                let idx = Math.floor(f * bins);
+                histo[idx === bins ? bins-1 : idx]++;
+            });
+            const normalizedHisto = histo.map(c => (c/exps)*bins);
+
+            // Theoretical
+            const alpha = b0/a, beta = v0/a;
+            const theoretical = Array.from({length: bins}, (_, i) => betaDensity((i+0.5)/bins, alpha, beta));
+
+            chartDens.data.datasets[0].data = normalizedHisto;
+            chartDens.data.datasets[1].data = theoretical;
+            chartDens.update();
+            drawUrn(b0, v0);
+        }
+
+        [pB, pV, pA, pExp].forEach(s => s.addEventListener('input', updateUI));
+        btnRun.addEventListener('click', run);
+
+        // Init
+        updateUI();
+        drawUrn(5, 5);
+    </script>
+</body>
+</html>
