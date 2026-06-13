@@ -81,6 +81,18 @@ PGCD-PPCM visualisé par le spirographe
 
 [Retour en haut](#VibeCoding)
 
+#### MAJOR
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Polya/" target="_blank" rel="noopener noreferrer">Spirographe </a></li>
+
+<img width="750" height="300" alt="image" src="https://github.com/user-attachments/assets/08b2ea02-de77-41b1-8229-ce1b74bd544e" />
+
+
+Simulation Urne de Polya
+
+***destination :*** Mathématiques CPGE-ECG
+
+[Retour en haut](#VibeCoding)
 
 ---
 ---
