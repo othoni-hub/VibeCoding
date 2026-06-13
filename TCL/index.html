@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G.A.U.S.S. Engine - Simulateur du Théorème Central Limite (CPGE ECG)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-white flex flex-col justify-between">
+
+    <div>
+        <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 bg-amber-600/20 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-mono font-bold tracking-widest">v1.4</span>
+                    <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                        G.A.U.S.S. Engine
+                    </h1>
+                </div>
+                <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">
+                    <span class="text-amber-400 font-bold">G</span>énérateur <span class="text-amber-400 font-bold">A</span>utonome d'<span class="text-amber-400 font-bold">U</span>nification des <span class="text-amber-400 font-bold">S</span>ommes <span class="text-amber-400 font-bold">S</span>tochastiques — <span class="text-slate-300">Application du T.C.L. (Maths ECG)</span>
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button id="btn-simulate" class="cursor-pointer px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-900/30 transition-all duration-200 active:scale-95 flex items-center gap-2 text-sm">
+                    🎲 Tirer un échantillon
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1800px] mx-auto w-full">
+            
+            <section class="xl:col-span-3 bg-slate-900/50 border border-slate-800/60 rounded-2xl p-5 backdrop-blur-sm flex flex-col gap-5">
+                <h2 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    🛠️ Configuration
+                </h2>
+                
+                <div class="space-y-3">
+                    <label class="text-xs font-semibold text-amber-400 uppercase tracking-wider block">1. Loi de la variable \(X_i\)</label>
+                    <select id="param-law" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+                        <option value="uniform">Loi Uniforme Continue sur [0, 1]</option>
+                        <option value="exponential">Loi Exponentielle (\(\lambda\))</option>
+                        <option value="bernoulli">Loi de Bernoulli (\(p\))</option>
+                        <option value="binomial">Loi Binomiale (\(N, p\))</option>
+                        <option value="poisson">Loi de Poisson (\(\lambda\))</option>
+                        <option value="bimodal">Loi Bimodale (Mélange réglable)</option>
+                    </select>
+                </div>
+
+                <div id="contextual-sliders-box" class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-4" style="display: none;">
+                    
+                    <div id="wrapper-param1" class="space-y-1">
+                        <div class="flex justify-between text-[11px] font-mono">
+                            <span id="label-param1" class="text-slate-400">Paramètre</span>
+                            <span id="val-param1" class="text-amber-400 font-bold">1</span>
+                        </div>
+                        <input type="range" id="input-param1" class="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-amber-500">
+                    </div>
+
+                    <div id="wrapper-param2" class="space-y-1" style="display: none;">
+                        <div class="flex justify-between text-[11px] font-mono">
+                            <span class="text-slate-400">Probabilité p</span>
+                            <span id="val-param2" class="text-amber-400 font-bold">0.40</span>
+                        </div>
+                        <input type="range" id="input-param2" min="0.01" max="0.99" step="0.01" value="0.40" class="w-full h-1 bg-slate-800 rounded appearance-none cursor-pointer accent-amber-500">
+                    </div>
+                </div>
+
+                <hr class="border-slate-800/60">
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label for="param-n" class="text-xs font-semibold text-orange-400 uppercase tracking-wider">2. Nombre de variables sommées (\(n\))</label>
+                        <span id="val-n" class="text-orange-400 font-mono font-bold text-lg">1</span>
+                    </div>
+                    <input type="range" id="param-n" min="1" max="50" value="1" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                        Indice \(n\) dans la somme \(S_n = \sum_{i=1}^n X_i\). Plus \(n\) augmente, plus la silhouette bleue s'aligne sur la courbe orange.
+                    </p>
+                </div>
+
+                <hr class="border-slate-800/60">
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label for="param-sims" class="text-xs font-semibold text-yellow-400 uppercase tracking-wider">3. Nombre de simulations</label>
+                        <span id="val-sims" class="text-yellow-400 font-mono font-bold">5 000</span>
+                    </div>
+                    <input type="range" id="param-sims" min="1000" max="10000" step="1000" value="5000" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-yellow-500">
+                </div>
+
+                <div class="mt-auto pt-4 border-t border-slate-800 text-xs text-slate-400 bg-slate-950/30 p-3 rounded-xl border border-slate-900">
+                    <div class="font-semibold text-slate-300 mb-1">Rappel du Théorème :</div>
+                    Si \((X_i)\) sont i.i.d, alors la variable centrée réduite :
+                    <div class="my-2 text-center text-amber-400">
+                        \[Z_n = \frac{\sum_{i=1}^n X_i - n\mu}{\sigma \sqrt{n}} \xrightarrow[n \to \infty]{\mathcal{L}} \mathcal{N}(0,1)\]
+                    </div>
+                </div>
+            </section>
+
+            <section class="xl:col-span-4 flex flex-col gap-3">
+                <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                    📊 Densité de la loi initiale \(X_1\)
+                </h2>
+                <div class="flex-1 bg-slate-900/30 border border-slate-900 rounded-2xl p-4 flex flex-col min-h-[220px] xl:min-h-[0px] h-[250px] xl:h-auto">
+                    <div class="flex-1 relative">
+                        <canvas id="chart-law-mother"></canvas>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-500 font-mono">
+                    Théorie : <span class="text-slate-300">\(\mu\)</span> = <span id="stat-mu" class="text-amber-400 font-bold">-</span> | 
+                    <span class="text-slate-300">\(\sigma\)</span> = <span id="stat-sigma" class="text-amber-400 font-bold">-</span>
+                </div>
+            </section>
+
+            <section class="xl:col-span-5 flex flex-col gap-3">
+                <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                    🔔 Distribution empirique de \(Z_n\) (Centrée Réduite)
+                </h2>
+                <div class="flex-1 bg-slate-950 border border-slate-900 rounded-2xl p-4 relative min-h-[400px] xl:min-h-[540px] shadow-2xl flex flex-col">
+                    <div class="flex-1 relative">
+                        <canvas id="chart-tcl"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="w-full text-center py-4 border-t border-slate-900 bg-slate-950 text-[11px] text-slate-600 tracking-wide mt-6">
+        Application créée par <span class="text-slate-400 font-medium">Olivier Thöni</span>, et vibe-codée avec l’aide de <span class="text-indigo-500 font-medium">Google Gemini</span>.
+    </footer>
+
+    <script>
+        const paramLaw = document.getElementById('param-law');
+        const paramN = document.getElementById('param-n');
+        const valN = document.getElementById('val-n');
+        const paramSims = document.getElementById('param-sims');
+        const valSims = document.getElementById('val-sims');
+        const btnSimulate = document.getElementById('btn-simulate');
+        
+        // Éléments du panneau contextuel
+        const slidersBox = document.getElementById('contextual-sliders-box');
+        const labelParam1 = document.getElementById('label-param1');
+        const valParam1 = document.getElementById('val-param1');
+        const inputParam1 = document.getElementById('input-param1');
+        const wrapperParam2 = document.getElementById('wrapper-param2');
+        const valParam2 = document.getElementById('val-param2');
+        const inputParam2 = document.getElementById('input-param2');
+
+        let chartMother = null;
+        let chartTCL = null;
+
+        // Structure mémoire des paramètres modifiables
+        let lawParams = {
+            exponential: { lambda: 1.0 },
+            bernoulli: { p: 0.2 },
+            binomial: { N: 10, p: 0.4 },
+            poisson: { lambda: 2.0 },
+            bimodal: { ratio: 0.4 }
+        };
+
+        let currentMu = 0.5;
+        let currentSigma = Math.sqrt(1/12);
+
+        // Écouteurs globaux invariables
+        paramN.addEventListener('input', (e) => { valN.innerText = e.target.value; generateTCL(); });
+        paramSims.addEventListener('input', (e) => { valSims.innerText = parseInt(e.target.value).toLocaleString('fr-FR'); generateTCL(); });
+        btnSimulate.addEventListener('click', () => { generateTCL(); });
+        
+        paramLaw.addEventListener('change', () => {
+            configureSlidersBox();
+            updateMotherLawChart();
+            generateTCL();
+        });
+
+        // RE-CONFIGURATION ET AFFICHAGE FILTRÉ DES CURSEURS
+        function configureSlidersBox() {
+            const law = paramLaw.value;
+
+            if (law === 'uniform') {
+                slidersBox.style.display = 'none';
+                return;
+            }
+            
+            slidersBox.style.display = 'block'; // On affiche le conteneur
+
+            if (law === 'exponential') {
+                labelParam1.innerText = "Paramètre Intensité λ";
+                setupSliderAttributes(inputParam1, 0.2, 4.0, 0.1, lawParams.exponential.lambda);
+                valParam1.innerText = lawParams.exponential.lambda;
+                wrapperParam2.style.display = 'none';
+            } 
+            else if (law === 'bernoulli') {
+                labelParam1.innerText = "Probabilité de succès p";
+                setupSliderAttributes(inputParam1, 0.01, 0.99, 0.01, lawParams.bernoulli.p);
+                valParam1.innerText = lawParams.bernoulli.p;
+                wrapperParam2.style.display = 'none';
+            } 
+            else if (law === 'binomial') {
+                labelParam1.innerText = "Nombre d'essais N";
+                setupSliderAttributes(inputParam1, 1, 30, 1, lawParams.binomial.N);
+                valParam1.innerText = lawParams.binomial.N;
+                
+                wrapperParam2.style.display = 'block'; // Activation du second curseur pour p
+                inputParam2.value = lawParams.binomial.p;
+                valParam2.innerText = lawParams.binomial.p;
+            } 
+            else if (law === 'poisson') {
+                labelParam1.innerText = "Intensité λ";
+                setupSliderAttributes(inputParam1, 0.5, 15.0, 0.5, lawParams.poisson.lambda);
+                valParam1.innerText = lawParams.poisson.lambda;
+                wrapperParam2.style.display = 'none';
+            } 
+            else if (law === 'bimodal') {
+                labelParam1.innerText = "Proportion du groupe 1";
+                setupSliderAttributes(inputParam1, 0.1, 0.9, 0.05, lawParams.bimodal.ratio);
+                valParam1.innerText = lawParams.bimodal.ratio;
+                wrapperParam2.style.display = 'none';
+            }
+        }
+
+        function setupSliderAttributes(input, min, max, step, val) {
+            input.min = min;
+            input.max = max;
+            input.step = step;
+            input.value = val;
+        }
+
+        // ÉCOUTEURS DÉDIÉS AUX CURSEURS INTERNES
+        inputParam1.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            valParam1.innerText = val;
+            const law = paramLaw.value;
+
+            if (law === 'exponential') lawParams.exponential.lambda = val;
+            else if (law === 'bernoulli') lawParams.bernoulli.p = val;
+            else if (law === 'binomial') lawParams.binomial.N = parseInt(val);
+            else if (law === 'poisson') lawParams.poisson.lambda = val;
+            else if (law === 'bimodal') lawParams.bimodal.ratio = val;
+
+            updateMotherLawChart();
+            generateTCL();
+        });
+
+        inputParam2.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            valParam2.innerText = val;
+            lawParams.binomial.p = val;
+
+            updateMotherLawChart();
+            generateTCL();
+        });
+
+        // SIMULATEUR STOCHASTIQUE
+        function sampleMotherLaw(type) {
+            if (type === 'uniform') {
+                return Math.random(); 
+            } else if (type === 'exponential') {
+                return -Math.log(1 - Math.random()) / lawParams.exponential.lambda; 
+            } else if (type === 'bernoulli') {
+                return Math.random() < lawParams.bernoulli.p ? 1 : 0; 
+            } else if (type === 'binomial') {
+                let k = 0;
+                const N = lawParams.binomial.N;
+                const p = lawParams.binomial.p;
+                for(let i=0; i<N; i++) { if(Math.random() < p) k++; }
+                return k;
+            } else if (type === 'poisson') {
+                let L = Math.exp(-lawParams.poisson.lambda);
+                let k = 0;
+                let p = 1;
+                do { k++; p *= Math.random(); } while (p > L);
+                return k - 1;
+            } else if (type === 'bimodal') {
+                if (Math.random() < lawParams.bimodal.ratio) {
+                    return Math.random() * 0.25; 
+                } else {
+                    return 0.75 + Math.random() * 0.25; 
+                }
+            }
+            return 0;
+        }
+
+        // CALCUL ANALYTIQUE VARIABLE DES ESPÉRANCES ET ÉCARTS-TYPES
+        function getTheoreticalStats(type) {
+            if (type === 'uniform') {
+                return { mu: 0.5, sigma: Math.sqrt(1/12), isDiscrete: false };
+            } else if (type === 'exponential') {
+                const l = lawParams.exponential.lambda;
+                return { mu: 1/l, sigma: 1/l, isDiscrete: false };
+            } else if (type === 'bernoulli') {
+                const p = lawParams.bernoulli.p;
+                return { mu: p, sigma: Math.sqrt(p * (1 - p)), isDiscrete: true };
+            } else if (type === 'binomial') {
+                const N = lawParams.binomial.N;
+                const p = lawParams.binomial.p;
+                return { mu: N * p, sigma: Math.sqrt(N * p * (1 - p)), isDiscrete: true };
+            } else if (type === 'poisson') {
+                const l = lawParams.poisson.lambda;
+                return { mu: l, sigma: Math.sqrt(l), isDiscrete: true };
+            } else if (type === 'bimodal') {
+                const r = lawParams.bimodal.ratio;
+                const mu = r * 0.125 + (1 - r) * 0.875;
+                const moment2 = r * (0.25*0.25/3) + (1 - r) * (0.75*0.75 + 0.75*0.25 + 0.25*0.25/3);
+                const variance = moment2 - (mu * mu);
+                return { mu: mu, sigma: Math.sqrt(variance), isDiscrete: false };
+            }
+        }
+
+        // RENDU GRAPHIQUE MICRO
+        function updateMotherLawChart() {
+            const lawType = paramLaw.value;
+            const stats = getTheoreticalStats(lawType);
+            currentMu = stats.mu;
+            currentSigma = stats.sigma;
+
+            document.getElementById('stat-mu').innerText = currentMu.toFixed(3);
+            document.getElementById('stat-sigma').innerText = currentSigma.toFixed(3);
+
+            let samples = [];
+            const nSamples = 4000;
+            for(let i=0; i<nSamples; i++) samples.push(sampleMotherLaw(lawType));
+
+            if(chartMother) chartMother.destroy();
+            const ctx = document.getElementById('chart-law-mother').getContext('2d');
+
+            if(stats.isDiscrete) {
+                let counts = {};
+                samples.forEach(v => counts[v] = (counts[v] || 0) + 1);
+                let labels = Object.keys(counts).map(Number).sort((a,b) => a-b);
+                let data = labels.map(k => counts[k] / nSamples);
+
+                chartMother = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#d97706',
+                            borderWidth: 1.5,
+                            barPercentage: labels.length > 15 ? 0.7 : 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }
+                        }
+                    }
+                });
+            } else {
+                let minX = 0;
+                let maxX = lawType === 'exponential' ? Math.max(5, 3 / lawParams.exponential.lambda) : 1;
+                let numBins = 25;
+                let bins = new Array(numBins).fill(0);
+                samples.forEach(v => {
+                    let binIdx = Math.floor(((v - minX) / (maxX - minX)) * numBins);
+                    if(binIdx >= 0 && binIdx < numBins) bins[binIdx]++;
+                });
+                const labels = Array.from({length: numBins}, (_, i) => (minX + (i + 0.5) * (maxX - minX) / numBins).toFixed(1));
+                const data = bins.map(c => c / (nSamples * ((maxX - minX)/numBins)));
+
+                chartMother = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: 'rgba(245, 158, 11, 0.4)',
+                            borderColor: '#f59e0b',
+                            borderWidth: 1.5,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
+                            y: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+
+        // RENDU GRAPHIQUE MACRO (CONVERGENCE DU TCL)
+        function generateTCL() {
+            const lawType = paramLaw.value;
+            const n = parseInt(paramN.value);
+            const numSimulations = parseInt(paramSims.value);
+            const stats = getTheoreticalStats(lawType);
+
+            const minZ = -4, maxZ = 4;
+            
+            let gaussData = [];
+            const steps = 100;
+            for (let i = 0; i <= steps; i++) {
+                let z = minZ + (i / steps) * (maxZ - minZ);
+                gaussData.push({ x: z, y: (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-Math.pow(z, 2) / 2) });
+            }
+
+            let datasetEmpirical = {
+                label: `Distribution de Zₙ (n = ${n})`,
+                data: [],
+                backgroundColor: 'rgba(56, 189, 248, 0.45)',
+                borderColor: '#38bdf8',
+                borderWidth: 1.5,
+                order: 2
+            };
+
+            if (stats.isDiscrete) {
+                let sumCounts = {};
+                for (let s = 0; s < numSimulations; s++) {
+                    let sum = 0;
+                    for (let i = 0; i < n; i++) sum += sampleMotherLaw(lawType);
+                    sumCounts[sum] = (sumCounts[sum] || 0) + 1;
+                }
+
+                let activeSums = Object.keys(sumCounts).map(Number).sort((a,b) => a-b);
+                let dz = 1.0 / (currentSigma * Math.sqrt(n));
+
+                activeSums.forEach(sum => {
+                    let z = (sum - (n * currentMu)) / (currentSigma * Math.sqrt(n));
+                    if (z >= minZ - dz && z <= maxZ + dz) {
+                        let freq = sumCounts[sum] / numSimulations;
+                        datasetEmpirical.data.push({ x: z, y: freq / dz });
+                    }
+                });
+                datasetEmpirical.type = 'bar';
+                datasetEmpirical.barThickness = 'flex'; 
+            } else {
+                let zValues = [];
+                for (let s = 0; s < numSimulations; s++) {
+                    let sum = 0;
+                    for (let i = 0; i < n; i++) sum += sampleMotherLaw(lawType);
+                    zValues.push((sum - (n * currentMu)) / (currentSigma * Math.sqrt(n)));
+                }
+
+                const binsCount = 40;
+                let histogram = new Array(binsCount).fill(0);
+                zValues.forEach(z => {
+                    if (z >= minZ && z <= maxZ) {
+                        let index = Math.floor(((z - minZ) / (maxZ - minZ)) * binsCount);
+                        if (index >= 0 && index < binsCount) histogram[index]++;
+                    }
+                });
+
+                let binWidth = (maxZ - minZ) / binsCount;
+                for (let b = 0; b < binsCount; b++) {
+                    let z = minZ + (b + 0.5) * binWidth;
+                    datasetEmpirical.data.push({ x: z, y: histogram[b] / (numSimulations * binWidth) });
+                }
+                datasetEmpirical.type = 'bar';
+            }
+
+            if(chartTCL) chartTCL.destroy();
+            const ctx = document.getElementById('chart-tcl').getContext('2d');
+            
+            chartTCL = new Chart(ctx, {
+                data: {
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Loi Normale 𝒩(0,1) Théorique',
+                            data: gaussData,
+                            borderColor: '#ea580c',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.1,
+                            order: 1
+                        },
+                        datasetEmpirical
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { size: 11, weight: '600' } } }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: -4,
+                            max: 4,
+                            grid: { color: '#1e293b' },
+                            ticks: { color: '#64748b' }
+                        },
+                        y: { min: 0, max: 0.5, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }
+                    },
+                    animation: { duration: 100 }
+                }
+            });
+        }
+
+        // Lancement initial au chargement de la page
+        configureSlidersBox();
+        updateMotherLawChart();
+        generateTCL();
+    </script>
+</body>
+</html>
