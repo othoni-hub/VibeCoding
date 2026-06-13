@@ -1,7 +1,9 @@
 # VibeCoding
-Applications "single page" pédagogiques ou autres, vibe-codées par Olivier Thöni
+Applications "single page" pédagogiques ou autres, *vibe-codées* par **Olivier Thöni**
 
 avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
+
+(Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
 ## Table des matières
 ### _Mathématiques_
