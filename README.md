@@ -16,7 +16,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 ### Jeux
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 
-
+--- 
 
 ### Mathématiques
 #### Constructor
