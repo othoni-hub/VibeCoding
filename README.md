@@ -57,6 +57,8 @@ Mur de calcul additif.
 
 [Retour en haut](#VibeCoding)
 
+---
+
 ### Autres disciplines
 #### Solarium
 [*Vibe-Codé* avec Gemini 3.5]
@@ -79,6 +81,8 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 ***destination :*** Français 3<sup>ème</sup>
 
 [Retour en haut](#VibeCoding)
+
+---
 
 ### Jeux
 
