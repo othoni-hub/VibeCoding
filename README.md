@@ -11,7 +11,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *Spirographe*](#Spirographe)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
-- [L'appli *Predateurs/Proies - Lotka-Voltera*](#PredateursProies)
+- [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
 - [L'appli *GAUSS*](#TCL)
   
 ### Autres disciplines
