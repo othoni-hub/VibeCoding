@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P.O.K.E.R. - Calibration Finale Brelan</title>
+    <style>
+        :root {
+            --bg-main: #090d16;
+            --panel-bg: rgba(17, 24, 39, 0.85);
+            --border-neon: #a855f7;
+            --border-glow: rgba(168, 85, 247, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary-neon: #fbbf24;
+            --primary-glow: rgba(251, 191, 36, 0.4);
+            --success: #10b981;
+            --info: #38bdf8;
+            --die-bg: #ffffff;
+            --die-dot: #090d16;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .game-container {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-neon);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 0 25px var(--border-glow);
+            backdrop-filter: blur(12px);
+        }
+
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { color: var(--primary-neon); font-size: 2.2rem; letter-spacing: 4px; text-shadow: 0 0 10px var(--primary-glow); margin-bottom: 2px; }
+        .subtitle { color: var(--border-neon); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
+        .acronym-def { color: var(--text-muted); font-size: 0.75rem; margin-top: 6px; font-style: italic; }
+
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-box { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 16px; padding: 12px; text-align: center; }
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; }
+        .stat-value.highlight { color: var(--primary-neon); }
+
+        .dice-area { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 24px 0; min-height: 65px; }
+        .die {
+            width: 60px; height: 60px; background: var(--die-bg); border-radius: 12px;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+            padding: 8px; gap: 2px; transition: transform 0.15s ease;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .pip { background-color: var(--die-dot); border-radius: 50%; width: 8px; height: 8px; margin: auto; opacity: 0; }
+
+        .die[data-face="1"] .pip:nth-child(5) { opacity: 1; }
+        .die[data-face="2"] .pip:nth-child(1), .die[data-face="2"] .pip:nth-child(9) { opacity: 1; }
+        .die[data-face="3"] .pip:nth-child(1), .die[data-face="3"] .pip:nth-child(5), .die[data-face="3"] .pip:nth-child(9) { opacity: 1; }
+        .die[data-face="4"] .pip:nth-child(1), .die[data-face="4"] .pip:nth-child(3), .die[data-face="4"] .pip:nth-child(7), .die[data-face="4"] .pip:nth-child(9) { opacity: 1; }
+        .die[data-face="5"] .pip:nth-child(1), .die[data-face="5"] .pip:nth-child(3), .die[data-face="5"] .pip:nth-child(5), .die[data-face="5"] .pip:nth-child(7), .die[data-face="5"] .pip:nth-child(9) { opacity: 1; }
+        .die[data-face="6"] .pip:nth-child(1), .die[data-face="6"] .pip:nth-child(3), .die[data-face="6"] .pip:nth-child(4), .die[data-face="6"] .pip:nth-child(6), .die[data-face="6"] .pip:nth-child(7), .die[data-face="6"] .pip:nth-child(9) { opacity: 1; }
+
+        .die.rolling { animation: shuffle 0.1s infinite; }
+        @keyframes shuffle { 
+            0% { transform: translateY(-2px) rotate(-5deg); } 
+            100% { transform: translateY(2px) rotate(5deg); } 
+        }
+
+        .controls { display: flex; flex-direction: column; gap: 16px; }
+        .bet-input-group { display: flex; align-items: center; justify-content: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; }
+        input[type="number"] { background: #000; border: 1px solid var(--border-neon); color: var(--primary-neon); padding: 8px; border-radius: 8px; width: 80px; text-align: center; font-size: 1.1rem; font-weight: bold; }
+        
+        .button-group { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: filter 0.2s; }
+        .btn-roll { background: var(--border-neon); color: white; box-shadow: 0 0 15px var(--border-glow); font-size: 1rem; }
+        .btn-reset { background: #1e293b; color: white; font-size: 0.75rem; }
+        .btn:active { filter: brightness(1.2); }
+
+        .result-display {
+            min-height: 90px; text-align: center; background: rgba(0, 0, 0, 0.6);
+            border-radius: 16px; padding: 15px; border: 1px dashed var(--border-neon);
+            margin-top: 20px; display: flex; flex-direction: column; justify-content: center;
+        }
+        .text-win { color: var(--success); text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+        .text-neutral { color: var(--info); }
+        .text-lose { color: var(--text-muted); }
+
+        footer { margin-top: 20px; font-size: 0.75rem; color: var(--text-muted); opacity: 0.5; text-align: center; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header>
+        <h1>P.O.K.E.R.</h1>
+        <div class="subtitle">Simulation Expérimentale — ECG</div>
+        <div class="acronym-def">Probabilités Optimales et Kombinatoires d’Expériences Répétées</div>
+    </header>
+
+    <div class="dashboard">
+        <div class="stat-box">
+            <div class="stat-label">Cagnotte</div>
+            <div id="balance" class="stat-value highlight">100</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Dernier Gain</div>
+            <div id="last-gain" class="stat-value">0</div>
+        </div>
+    </div>
+
+    <div class="dice-area" id="dice-container">
+        <div class="die" data-face="6"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        <div class="die" data-face="6"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        <div class="die" data-face="6"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        <div class="die" data-face="6"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+        <div class="die" data-face="6"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+    </div>
+
+    <div class="controls">
+        <div class="bet-input-group">
+            <label>Mise :</label>
+            <input type="number" id="bet-amount" value="10" min="1">
+            <span style="font-size: 0.8rem; font-weight: bold;">Beans</span>
+        </div>
+        <div class="button-group">
+            <button class="btn btn-roll" id="roll-button" onclick="playTurn()">Lancer les dés</button>
+            <button class="btn btn-reset" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+
+    <div class="result-display" id="result-box">
+        <div id="res-name" style="font-weight:bold; font-size:1.2rem; margin-bottom: 4px;">Faites vos jeux</div>
+        <div id="res-detail" style="font-size:0.8rem; color:var(--text-muted);">
+            Barème : Brelan x1.2 | Séquence x2.0 | Deux Paires x0.8
+        </div>
+    </div>
+</div>
+
+<footer>
+    Vibe-codé par Olivier Thöni, avec l’aide de Gemini 3.5<br>
+    <span style="font-size:0.65rem;">Modèle calibré (Brelan supérieur à 1) — Espérance globale E ≈ 0.84</span>
+</footer>
+
+<script>
+    let balance = 100;
+
+    function resetGame() {
+        balance = 100;
+        updateUI(0);
+        document.getElementById('res-name').textContent = "Faites vos jeux";
+        document.getElementById('res-name').className = "";
+        document.getElementById('res-detail').textContent = "Barème : Brelan x1.2 | Séquence x2.0 | Deux Paires x0.8";
+    }
+
+    function updateUI(gain) {
+        document.getElementById('balance').textContent = balance;
+        document.getElementById('last-gain').textContent = gain;
+    }
+
+    function playTurn() {
+        const betInput = document.getElementById('bet-amount');
+        const bet = parseInt(betInput.value);
+        
+        if (isNaN(bet) || bet <= 0) return alert("Veuillez saisir une mise valide.");
+        if (bet > balance) return alert("Cagnotte insuffisante !");
+
+        balance -= bet;
+        updateUI(0);
+        
+        const diceElements = document.querySelectorAll('.die');
+        diceElements.forEach(d => d.classList.add('rolling'));
+
+        setTimeout(() => {
+            const dice = Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1);
+            diceElements.forEach((d, i) => {
+                d.classList.remove('rolling');
+                d.setAttribute('data-face', dice[i]);
+            });
+
+            const analysis = evaluate(dice);
+            let factor = 0;
+
+            // --- NOUVEAU BARÈME EXPÉRIMENTAL RECALIBRÉ ---
+            if (analysis.type === 'Yams') factor = 30;
+            else if (analysis.type === 'Carré') factor = 5;
+            else if (analysis.type === 'Séquence') factor = 2; 
+            else if (analysis.type === 'Full') factor = 1.5;
+            else if (analysis.type === 'Brelan') factor = 1.2;     // Repasse au-dessus de 1
+            else if (analysis.type === 'Deux Paires') factor = 0.8; 
+            else if (analysis.type === 'Paire') factor = 0.5;       
+            
+            const gain = Math.round(bet * factor);
+            balance += gain;
+            updateUI(gain);
+
+            const nameElement = document.getElementById('res-name');
+            const detailElement = document.getElementById('res-detail');
+            
+            nameElement.textContent = analysis.name;
+            
+            if (factor > 1) {
+                nameElement.className = "text-win";
+                detailElement.textContent = `PROFIT : +${gain} Beans (x${factor})`;
+            } else if (factor >= 0.5) {
+                nameElement.className = "text-neutral";
+                detailElement.textContent = `RETOUR PARTIEL : ${gain} Beans (x${factor})`;
+            } else {
+                nameElement.className = "text-lose";
+                detailElement.textContent = "PERDU (0 Beans)";
+            }
+
+            if (balance <= 0) {
+                nameElement.textContent = "BANQUEROUTE";
+                nameElement.className = "text-lose";
+                detailElement.textContent = "Le casino a tout pris. Reset pour recommencer.";
+            }
+            
+        }, 600);
+    }
+
+    function evaluate(dice) {
+        const counts = {};
+        dice.forEach(x => counts[x] = (counts[x] || 0) + 1);
+        const v = Object.values(counts);
+        
+        if (v.includes(5)) return {type:'Yams', name:'YAMS !'};
+        if (v.includes(4)) return {type:'Carré', name:'CARRÉ'};
+        
+        // Détection des Séquences (Suites)
+        if (v.length === 5) {
+            const sorted = [...dice].sort((a, b) => a - b);
+            if (sorted[4] - sorted[0] === 4) {
+                return {type:'Séquence', name:'SÉQUENCE ! (SUITE)'};
+            }
+        }
+
+        if (v.includes(3) && v.includes(2)) return {type:'Full', name:'FULL'};
+        if (v.includes(3)) return {type:'Brelan', name:'BRELAN'};
+        
+        const pairs = v.filter(x => x === 2).length;
+        if (pairs === 2) return {type:'Deux Paires', name:'DEUX PAIRES'};
+        if (pairs === 1) return {type:'Paire', name:'UNE PAIRE'};
+        
+        return {type:'Rien', name:'AUCUNE FIGURE'};
+    }
+</script>
+</body>
+</html>
