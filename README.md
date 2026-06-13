@@ -11,7 +11,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
   
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
-- [L'appli *timeline* de Marcel Pagnol](#PAGNOL
+- [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
 
 ### Jeux
 - [L'appli *Arbre Fractal*](#ArbreFractal)
