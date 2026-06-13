@@ -62,3 +62,12 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 
 [Retour en haut](#VibeCoding)
 
+## BRIQUE
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li>
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
+
+Mur de calcul additif.
+
+***destination :*** CE2
+[Retour en haut](#VibeCoding)
