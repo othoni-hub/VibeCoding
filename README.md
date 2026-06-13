@@ -9,6 +9,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *BRIQUE*](#BRIQUE)
 - [L'appli *Spirographe*](#Spirographe)
+- [L'appli *MAJOR - Urne de Polya*](#MAJOR)
   
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
