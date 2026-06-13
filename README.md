@@ -207,7 +207,7 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 
 #### POKER
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/PPOKER/" target="_blank" rel="noopener noreferrer">POKER </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/POKER/" target="_blank" rel="noopener noreferrer">POKER </a></li>
 
 
 <img width="200" height="270" alt="image" src="https://github.com/user-attachments/assets/ea9dd482-b9a1-4e8f-8dfb-77e2040231bb" />
