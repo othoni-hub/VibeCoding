@@ -20,6 +20,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ### Jeux
 - [L'appli *Arbre Fractal*](#ArbreFractal)
+- [L'appli *VOLUME (SketchUp like)*](#VOLUME)
 
 --- 
 ---
@@ -187,5 +188,19 @@ Arbre fractal avec paramètres
 
 ---
 
+#### VOLUME
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/VOLUME/" target="_blank" rel="noopener noreferrer">VOLUME (sketchUp like) </a></li>
+
+<img width="300" height="200" alt="image" src="https://github.com/user-attachments/assets/e8743e06-e1f6-43ec-93ae-1e39ee3552f2" />
+
+
+Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
+
+***destination :*** tous
+
+[Retour en haut](#VibeCoding)
+
+---
 
 
