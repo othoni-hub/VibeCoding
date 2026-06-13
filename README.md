@@ -6,7 +6,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 (Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
 ## Table des matières
-### _Mathématiques_
+### Mathématiques
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *BRIQUE*](#BRIQUE)
@@ -28,8 +28,8 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 --- 
 ---
 
-### Mathématiques
-#### --> Constructor
+## **Mathématiques**
+### Constructor
 [*Vibe-Codé* avec Gemini 3.5]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> 
@@ -46,7 +46,7 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 
 ---
 
-#### --> i-CONIC
+### i-CONIC
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li>
 
@@ -61,7 +61,7 @@ Visualiseur intéractif de coniques
 
 ---
 
-#### --> BRIQUE
+### BRIQUE
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/BRIQUE/brique.html" target="_blank" rel="noopener noreferrer">BRIQUE </a></li>
 <img width="300" height="220" alt="image" src="https://github.com/user-attachments/assets/96de829f-d209-48ce-b2ae-dbf1de6d817d" />
@@ -76,7 +76,7 @@ Mur de calcul additif.
 
 ---
 
-#### --> Spirographe
+### Spirographe
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Spirograph/Spirographe.html" target="_blank" rel="noopener noreferrer">Spirographe </a></li>
 <img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/8396fd48-924c-46dc-9a60-67b3abc13323" />
@@ -91,7 +91,7 @@ PGCD-PPCM visualisé par le spirographe
 
 ---
 
-#### --> MAJOR
+### MAJOR
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Polya/" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
 
@@ -106,7 +106,7 @@ Simulation Urne de Polya
 
 ---
 
-#### --> EPIDEMIC
+### EPIDEMIC
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/EPIDEMIC/" target="_blank" rel="noopener noreferrer">Propagation épidémique </a></li>
 
@@ -120,7 +120,7 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 
 ---
 
-#### --> PredateursProies
+### PredateursProies
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PredateursProies/" target="_blank" rel="noopener noreferrer">Prédateurs - Proies : Lotka-Voltera </a></li>
 
@@ -133,7 +133,7 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 [Retour en haut](#VibeCoding)
 ---
 
-#### --> TCL
+### TCL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/TCL/" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
 
@@ -149,8 +149,8 @@ Simulations de diverses lois de probabilité pour illustrer la convergence en lo
 ---
 ---
 
-### Autres disciplines
-#### --> Solarium
+## **Autres disciplines**
+### Solarium
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/" target="_blank" rel="noopener noreferrer">Solarium 3D </a></li>
 
@@ -163,7 +163,7 @@ Vue animée du Système Solaire
 [Retour en haut](#VibeCoding)
 
 ---
-#### --> PAGNOL
+### PAGNOL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li>
 <img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
@@ -176,9 +176,9 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 ---
 ---
 
-### Jeux
+## **Jeux**
 
-#### --> ArbreFractal
+### ArbreFractal
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ArbreFractal/" target="_blank" rel="noopener noreferrer">Arbre Fractal </a></li>
 
@@ -192,7 +192,7 @@ Arbre fractal avec paramètres
 
 ---
 
-#### --> VOLUME
+### VOLUME
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/VOLUME/" target="_blank" rel="noopener noreferrer">VOLUME (sketchUp like) </a></li>
 
@@ -207,7 +207,7 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 
 ---
 
-#### --> POKER
+### POKER
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/POKER/" target="_blank" rel="noopener noreferrer">POKER </a></li>
 
