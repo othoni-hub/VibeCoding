@@ -7,22 +7,22 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ## Table des matières
 ### _Mathématiques_
-- [L'appli *Constructor*](# --> Constructor)
-- [L'appli *i-CONIC*](#--> i-CONIC)
-- [L'appli *BRIQUE*](#--> BRIQUE)
-- [L'appli *Spirographe*](#--> Spirographe)
-- [L'appli *MAJOR - Urne de Polya*](#--> MAJOR)
-- [L'appli *EPIDEMIC - Modèle SIR*](#--> EPIDEMIC)
-- [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#--> PredateursProies)
-- [L'appli *GAUSS*](#--> TCL)
+- [L'appli *Constructor*](#Constructor)
+- [L'appli *i-CONIC*](#i-CONIC)
+- [L'appli *BRIQUE*](#BRIQUE)
+- [L'appli *Spirographe*](#Spirographe)
+- [L'appli *MAJOR - Urne de Polya*](#MAJOR)
+- [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
+- [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
+- [L'appli *GAUSS*](#TCL)
   
 ### Autres disciplines
-- [L'appli *S.Y.S.M.O Solarium 3D*](#--> solarium)
-- [L'appli *timeline* de Marcel Pagnol](#--> PAGNOL)
+- [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
+- [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
 
 ### Jeux
-- [L'appli *Arbre Fractal*](#--> ArbreFractal)
-- [L'appli *VOLUME (SketchUp like)*](#--> VOLUME)
+- [L'appli *Arbre Fractal*](#ArbreFractal)
+- [L'appli *VOLUME (SketchUp like)*](#VOLUME)
 - [L'appli *POKER-Dés*](#POKER)
 
 --- 
