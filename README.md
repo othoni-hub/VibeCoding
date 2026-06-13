@@ -18,6 +18,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 
 --- 
+---
 
 ### Mathématiques
 #### Constructor
@@ -34,6 +35,9 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 
 [Retour en haut](#VibeCoding)
 
+
+---
+
 #### i-CONIC
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li>
@@ -46,6 +50,9 @@ Visualiseur intéractif de coniques
 
 [Retour en haut](#VibeCoding)
 
+
+---
+
 #### BRIQUE
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/BRIQUE/" target="_blank" rel="noopener noreferrer">BRIQUE </a></li>
@@ -57,6 +64,9 @@ Mur de calcul additif.
 ***destination :*** CE2
 
 [Retour en haut](#VibeCoding)
+
+
+---
 
 #### Spirographe
 [*Vibe-Codé* avec Gemini 3.5]
@@ -73,6 +83,7 @@ PGCD-PPCM visualisé par le spirographe
 
 
 ---
+---
 
 ### Autres disciplines
 #### Solarium
@@ -87,6 +98,7 @@ Vue animée du Système Solaire
 
 [Retour en haut](#VibeCoding)
 
+---
 #### PAGNOL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li>
@@ -97,6 +109,7 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 
 [Retour en haut](#VibeCoding)
 
+---
 ---
 
 ### Jeux
@@ -112,6 +125,8 @@ Arbre fractal avec paramètres
 ***destination :*** tous
 
 [Retour en haut](#VibeCoding)
+
+---
 
 
 
