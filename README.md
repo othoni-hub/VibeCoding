@@ -11,6 +11,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *Spirographe*](#Spirographe)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
+- [L'appli *GAUSS*](#TCL)
   
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
@@ -108,6 +109,20 @@ Simulation Urne de Polya
 
 Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selon le modèle SIR (Sains - Infectés - Rétablis)
 
+***destination :*** Mathématiques CPGE-ECG
+
+[Retour en haut](#VibeCoding)
+
+---
+
+#### TCL
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/TCL/" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
+
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/bc7da267-2154-41d2-ac30-37e1c35c9a12" />
+
+
+Simulations de diverses lois de probabilité pour illustrer la convergence en loi (Théorème Central Limite)
 ***destination :*** Mathématiques CPGE-ECG
 
 [Retour en haut](#VibeCoding)
