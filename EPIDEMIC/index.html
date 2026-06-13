@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E.P.I.D.E.M.I.C. - Simulateur Multi-Agent SIR (CPGE ECG)</title>
+    <!-- Tailwind CSS v4 via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js pour des graphiques fluides -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Polyfill MathJax pour le rendu des équations LaTeX -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-rose-500 selection:text-white flex flex-col justify-between">
+
+    <div>
+        <!-- Header -->
+        <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-mono font-bold tracking-widest">v1.0</span>
+                    <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-rose-400 to-amber-400 bg-clip-text text-transparent">
+                        E.P.I.D.E.M.I.C.
+                    </h1>
+                </div>
+                <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">
+                    <span class="text-rose-400">E</span>pidemic <span class="text-rose-400">P</span>opulation <span class="text-rose-400">I</span>nteraction & <span class="text-rose-400">D</span>isease <span class="text-rose-400">E</span>volution <span class="text-rose-400">M</span>odel for <span class="text-rose-400">I</span>ntensive <span class="text-rose-400">C</span>lasses — CPGE ECG
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button id="btn-start" class="cursor-pointer px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-900/30 transition-all duration-200 active:scale-95 flex items-center gap-2 text-sm">
+                    <span id="btn-start-icon">▶</span> <span id="btn-start-text">Démarrer</span>
+                </button>
+                <button id="btn-reset" class="cursor-pointer px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition-all duration-200 active:scale-95 text-sm">
+                    🔄 Réinitialiser
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 max-w-[1800px] mx-auto w-full">
+            
+            <!-- PANNEAU DES PARAMÈTRES (CURSEURS) -->
+            <section class="xl:col-span-3 bg-slate-900/50 border border-slate-800/60 rounded-2xl p-5 backdrop-blur-sm flex flex-col gap-5">
+                <h2 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    ⚙️ Paramètres de l'Infection
+                </h2>
+                
+                <!-- Configuration de base -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-semibold text-sky-400 uppercase tracking-wider">Population Initiale</h3>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1 font-medium text-slate-400">
+                            <label for="param-pop-total">Taille de la population (\(N\))</label>
+                            <span id="val-pop-total" class="text-sky-400 font-mono font-bold">300</span>
+                        </div>
+                        <input type="range" id="param-pop-total" min="50" max="500" value="300" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1 font-medium text-slate-400">
+                            <label for="param-infectes-init">Infectés initiaux (\(I_0\))</label>
+                            <span id="val-infectes-init" class="text-rose-400 font-mono font-bold">2</span>
+                        </div>
+                        <input type="range" id="param-infectes-init" min="1" max="10" value="2" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                    </div>
+                </div>
+
+                <hr class="border-slate-800/60">
+
+                <!-- Dynamique de transmission -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-semibold text-rose-400 uppercase tracking-wider">Facteurs Biologiques</h3>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1 font-medium text-slate-400">
+                            <label for="param-taux-trans">Taux de contagion (\(\beta\))</label>
+                            <span id="val-taux-trans" class="text-rose-400 font-mono font-bold">60 %</span>
+                        </div>
+                        <input type="range" id="param-taux-trans" min="10" max="100" step="5" value="60" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                        <p class="text-[10px] text-slate-500 mt-1">Probabilité de transmission lors d'un contact rapproché.</p>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1 font-medium text-slate-400">
+                            <label for="param-temps-guerison">Durée d'infection (\(1/\gamma\))</label>
+                            <span id="val-temps-guerison" class="text-amber-400 font-mono font-bold">120 itér.</span>
+                        </div>
+                        <input type="range" id="param-temps-guerison" min="30" max="300" step="10" value="120" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        <p class="text-[10px] text-slate-500 mt-1">Temps moyen avant de passer de Infecté (\(I\)) à Retiré (\(R\)).</p>
+                    </div>
+                </div>
+
+                <hr class="border-slate-800/60">
+
+                <!-- Politique sanitaire / ESH contrainte -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Politique Publique (Choc)</h3>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1 font-medium text-slate-400">
+                            <label for="param-distanciation" class="text-amber-400 font-semibold">Confinement / Distanciation</label>
+                            <span id="val-distanciation" class="text-amber-400 font-mono font-bold">0 %</span>
+                        </div>
+                        <input type="range" id="param-distanciation" min="0" max="90" step="5" value="0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">Gèle le mouvement d'un pourcentage d'agents pour simuler une baisse forcée de la mobilité macroéconomique.</p>
+                    </div>
+                </div>
+
+                <!-- Indicateurs analytiques rapides -->
+                <div class="mt-auto pt-4 border-t border-slate-800 grid grid-cols-2 gap-3 text-center text-xs">
+                    <div class="p-2.5 bg-slate-950/40 border border-slate-900 rounded-xl">
+                        <div class="text-slate-500 font-medium mb-0.5">Temps (\(t\))</div>
+                        <div id="stat-tick" class="text-base font-mono font-bold text-teal-400">0</div>
+                    </div>
+                    <div class="p-2.5 bg-slate-950/40 border border-slate-900 rounded-xl">
+                        <div class="text-slate-500 font-medium mb-0.5">Pic d'Infectés</div>
+                        <div id="stat-pic" class="text-base font-mono font-bold text-rose-400">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CANVAS DE LA POPULATION SPATIALISÉE (VUE MICRO) -->
+            <section class="xl:col-span-5 flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                        🌍 Propagation Spatiale <span class="text-xs font-normal text-slate-500">(Interactions directes)</span>
+                    </h2>
+                    <div class="flex gap-3 text-[11px] font-mono bg-slate-900/30 px-2.5 py-1.5 rounded-lg border border-slate-900">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-sky-400 rounded-full"></span> S: <b id="count-s" class="text-sky-400">0</b></span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-rose-500 rounded-full"></span> I: <b id="count-i" class="text-rose-400">0</b></span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-amber-500 rounded-full"></span> R: <b id="count-r" class="text-amber-400">0</b></span>
+                    </div>
+                </div>
+                <div class="flex-1 bg-slate-950 border border-slate-900 rounded-2xl relative overflow-hidden flex items-center justify-center min-h-[450px] xl:min-h-[580px] shadow-2xl">
+                    <canvas id="epidemic-canvas" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </section>
+
+            <!-- DIAGRAMMES ANALYTIQUES (MACRO) -->
+            <section class="xl:col-span-4 flex flex-col gap-5">
+                <!-- Courbe Épidémique Temporelle -->
+                <div class="flex-1 bg-slate-900/20 border border-slate-900 rounded-2xl p-4 flex flex-col h-[285px]">
+                    <h3 class="text-sm font-bold text-slate-300 mb-2 flex items-center justify-between">
+                        <span>📈 Dynamique des Compartiments \(S, I, R\)</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Modèle Kermack-McKendrick</span>
+                    </h3>
+                    <div class="flex-1 relative">
+                        <canvas id="chart-temporal"></canvas>
+                    </div>
+                </div>
+
+                <!-- Diagramme de Phase Spécifique Épidémie (S en abscisse, I en ordonnée) -->
+                <div class="flex-1 bg-slate-900/20 border border-slate-900 rounded-2xl p-4 flex flex-col h-[285px]">
+                    <h3 class="text-sm font-bold text-slate-300 mb-2 flex items-center justify-between">
+                        <span>🔄 Portrait de Phase \((S, I)\)</span>
+                        <span class="text-[10px] text-rose-400 font-mono">Effet d'estompement</span>
+                    </h3>
+                    <div class="flex-1 relative">
+                        <canvas id="chart-phase"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Pied de page avec vos crédits obligatoires -->
+    <footer class="w-full text-center py-4 border-t border-slate-900 bg-slate-950 text-[11px] text-slate-600 tracking-wide mt-6">
+        Application créée par <span class="text-slate-400 font-medium">Olivier Thöni</span>, et vibe-codée avec l’aide de <span class="text-indigo-500 font-medium">Google Gemini</span>.
+    </footer>
+
+    <!-- Logique mathématique et comportementale du modèle E.P.I.D.E.M.I.C. -->
+    <script>
+        const canvas = document.getElementById('epidemic-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const controls = {
+            popTotal: { input: document.getElementById('param-pop-total'), val: document.getElementById('val-pop-total'), suffix: '' },
+            infectesInit: { input: document.getElementById('param-infectes-init'), val: document.getElementById('val-infectes-init'), suffix: '' },
+            tauxTrans: { input: document.getElementById('param-taux-trans'), val: document.getElementById('val-taux-trans'), suffix: ' %' },
+            tempsGuerison: { input: document.getElementById('param-temps-guerison'), val: document.getElementById('val-temps-guerison'), suffix: ' itér.' },
+            distanciation: { input: document.getElementById('param-distanciation'), val: document.getElementById('val-distanciation'), suffix: ' %' }
+        };
+
+        const btnStart = document.getElementById('btn-start');
+        const btnReset = document.getElementById('btn-reset');
+        
+        let isRunning = false;
+        let animationFrameId = null;
+        let iterationCount = 0;
+        let agents = [];
+        let historicalData = { t: [], s: [], i: [], r: [] };
+        let chartTemporal = null;
+        let chartPhase = null;
+        let maxInfectedCounter = 0;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        Object.keys(controls).forEach(key => {
+            controls[key].input.addEventListener('input', (e) => {
+                controls[key].val.innerText = e.target.value + controls[key].suffix;
+            });
+        });
+
+        // AGENT INDIVIDUEL (Sains = S, Infecté = I, Retiré/Guéri = R)
+        class Individual {
+            constructor(state, isIsolated) {
+                this.state = state; // 'S', 'I', ou 'R'
+                this.isIsolated = isIsolated; // Si confiné, vitesse = 0
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                
+                if (this.isIsolated) {
+                    this.vx = 0;
+                    this.vy = 0;
+                } else {
+                    this.vx = (Math.random() - 0.5) * 3.5;
+                    this.vy = (Math.random() - 0.5) * 3.5;
+                }
+                this.infectionDuration = 0;
+            }
+
+            move() {
+                if (this.isIsolated) return;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Structure topologique en Tore (bords infinis)
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+
+                // Fluctuation brownienne légère
+                this.vx += (Math.random() - 0.5) * 0.3;
+                this.vy += (Math.random() - 0.5) * 0.3;
+
+                const speed = Math.sqrt(this.vx**2 + this.vy**2);
+                if (speed > 2.5) {
+                    this.vx = (this.vx / speed) * 2.5;
+                    this.vy = (this.vy / speed) * 2.5;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4.5, 0, Math.PI * 2);
+                
+                if (this.state === 'S') {
+                    ctx.fillStyle = '#38bdf8'; // Bleu Sky (Sains)
+                    ctx.shadowColor = '#38bdf8';
+                } else if (this.state === 'I') {
+                    ctx.fillStyle = '#f43f5e'; // Rose-Rouge (Infectés)
+                    ctx.shadowColor = '#f43f5e';
+                } else {
+                    ctx.fillStyle = '#f59e0b'; // Ambre (Retirés/Immunisés)
+                    ctx.shadowColor = '#f59e0b';
+                }
+                
+                ctx.shadowBlur = this.state === 'I' ? 6 : 2;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // INITIALISATION DE LA SIMULATION
+        function initSimulation() {
+            iterationCount = 0;
+            maxInfectedCounter = 0;
+            agents = [];
+            historicalData = { t: [], s: [], i: [], r: [] };
+
+            const totalN = parseInt(controls.popTotal.input.value);
+            const initI = parseInt(controls.infectesInit.input.value);
+            const distPct = parseInt(controls.distanciation.input.value) / 100;
+
+            const countIsolated = Math.floor(totalN * distPct);
+
+            // Génération des agents
+            for (let i = 0; i < totalN; i++) {
+                let state = (i < initI) ? 'I' : 'S';
+                let isIsolated = (i >= initI && i < initI + countIsolated);
+                agents.push(new Individual(state, isIsolated));
+            }
+
+            updateStats(totalN - initI, initI, 0);
+            initCharts();
+        }
+
+        // GRAPHIQUES ANALYTIQUES (CHART.JS)
+        function initCharts() {
+            if(chartTemporal) chartTemporal.destroy();
+            if(chartPhase) chartPhase.destroy();
+
+            // 1. Évolution Temporelle S(t), I(t), R(t)
+            const ctxTemporal = document.getElementById('chart-temporal').getContext('2d');
+            chartTemporal = new Chart(ctxTemporal, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Sains (S)', data: [], borderColor: '#38bdf8', borderWidth: 2, pointRadius: 0, fill: false },
+                        { label: 'Infectés (I)', data: [], borderColor: '#f43f5e', borderWidth: 2, pointRadius: 0, fill: false },
+                        { label: 'Retirés (R)', data: [], borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0, fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                    scales: {
+                        x: { display: false },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // 2. Portrait de Phase Épidémique (S, I)
+            const ctxPhase = document.getElementById('chart-phase').getContext('2d');
+            chartPhase = new Chart(ctxPhase, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Trajectoire épidémique',
+                        data: [],
+                        borderColor: function(context) {
+                            const index = context.dataIndex;
+                            const count = context.dataset.data.length;
+                            if (count === 0) return 'rgba(244, 63, 94, 1)';
+                            const opacity = Math.max(0.08, index / count);
+                            return `rgba(244, 63, 94, ${opacity})`;
+                        },
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        showLine: true,
+                        tension: 0.1,
+                        pointRadius: function(context) {
+                            return context.dataIndex === context.dataset.data.length - 1 ? 6 : 0;
+                        },
+                        pointBackgroundColor: '#f43f5e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Sains (S)', color: '#38bdf8', font: { size: 11 } }, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+                        y: { title: { display: true, text: 'Infectés (I)', color: '#f43f5e', font: { size: 11 } }, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(s, i, r) {
+            historicalData.t.push(iterationCount);
+            historicalData.s.push(s);
+            historicalData.i.push(i);
+            historicalData.r.push(r);
+
+            const maxBuffer = 250;
+            if (historicalData.t.length > maxBuffer) {
+                historicalData.t.shift();
+                historicalData.s.shift();
+                historicalData.i.shift();
+                historicalData.r.shift();
+            }
+
+            chartTemporal.data.labels = historicalData.t;
+            chartTemporal.data.datasets[0].data = historicalData.s;
+            chartTemporal.data.datasets[1].data = historicalData.i;
+            chartTemporal.data.datasets[2].data = historicalData.r;
+            chartTemporal.update('none');
+
+            const phasePoints = historicalData.s.map((val, idx) => ({ x: val, y: historicalData.i[idx] }));
+            chartPhase.data.datasets[0].data = phasePoints;
+            chartPhase.update('none');
+        }
+
+        function updateStats(s, i, r) {
+            document.getElementById('count-s').innerText = s;
+            document.getElementById('count-i').innerText = i;
+            document.getElementById('count-r').innerText = r;
+            document.getElementById('stat-tick').innerText = iterationCount;
+            
+            if (i > maxInfectedCounter) {
+                maxInfectedCounter = i;
+            }
+            document.getElementById('stat-pic').innerText = maxInfectedCounter;
+        }
+
+        // BOUCLE D'ÉVOLUTION MULTI-AGENT SIR
+        function loop() {
+            if (!isRunning) return;
+
+            // Arrière-plan du canvas spatialisé
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const beta = parseFloat(controls.tauxTrans.input.value) / 100;
+            const gammaDuration = parseInt(controls.tempsGuerison.input.value);
+            const contactRadius = 14; // Distance critique de contamination géométrique
+
+            // 1. Déplacement de la population
+            agents.forEach(a => {
+                a.move();
+                a.draw();
+                if (a.state === 'I') {
+                    a.infectionDuration++;
+                }
+            });
+
+            // 2. Gestion des contaminations croisées par proximité spatiale
+            let infectesCourants = agents.filter(a => a.state === 'I');
+            let sainsCourants = agents.filter(a => a.state === 'S');
+
+            sainsCourants.forEach(s => {
+                for (let i = 0; i < infectesCourants.length; i++) {
+                    let inf = infectesCourants[i];
+                    let distance = Math.sqrt((s.x - inf.x)**2 + (s.y - inf.y)**2);
+                    
+                    if (distance < contactRadius) {
+                        // Jet de dés stochastique basé sur le taux de contagion bêta
+                        if (Math.random() < beta) {
+                            s.state = 'I';
+                            break; // Infecté, pas besoin de tester les autres contacts à cette itération
+                        }
+                    }
+                }
+            });
+
+            // 3. Gestion de la rémission / guérison (Transition vers R)
+            agents.forEach(a => {
+                if (a.state === 'I' && a.infectionDuration >= gammaDuration) {
+                    a.state = 'R';
+                }
+            });
+
+            iterationCount++;
+
+            // Calcul macroéconomique agrégé
+            const sCount = agents.filter(a => a.state === 'S').length;
+            const iCount = agents.filter(a => a.state === 'I').length;
+            const rCount = agents.filter(a => a.state === 'R').length;
+
+            if (iterationCount % 2 === 0) {
+                updateStats(sCount, iCount, rCount);
+                updateCharts(sCount, iCount, rCount);
+            }
+
+            // Fin de la simulation s'il n'y a plus aucun vecteur actif (Infecté)
+            if (iCount === 0) {
+                toggleSimulation();
+                updateStats(sCount, iCount, rCount);
+                updateCharts(sCount, iCount, rCount);
+            } else {
+                animationFrameId = requestAnimationFrame(loop);
+            }
+        }
+
+        // CONTROLES INTERFACE
+        function toggleSimulation() {
+            isRunning = !isRunning;
+            if (isRunning) {
+                btnStart.classList.replace('bg-rose-600', 'bg-amber-600');
+                btnStart.classList.replace('hover:bg-rose-500', 'hover:bg-amber-500');
+                document.getElementById('btn-start-text').innerText = "Pause";
+                document.getElementById('btn-start-icon').innerText = "⏸";
+                loop();
+            } else {
+                btnStart.classList.replace('bg-amber-600', 'bg-rose-600');
+                btnStart.classList.replace('hover:bg-amber-500', 'hover:bg-rose-500');
+                document.getElementById('btn-start-text').innerText = "Reprendre";
+                document.getElementById('btn-start-icon').innerText = "▶";
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        btnStart.addEventListener('click', toggleSimulation);
+        
+        btnReset.addEventListener('click', () => {
+            if(isRunning) toggleSimulation();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('btn-start-text').innerText = "Démarrer";
+            document.getElementById('btn-start-icon').innerText = "▶";
+            initSimulation();
+        });
+
+        // Amorce automatique au chargement
+        initSimulation();
+    </script>
+</body>
+</html>
