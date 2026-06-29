@@ -233,7 +233,8 @@ Vue animée du Système Solaire
 
 <img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
 
-Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup>
+Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup
+                                                                                            
 ***destination :*** Français 3<sup>ème</sup>
 
 [Retour en haut](#VibeCoding)
