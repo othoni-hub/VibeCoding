@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRIQUE - Mur de Calcul CE2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Lato', sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: #ffffff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin: 20px 0;
+            border-radius: 16px;
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            color: #4f46e5;
+            text-align: center;
+        }
+
+        .acronym {
+            font-size: 16px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .pyramid {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .brick {
+            width: 90px;
+            height: 65px;
+            background: #ffffff;
+            border: 3px solid #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .brick.fixed {
+            background: #4f46e5;
+            border-color: #4338ca;
+            color: white;
+        }
+
+        .brick input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            background: transparent;
+            outline: none;
+        }
+
+        /* Supprimer les flèches des inputs de type number */
+        .brick input::-webkit-outer-spin-button,
+        .brick input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .brick input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .brick.correct {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        .brick.wrong {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .controls-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .controls-panel h3 {
+            margin: 0 0 5px 0;
+            font-family: 'Poppins', sans-serif;
+            color: #1e293b;
+        }
+
+        .controls-panel p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-check { background: #4f46e5; color: white; }
+        .btn-new { background: #ffffff; color: #4f46e5; border: 2px solid #4f46e5; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15); }
+
+        .status-msg {
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            min-height: 24px;
+            margin-top: 5px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .footer-mention { font-style: italic; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>BRIQUE</h1>
+    <div class="acronym">Bâtir des Résultats par l'Ingéniosité, le Questionnement et l'Union des Entiers</div>
+
+    <div class="game-area">
+        <div class="pyramid" id="pyramid"></div>
+
+        <div class="controls-panel">
+            <h3>Mission CE2</h3>
+            <p>Chaque brique doit être égale à la somme des deux briques situées juste en dessous.</p>
+            
+            <div id="status" class="status-msg"></div>
+
+            <button class="btn btn-check" onclick="checkAnswers()">
+                <i class="fa-solid fa-check-double"></i> Vérifier le mur
+            </button>
+            <button class="btn btn-new" onclick="initGame()">
+                <i class="fa-solid fa-rotate-right"></i> Nouveau mur
+            </button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>CE2 - Mathématiques : Addition & Logique</div>
+        <div class="footer-mention">Créé par Olivier Thöni, vibe-codé avec l'aide de Gemini 3.5 Flash</div>
+    </div>
+</div>
+
+<script>
+    let solution = [];
+
+    function initGame() {
+        const container = document.getElementById('pyramid');
+        const status = document.getElementById('status');
+        container.innerHTML = '';
+        status.textContent = '';
+
+        // 1. Génération de la base (Nombres entre 1 et 12)
+        const base = Array.from({length: 4}, () => Math.floor(Math.random() * 12) + 1);
+        
+        // 2. Construction des étages supérieurs
+        solution = [base];
+        for (let r = 1; r < 4; r++) {
+            let row = [];
+            for (let i = 0; i < solution[r-1].length - 1; i++) {
+                row.push(solution[r-1][i] + solution[r-1][i+1]);
+            }
+            solution.push(row);
+        }
+
+        // 3. Masquage partiel aléatoire (Masque 50% des briques de façon dynamique)
+        const visibility = [
+            [true, Math.random() > 0.5, Math.random() > 0.5, true],
+            [Math.random() > 0.5, true, Math.random() > 0.5],
+            [true, false],
+            [Math.random() > 0.5]
+        ];
+
+        // 4. Injection dans la page HTML
+        for (let r = 3; r >= 0; r--) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row';
+            for (let i = 0; i < solution[r].length; i++) {
+                const brick = document.createElement('div');
+                brick.className = 'brick';
+                
+                if (visibility[r][i]) {
+                    brick.classList.add('fixed');
+                    brick.textContent = solution[r][i];
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.dataset.row = r;
+                    input.dataset.col = i;
+                    input.addEventListener('input', () => {
+                        brick.className = 'brick'; // Réinitialise la couleur au changement
+                    });
+                    brick.appendChild(input);
+                }
+                rowDiv.appendChild(brick);
+            }
+            container.prepend(rowDiv);
+        }
+    }
+
+    function checkAnswers() {
+        const inputs = document.querySelectorAll('input');
+        const status = document.getElementById('status');
+        let correctCount = 0;
+
+        inputs.forEach(input => {
+            const val = parseInt(input.value);
+            const sol = solution[input.dataset.row][input.dataset.col];
+            const brick = input.parentElement;
+
+            if (val === sol) {
+                brick.className = 'brick correct';
+                correctCount++;
+            } else {
+                brick.className = 'brick wrong';
+            }
+        });
+
+        if (correctCount === inputs.length) {
+            status.textContent = "Excellent ! Mur solide ! 🎉";
+            status.style.color = "#166534";
+        } else {
+            status.textContent = "Le mur tremble, vérifie tes calculs !";
+            status.style.color = "#991b1b";
+        }
+    }
+
+    window.onload = initGame;
+</script>
+
+</body>
+</html>

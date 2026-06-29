@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.T.E.L.L.A.R. - Carte du Ciel Dynamique</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col md:flex-row overflow-hidden select-none">
+
+    <aside class="w-full md:w-80 bg-gray-950/80 backdrop-blur-md border-b md:border-b-0 md:border-r border-gray-800 p-4 flex flex-col justify-between z-10 space-y-4 shadow-2xl overflow-y-auto">
+        <div class="space-y-4">
+            <div class="flex items-start space-x-2">
+                <i data-lucide="orbit" class="text-indigo-400 w-8 h-8 animate-spin-slow mt-1"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">S.T.E.L.L.A.R.</h1>
+                    <p class="text-[9px] text-gray-400 font-mono leading-tight uppercase tracking-tight">
+                        <span class="text-indigo-400 font-bold">S</span>ky <span class="text-indigo-400 font-bold">T</span>racking, <span class="text-indigo-400 font-bold">E</span>cliptic & <span class="text-indigo-400 font-bold">L</span>ocal <span class="text-indigo-400 font-bold">L</span>ocation <span class="text-indigo-400 font-bold">A</span>stronomical <span class="text-indigo-400 font-bold">R</span>enderer
+                    </p>
+                    <p class="text-[10px] text-gray-500 mt-1">Hémisphère Nord</p>
+                </div>
+            </div>
+
+            <hr class="border-gray-800">
+
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Observation (France)</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-[10px] text-gray-500 block">Lat (N)</span>
+                        <input type="number" id="lat" value="48.0061" step="0.01" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 block">Lon (E)</span>
+                        <input type="number" id="lon" value="0.1996" step="0.01" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <select id="cityPreset" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-300 focus:outline-none focus:border-indigo-500 mt-1">
+                    <option value="lemans">Le Mans (Défaut)</option>
+                    <option value="paris">Paris</option>
+                    <option value="marseille">Marseille</option>
+                    <option value="brest">Brest</option>
+                    <option value="strasbourg">Strasbourg</option>
+                </select>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Direction de visée (Horizon)</label>
+                <select id="viewAzimuth" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <option value="0">Nord (Par défaut)</option>
+                    <option value="90">Est</option>
+                    <option value="180">Sud</option>
+                    <option value="270">Ouest</option>
+                </select>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Date & Heure</label>
+                <input type="datetime-local" id="datetime" class="w-full bg-gray-900 border border-gray-800 rounded px-2 py-1 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button id="btnHourMinus" class="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-xs py-1.5 rounded flex items-center justify-center space-x-1 transition">
+                        <i data-lucide="chevron-left" class="w-3 h-3"></i> <span>1 Heure</span>
+                    </button>
+                    <button id="btnHourPlus" class="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-xs py-1.5 rounded flex items-center justify-center space-x-1 transition">
+                        <span>1 Heure</span> <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                    </button>
+                    <button id="btnDayMinus" class="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-xs py-1.5 rounded flex items-center justify-center space-x-1 transition">
+                        <i data-lucide="chevrons-left" class="w-3 h-3"></i> <span>1 Jour</span>
+                    </button>
+                    <button id="btnDayPlus" class="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-xs py-1.5 rounded flex items-center justify-center space-x-1 transition">
+                        <span>1 Jour</span> <i data-lucide="chevrons-right" class="w-3 h-3"></i>
+                    </button>
+                </div>
+                <button id="btnNow" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs py-1.5 rounded font-medium transition flex items-center justify-center space-x-1">
+                    <i data-lucide="clock" class="w-3 h-3"></i> <span>Revenir à l'instant présent</span>
+                </button>
+            </div>
+
+            <div class="space-y-2 pt-2">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Options d'affichage</label>
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" id="showConstellations" checked class="accent-indigo-500 rounded bg-gray-900 border-gray-800">
+                        <span>Lignes de Constellations</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" id="showGrid" checked class="accent-indigo-500 rounded bg-gray-900 border-gray-800">
+                        <span>Écliptique & Équateur</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" id="showLabels" checked class="accent-indigo-500 rounded bg-gray-900 border-gray-800">
+                        <span>Étiquettes (Noms)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-[11px] text-gray-500 pt-4 border-t border-gray-900 space-y-1">
+            <p class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-2"></span> Planètes, Soleil & Lune</p>
+            <p class="flex items-center"><span class="w-2 h-2 rounded-full bg-cyan-400 inline-block mr-2"></span> Étoiles principales</p>
+            <p class="flex items-center"><span class="w-2 h-2 rounded-full bg-fuchsia-400 inline-block mr-2"></span> Galaxies & Amas</p>
+            <p class="mt-2 italic text-gray-600">Molette ou drag pour Zoomer/Naviguer.</p>
+            
+            <div class="pt-3 mt-2 border-t border-gray-900/50 text-[10px] text-gray-500/80 font-sans tracking-wide leading-relaxed">
+                Créé par <span class="text-gray-400 font-medium">Olivier Thöni</span>, vibe-codé avec l'aide de <span class="text-indigo-400/80 font-medium">Gemini 3.5 Flash</span>.
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 relative bg-radial from-gray-900 to-gray-950 flex items-center justify-center overflow-hidden">
+        <div id="compassIndicator" class="absolute top-4 right-4 bg-gray-950/80 border border-gray-800 px-3 py-1.5 rounded-full text-xs font-mono text-gray-400 backdrop-blur flex items-center space-x-2 pointer-events-none z-10">
+            <span class="text-red-400 font-bold" id="compassTop">N</span> <span>En haut</span>
+        </div>
+
+        <div class="absolute bottom-4 right-4 flex flex-col space-y-2 z-10">
+            <button id="zoomIn" class="p-2 bg-gray-950/85 hover:bg-gray-900 border border-gray-800 rounded-xl text-gray-300 transition shadow-lg"><i data-lucide="zoom-in" class="w-5 h-5"></i></button>
+            <button id="zoomOut" class="p-2 bg-gray-950/85 hover:bg-gray-900 border border-gray-800 rounded-xl text-gray-300 transition shadow-lg"><i data-lucide="zoom-out" class="w-5 h-5"></i></button>
+            <button id="resetView" class="p-2 bg-gray-950/85 hover:bg-gray-900 border border-gray-800 rounded-xl text-gray-300 transition shadow-lg"><i data-lucide="maximize" class="w-5 h-5"></i></button>
+        </div>
+
+        <canvas id="skyCanvas" class="w-full h-full"></canvas>
+    </main>
+
+    <script>
+        // --- 1. BASE DE DONNÉES CÉLESTES (RA en heures, DEC en degrés) ---
+        const STARS = [
+            { name: "Polaris", ra: 2.53, dec: 89.26, mag: 2.0 },
+            { name: "Vega", ra: 18.62, dec: 38.78, mag: 0.03 },
+            { name: "Deneb", ra: 20.69, dec: 45.28, mag: 1.25 },
+            { name: "Altair", ra: 19.84, dec: 8.87, mag: 0.76 },
+            { name: "Capella", ra: 5.28, dec: 46.00, mag: 0.08 },
+            { name: "Betelgeuse", ra: 5.92, dec: 7.41, mag: 0.42 },
+            { name: "Rigel", ra: 5.25, dec: -8.20, mag: 0.18 },
+            { name: "Bellatrix", ra: 5.42, dec: 6.35, mag: 1.64 },
+            { name: "Mintaka", ra: 5.53, dec: -0.30, mag: 2.25 },
+            { name: "Alnilam", ra: 5.60, dec: -1.20, mag: 1.69 },
+            { name: "Alnitak", ra: 5.68, dec: -1.94, mag: 1.74 },
+            { name: "Sirius (Grand Chien)", ra: 6.75, dec: -16.72, mag: -1.46 },
+            { name: "Arcturus", ra: 14.26, dec: 19.18, mag: -0.04 },
+            { name: "Aldebaran", ra: 4.60, dec: 16.51, mag: 0.87 },
+            { name: "Castor", ra: 7.57, dec: 31.88, mag: 1.58 },
+            { name: "Pollux", ra: 7.75, dec: 28.02, mag: 1.16 },
+            { name: "Regulus", ra: 10.14, dec: 11.96, mag: 1.36 },
+            { name: "Procyon", ra: 7.66, dec: 5.22, mag: 0.34 },
+            { name: "Spica", ra: 13.42, dec: -11.16, mag: 1.04 },
+            { name: "Antares", ra: 16.49, dec: -26.43, mag: 1.06 },
+            { name: "Almach", ra: 2.07, dec: 42.33, mag: 2.10 },
+            { name: "Mirach", ra: 1.16, dec: 35.62, mag: 2.05 },
+            { name: "Alpheratz", ra: 0.13, dec: 29.09, mag: 2.06 },
+            { name: "Algenib", ra: 0.22, dec: 15.18, mag: 2.83 },
+            { name: "Markab", ra: 23.08, dec: 15.20, mag: 2.49 },
+            { name: "Scheat", ra: 23.06, dec: 28.08, mag: 2.42 },
+            { name: "Alphecca", ra: 15.58, dec: 26.71, mag: 2.22 },
+            { name: "Thuban", ra: 14.07, dec: 64.37, mag: 3.67 },
+            { name: "Eltanin", ra: 17.94, dec: 51.49, mag: 2.24 },
+            { name: "Hamal", ra: 2.12, dec: 23.46, mag: 2.01 },
+            { name: "Fomalhaut", ra: 22.96, dec: -29.62, mag: 1.16 },
+            { name: "Denebola", ra: 11.82, dec: 14.57, mag: 2.14 },
+            { name: "Kaus Australis", ra: 18.40, dec: -34.38, mag: 1.79 },
+            { name: "Mizar", ra: 13.40, dec: 54.92, mag: 2.23 },
+            { name: "Alcor", ra: 13.42, dec: 54.99, mag: 3.99 },
+            { name: "Rasalhague", ra: 17.59, dec: 12.56, mag: 2.08 }
+        ];
+
+        const CONSTELLATIONS = [
+            {
+                name: "Bélier (Aries)",
+                stars: [{ ra: 2.12, dec: 23.46 }, { ra: 1.91, dec: 20.81 }, { ra: 1.90, dec: 19.29 }],
+                closed: false
+            },
+            {
+                name: "Taureau (Taurus)",
+                stars: [{ ra: 4.60, dec: 16.51 }, { ra: 4.47, dec: 15.62 }, { ra: 4.33, dec: 17.53 }, { ra: 5.43, dec: 28.60 }, { ra: 3.78, dec: 24.11 }],
+                closed: false
+            },
+            {
+                name: "Gémeaux (Gemini)",
+                stars: [{ ra: 7.75, dec: 28.02 }, { ra: 7.57, dec: 31.88 }, { ra: 6.74, dec: 25.13 }, { ra: 6.24, dec: 22.51 }, { ra: 7.33, dec: 16.54 }, { ra: 7.75, dec: 28.02 }],
+                closed: true
+            },
+            {
+                name: "Cancer",
+                stars: [{ ra: 8.15, dec: 9.18 }, { ra: 8.72, dec: 18.15 }, { ra: 8.73, dec: 17.15 }, { ra: 8.93, dec: 11.85 }],
+                closed: false
+            },
+            {
+                name: "Lion (Leo)",
+                stars: [{ ra: 10.14, dec: 11.96 }, { ra: 10.33, dec: 19.84 }, { ra: 11.23, dec: 20.51 }, { ra: 11.82, dec: 14.57 }, { ra: 11.24, dec: 15.43 }, { ra: 10.14, dec: 11.96 }],
+                closed: true
+            },
+            {
+                name: "Vierge (Virgo)",
+                stars: [{ ra: 13.42, dec: -11.16 }, { ra: 13.04, dec: -5.53 }, { ra: 12.84, dec: 3.39 }, { ra: 11.84, dec: 1.76 }, { ra: 13.17, dec: 10.95 }],
+                closed: false
+            },
+            {
+                name: "Balance (Libra)",
+                stars: [{ ra: 14.85, dec: -16.04 }, { ra: 15.29, dec: -9.38 }, { ra: 15.62, dec: -16.73 }, { ra: 14.85, dec: -16.04 }],
+                closed: true
+            },
+            {
+                name: "Scorpion (Scorpius)",
+                stars: [{ ra: 16.01, dec: -22.62 }, { ra: 16.49, dec: -26.43 }, { ra: 16.84, dec: -34.29 }, { ra: 17.56, dec: -37.30 }],
+                closed: false
+            },
+            {
+                name: "Sagittaire (Sagittarius)",
+                stars: [{ ra: 18.40, dec: -34.38 }, { ra: 18.92, dec: -26.31 }, { ra: 19.04, dec: -29.88 }, { ra: 18.14, dec: -29.83 }, { ra: 18.40, dec: -34.38 }],
+                closed: true
+            },
+            {
+                name: "Capricorne (Capricornus)",
+                stars: [{ ra: 20.29, dec: -12.54 }, { ra: 21.77, dec: -16.12 }, { ra: 21.44, dec: -22.41 }, { ra: 20.29, dec: -12.54 }],
+                closed: true
+            },
+            {
+                name: "Verseau (Aquarius)",
+                stars: [{ ra: 22.10, dec: -0.32 }, { ra: 22.47, dec: -5.81 }, { ra: 23.15, dec: -9.10 }, { ra: 22.87, dec: -21.18 }],
+                closed: false
+            },
+            {
+                name: "Poissons (Pisces)",
+                stars: [{ ra: 23.46, dec: 3.28 }, { ra: 0.04, dec: 7.91 }, { ra: 1.53, dec: 15.34 }, { ra: 0.55, dec: -1.04 }],
+                closed: false
+            },
+            {
+                name: "Orion",
+                stars: [
+                    { ra: 5.92, dec: 7.41 },  
+                    { ra: 5.42, dec: 6.35 },  
+                    { ra: 5.53, dec: -0.30 }, 
+                    { ra: 5.60, dec: -1.20 }, 
+                    { ra: 5.68, dec: -1.94 }, 
+                    { ra: 5.25, dec: -8.20 }, 
+                    { ra: 5.79, dec: -9.67 }, 
+                    { ra: 5.68, dec: -1.94 }, 
+                    { ra: 5.92, dec: 7.41 }   
+                ],
+                closed: false
+            },
+            {
+                name: "Cocher (Auriga)",
+                stars: [
+                    { ra: 5.28, dec: 46.00 }, 
+                    { ra: 5.99, dec: 44.94 }, 
+                    { ra: 5.98, dec: 37.21 }, 
+                    { ra: 5.03, dec: 33.15 }, 
+                    { ra: 4.94, dec: 41.23 }, 
+                    { ra: 5.28, dec: 46.00 }  
+                ],
+                closed: true
+            },
+            {
+                name: "Andromède (Andromeda)",
+                stars: [
+                    { ra: 0.13, dec: 29.09 }, 
+                    { ra: 1.16, dec: 35.62 }, 
+                    { ra: 2.07, dec: 42.33 }  
+                ],
+                closed: false
+            },
+            {
+                name: "Pégase (Pegasus)",
+                stars: [
+                    { ra: 23.08, dec: 15.20 }, 
+                    { ra: 23.06, dec: 28.08 }, 
+                    { ra: 0.13, dec: 29.09 },  
+                    { ra: 0.22, dec: 15.18 },  
+                    { ra: 23.08, dec: 15.20 }  
+                ],
+                closed: true
+            },
+            {
+                name: "Cygne (Cygnus)",
+                stars: [
+                    { ra: 20.69, dec: 45.28 }, 
+                    { ra: 20.37, dec: 40.26 }, 
+                    { ra: 19.51, dec: 27.96 }, 
+                    { ra: 20.37, dec: 40.26 }, 
+                    { ra: 20.77, dec: 33.97 }, 
+                    { ra: 20.37, dec: 40.26 }, 
+                    { ra: 19.60, dec: 45.13 }  
+                ],
+                closed: false
+            },
+            {
+                name: "Aigle (Aquila)",
+                stars: [
+                    { ra: 19.84, dec: 8.87 }, // Altair
+                    { ra: 19.08, dec: 6.42 }, // Delta Aquilae
+                    { ra: 19.78, dec: 11.36 } // Gamma Aquilae
+                ],
+                closed: false
+            },
+            {
+                name: "Ophiuchus (Serpentaire)",
+                stars: [
+                    { ra: 17.59, dec: 12.56 }, // Rasalhague
+                    { ra: 17.06, dec: 3.50 },  // Zeta Ophiuchi
+                    { ra: 16.59, dec: -10.50 } // Sabik
+                ],
+                closed: false
+            },
+            {
+                name: "Serpent (Serpens)",
+                stars: [
+                    { ra: 15.75, dec: 6.45 },  // Tête (Alpha Serpens)
+                    { ra: 17.90, dec: 6.20 },  // Centre
+                    { ra: 18.90, dec: 4.00 }   // Queue
+                ],
+                closed: false
+            },
+            {
+                name: "Grand Chien (Canis Major)",
+                stars: [{ ra: 6.75, dec: -16.72 }, { ra: 6.90, dec: -23.94 }, { ra: 7.05, dec: -26.35 }, { ra: 6.37, dec: -17.95 }, { ra: 6.75, dec: -16.72 }],
+                closed: true
+            },
+            {
+                name: "Lyre (Lyra)",
+                stars: [{ ra: 18.62, dec: 38.78 }, { ra: 18.77, dec: 32.69 }, { ra: 18.91, dec: 33.36 }, { ra: 18.75, dec: 37.60 }, { ra: 18.62, dec: 38.78 }],
+                closed: true
+            },
+            {
+                name: "Dragon (Draco)",
+                stars: [{ ra: 17.94, dec: 51.49 }, { ra: 17.50, dec: 52.30 }, { ra: 16.40, dec: 55.10 }, { ra: 14.07, dec: 64.37 }, { ra: 11.50, dec: 70.30 }],
+                closed: false
+            },
+            {
+                name: "Couronne Boréale (Corona Borealis)",
+                stars: [
+                    { ra: 15.46, dec: 26.06 }, 
+                    { ra: 15.50, dec: 26.88 }, 
+                    { ra: 15.58, dec: 26.71 }, 
+                    { ra: 15.66, dec: 26.15 }, 
+                    { ra: 15.82, dec: 26.07 }, 
+                    { ra: 15.96, dec: 26.35 }, 
+                    { ra: 16.02, dec: 26.10 }  
+                ],
+                closed: false
+            },
+            {
+                name: "Bouvier (Bootes)",
+                stars: [
+                    { ra: 14.26, dec: 19.18 }, 
+                    { ra: 14.54, dec: 13.73 }, 
+                    { ra: 14.75, dec: 27.07 }, 
+                    { ra: 15.03, dec: 33.31 }, 
+                    { ra: 15.03, dec: 40.38 }, 
+                    { ra: 14.53, dec: 38.31 }, 
+                    { ra: 14.26, dec: 19.18 }  
+                ],
+                closed: true
+            },
+            {
+                name: "Grande Ourse (Ursa Major)",
+                stars: [{ ra: 11.06, dec: 61.75 }, { ra: 11.03, dec: 56.38 }, { ra: 11.89, dec: 53.69 }, { ra: 12.25, dec: 57.03 }, { ra: 12.90, dec: 54.92 }, { ra: 13.40, dec: 54.92 }, { ra: 13.42, dec: 54.99 }, { ra: 13.79, dec: 49.31 }],
+                closed: false
+            },
+            {
+                name: "Petite Ourse (Ursa Minor)",
+                stars: [{ ra: 2.53, dec: 89.26 }, { ra: 17.50, dec: 75.30 }, { ra: 16.80, dec: 74.10 }, { ra: 15.70, dec: 74.10 }],
+                closed: false
+            },
+            {
+                name: "Cassiopée (Cassiopeia)",
+                stars: [{ ra: 0.15, dec: 59.15 }, { ra: 0.61, dec: 56.54 }, { ra: 0.94, dec: 60.72 }, { ra: 1.42, dec: 60.23 }, { ra: 1.91, dec: 63.67 }],
+                closed: false
+            }
+        ];
+
+        const DEEP_SKY = [
+            { name: "Galaxie d'Andromède (M31)", ra: 0.73, dec: 41.27, type: "galaxy" },
+            { name: "Nébuleuse d'Orion (M42)", ra: 5.59, dec: -5.38, type: "nebula" },
+            { name: "Amas des Pléiades (M45)", ra: 3.78, dec: 24.11, type: "cluster" }
+        ];
+
+        const CITIES = {
+            lemans: { lat: 48.0061, lon: 0.1996 },
+            paris: { lat: 48.8566, lon: 2.3522 },
+            marseille: { lat: 43.2965, lon: 5.3698 },
+            brest: { lat: 48.3903, lon: -4.4861 },
+            strasbourg: { lat: 48.5734, lon: 7.7521 }
+        };
+
+        // --- 2. VARIABLES D'ÉTAT DE L'APPLICATION ---
+        const canvas = document.getElementById('skyCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let viewState = {
+            zoom: 1.0,
+            offsetX: 0,
+            offsetY: 0,
+            isDragging: false,
+            startX: 0,
+            startY: 0
+        };
+
+        let currentDate = new Date();
+
+        // --- 3. LOGIQUE D'ASTRONOMIE DE POSITION CORRIGÉE ---
+        function getLocalSiderealTime(date, longitude) {
+            // Calcul du temps universel (UT) en siècles depuis J2000.0
+            const jd = (date.getTime() / 86400000) + 2440587.5;
+            const t = (jd - 2451545.0) / 36525;
+            
+            // Temps sidéral moyen à Greenwich (GMST) en degrés
+            let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t - t * t * t / 38710000;
+            gmst = gmst % 360;
+            if (gmst < 0) gmst += 360;
+
+            // Temps sidéral local (LST) en heures
+            let lst = (gmst + longitude) / 15.0;
+            lst = lst % 24;
+            if (lst < 0) lst += 24;
+            return lst;
+        }
+
+        function skyToCanvasCoords(ra, dec, lst, lat, width, height, zoom, offsetX, offsetY, targetAzimuth) {
+            const raRad = ra * 15 * Math.PI / 180;
+            const decRad = dec * Math.PI / 180;
+            const latRad = lat * Math.PI / 180;
+            const lstRad = lst * 15 * Math.PI / 180;
+
+            // Angle horaire (HA)
+            let haRad = lstRad - raRad;
+
+            // Hauteur (Alt)
+            const sinAlt = Math.sin(decRad) * Math.sin(latRad) + Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad);
+            const alt = Math.asin(sinAlt);
+
+            // Azimut (Az)
+            const cosAz = (Math.sin(decRad) - Math.sin(alt) * Math.sin(latRad)) / (Math.cos(alt) * Math.cos(latRad));
+            let az = Math.acos(Math.min(1, Math.max(-1, cosAz)));
+            if (Math.sin(haRad) > 0) {
+                az = 2 * Math.PI - az;
+            }
+
+            // Rotation liée à la boussole sélectionnée par l'utilisateur
+            const rotAz = az - (targetAzimuth * Math.PI / 180);
+
+            const r = (Math.PI / 2 - alt) / (Math.PI / 2);
+            const maxRadius = Math.min(width, height) * 0.45 * zoom;
+
+            const cx = width / 2 + offsetX;
+            const cy = height / 2 + offsetY;
+
+            const x = cx + maxRadius * r * Math.sin(rotAz);
+            const y = cy - maxRadius * r * Math.cos(rotAz);
+
+            return { x, y, visible: alt > -0.02, alt: alt * 180 / Math.PI };
+        }
+
+        function getPlanetsPositions(date) {
+            const jd = (date.getTime() / 86400000) + 2440587.5;
+            const d = jd - 2451545.0; // Jours depuis J2000.0
+
+            // Calcul rigoureux du Soleil (coordonnées écliptiques -> équatoriales)
+            let L = (280.466 + 0.9856474 * d) % 360;
+            let g = (357.528 + 0.9856003 * d) % 360;
+            if (L < 0) L += 360;
+            if (g < 0) g += 360;
+            
+            let lRad = L * Math.PI / 180;
+            let gRad = g * Math.PI / 180;
+            
+            // Longitude écliptique vraie du Soleil
+            let lambda = L + 1.915 * Math.sin(gRad) + 0.020 * Math.sin(2 * gRad);
+            let lamRad = lambda * Math.PI / 180;
+            
+            // Obliquité de l'écliptique
+            let eps = (23.439 - 0.0000004 * d) * Math.PI / 180;
+            
+            // Ascension droite (RA) et Déclinaison (DEC) du Soleil
+            let sunRaRad = Math.atan2(Math.cos(eps) * Math.sin(lamRad), Math.cos(lamRad));
+            let sunDecRad = Math.asin(Math.sin(eps) * Math.sin(lamRad));
+            
+            let sunRa = (sunRaRad * 180 / Math.PI / 15);
+            if (sunRa < 0) sunRa += 24;
+            let sunDec = sunDecRad * 180 / Math.PI;
+
+            // Base des objets du système solaire calculés via approximations orbites circulaires
+            const objects = [
+                { name: "Soleil", icon: "☀️", ra: sunRa, dec: sunDec, isSun: true },
+                { name: "Vénus", icon: "✨", N: 76.6806, i: 3.3946, w: 54.8910, a: 0.723332, e: 0.006773, M: 50.115 + 1.6021302244 * d },
+                { name: "Mars", icon: "🔴", N: 49.5574, i: 1.8497, w: 286.5016, a: 1.523662, e: 0.093412, M: 18.6514 + 0.5240207766 * d },
+                { name: "Jupiter", icon: "🪐", N: 100.4542, i: 1.3030, w: 273.6777, a: 5.203363, e: 0.048393, M: 19.8950 + 0.0830853001 * d },
+                { name: "Saturne", icon: "🪐", N: 113.6655, i: 2.4844, w: 339.3939, a: 9.537070, e: 0.054150, M: 317.0206 + 0.0334442282 * d },
+                { name: "Uranus", icon: "🔵", N: 74.0060, i: 0.7733, w: 96.9988, a: 19.19126, e: 0.047257, M: 142.2386 + 0.01172834 * d }
+            ];
+
+            const result = objects.map(p => {
+                if(p.isSun) return p;
+                let M = p.M % 360;
+                if (M < 0) M += 360;
+                let mRad = M * Math.PI / 180;
+                let l = mRad + 2 * p.e * Math.sin(mRad); 
+                let ra = (l * 180 / Math.PI / 15) % 24;
+                if (ra < 0) ra += 24;
+                let dec = 23.44 * Math.sin(l);
+                return { name: p.name, icon: p.icon, ra, dec, isSun: false };
+            });
+
+            // Lune (Modèle de perturbation de base)
+            let moonMeanLong = (218.316 + 13.176396 * d) % 360;
+            let moonMeanAnomaly = (134.963 + 13.064993 * d) % 360;
+            let moonLonRad = (moonMeanLong + 6.289 * Math.sin(moonMeanAnomaly * Math.PI / 180)) * Math.PI / 180;
+            
+            let moonRa = (moonLonRad * 180 / Math.PI / 15) % 24;
+            if (moonRa < 0) moonRa += 24;
+            let moonDec = 23.44 * Math.sin(moonLonRad);
+
+            result.push({ name: "Lune", icon: "🌙", ra: moonRa, dec: moonDec, isMoon: true, isSun: false });
+
+            return result;
+        }
+
+        // --- 4. ENGINE DE RENDU VISUEL (CANVAS) ---
+        function renderSky() {
+            const w = canvas.width = canvas.parentElement.clientWidth;
+            const h = canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const targetAzimuth = parseFloat(document.getElementById('viewAzimuth').value);
+            const lst = getLocalSiderealTime(currentDate, lon);
+
+            const azLabels = { "0": "N", "90": "E", "180": "S", "270": "O" };
+            document.getElementById('compassTop').innerText = azLabels[document.getElementById('viewAzimuth').value] || "N";
+
+            const cx = w / 2 + viewState.offsetX;
+            const cy = h / 2 + viewState.offsetY;
+            const baseRadius = Math.min(w, h) * 0.45 * viewState.zoom;
+
+            const showConstellations = document.getElementById('showConstellations').checked;
+            const showGrid = document.getElementById('showGrid').checked;
+            const showLabels = document.getElementById('showLabels').checked;
+
+            // Fond d'horizon
+            ctx.fillStyle = "#050b18";
+            ctx.beginPath();
+            ctx.arc(cx, cy, baseRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Grilles : Équateur et Écliptique
+            if (showGrid) {
+                ctx.strokeStyle = "rgba(99, 102, 241, 0.2)";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                for (let hour = 0; hour <= 24; hour += 0.5) {
+                    let pt = skyToCanvasCoords(hour, 0, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                    if (hour === 0) ctx.moveTo(pt.x, pt.y);
+                    else ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.stroke();
+
+                ctx.strokeStyle = "rgba(234, 179, 8, 0.25)";
+                ctx.beginPath();
+                for (let hour = 0; hour <= 24; hour += 0.5) {
+                    let dec = 23.44 * Math.sin((hour / 24) * 2 * Math.PI);
+                    let pt = skyToCanvasCoords(hour, dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                    if (hour === 0) ctx.moveTo(pt.x, pt.y);
+                    else ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Dessiner les lignes de constellations
+            if (showConstellations) {
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.35)";
+                ctx.lineWidth = 1.2;
+                CONSTELLATIONS.forEach(c => {
+                    ctx.beginPath();
+                    let first = true;
+                    
+                    c.stars.forEach(s => {
+                        let pt = skyToCanvasCoords(s.ra, s.dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                        if (pt.visible) {
+                            if (first) { ctx.moveTo(pt.x, pt.y); first = false; }
+                            else ctx.lineTo(pt.x, pt.y);
+                        }
+                    });
+                    if (c.closed) ctx.closePath();
+                    ctx.stroke();
+
+                    c.stars.forEach(s => {
+                        let pt = skyToCanvasCoords(s.ra, s.dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                        if (pt.visible) {
+                            ctx.fillStyle = "rgba(165, 243, 252, 0.8)";
+                            ctx.beginPath();
+                            ctx.arc(pt.x, pt.y, 2.2, 0, 2 * Math.PI);
+                            ctx.fill();
+                        }
+                    });
+
+                    if (showLabels) {
+                        let labelPt = skyToCanvasCoords(c.stars[0].ra, c.stars[0].dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                        if (labelPt.visible) {
+                            ctx.fillStyle = "rgba(148, 163, 184, 0.8)";
+                            ctx.font = "10px sans-serif";
+                            ctx.fillText(c.name, labelPt.x + 10, labelPt.y - 6);
+                        }
+                    }
+                });
+            }
+
+            // Étoiles nommées principales
+            STARS.forEach(star => {
+                let pt = skyToCanvasCoords(star.ra, star.dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                if (pt.visible) {
+                    let size = Math.max(1.8, 4.5 - star.mag);
+                    
+                    ctx.fillStyle = "#ffffff";
+                    ctx.shadowBlur = size * 2;
+                    ctx.shadowColor = "#67e8f9";
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, size, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    if (showLabels && (star.mag < 2.5 || ["Bellatrix", "Alcor", "Mizar", "Rigel", "Mintaka", "Alnilam", "Alnitak", "Algenib", "Markab", "Scheat", "Rasalhague"].includes(star.name))) {
+                        ctx.fillStyle = "#cbd5e1";
+                        ctx.font = "11px sans-serif";
+                        ctx.fillText(star.name, pt.x + 6, pt.y + 3);
+                    }
+                }
+            });
+
+            // Ciel profond / Galaxies / Amas
+            DEEP_SKY.forEach(obj => {
+                let pt = skyToCanvasCoords(obj.ra, obj.dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                if (pt.visible) {
+                    ctx.strokeStyle = "#f472b6";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.ellipse(pt.x, pt.y, 7, 4, Math.PI / 4, 0, 2 * Math.PI);
+                    ctx.stroke();
+
+                    if (showLabels) {
+                        ctx.fillStyle = "#f472b6";
+                        ctx.font = "10px sans-serif";
+                        ctx.fillText(obj.name, pt.x + 10, pt.y + 3);
+                    }
+                }
+            });
+
+            // Dessin des Planètes, Lune et du Soleil corrigé
+            const spaceObjects = getPlanetsPositions(currentDate);
+            spaceObjects.forEach(p => {
+                let pt = skyToCanvasCoords(p.ra, p.dec, lst, lat, w, h, viewState.zoom, viewState.offsetX, viewState.offsetY, targetAzimuth);
+                if (pt.visible) {
+                    ctx.font = "16px Arial, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    
+                    ctx.fillText(p.icon, pt.x, pt.y);
+
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "alphabetic";
+
+                    if (showLabels) {
+                        ctx.fillStyle = p.isMoon ? "#94a3b8" : (p.isSun ? "#fde047" : "#fef08a");
+                        ctx.font = "bold 11px sans-serif";
+                        ctx.fillText(p.name, pt.x + 12, pt.y + 4);
+                    }
+                }
+            });
+
+            // Masque extérieur à l'horizon circulaire
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, baseRadius, 0, 2 * Math.PI);
+            ctx.rect(w, 0, -w, h);
+            ctx.fillStyle = "#030712";
+            ctx.fill();
+            ctx.restore();
+
+            ctx.strokeStyle = "rgba(79, 70, 229, 0.4)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, baseRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        // --- 5. ENTRÉES ET INTERACTION UTILISATEUR ---
+        function updateInputsFromDate() {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(currentDate.getTime() - tzoffset)).toISOString().slice(0, 16);
+            document.getElementById('datetime').value = localISOTime;
+        }
+
+        updateInputsFromDate();
+
+        document.getElementById('datetime').addEventListener('input', (e) => {
+            currentDate = new Date(e.target.value);
+            renderSky();
+        });
+
+        document.getElementById('cityPreset').addEventListener('change', (e) => {
+            const city = CITIES[e.target.value];
+            if (city) {
+                document.getElementById('lat').value = city.lat;
+                document.getElementById('lon').value = city.lon;
+                renderSky();
+            }
+        });
+
+        document.querySelectorAll('#lat, #lon, #showConstellations, #showGrid, #showLabels, #viewAzimuth').forEach(el => {
+            el.addEventListener('input', renderSky);
+        });
+
+        document.getElementById('btnHourPlus').addEventListener('click', () => { currentDate.setHours(currentDate.getHours() + 1); updateInputsFromDate(); renderSky(); });
+        document.getElementById('btnHourMinus').addEventListener('click', () => { currentDate.setHours(currentDate.getHours() - 1); updateInputsFromDate(); renderSky(); });
+        document.getElementById('btnDayPlus').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 1); updateInputsFromDate(); renderSky(); });
+        document.getElementById('btnDayMinus').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); updateInputsFromDate(); renderSky(); synapticRender(); });
+        document.getElementById('btnNow').addEventListener('click', () => { currentDate = new Date(); updateInputsFromDate(); renderSky(); });
+
+        document.getElementById('zoomIn').addEventListener('click', () => { viewState.zoom *= 1.2; renderSky(); });
+        document.getElementById('zoomOut').addEventListener('click', () => { viewState.zoom /= 1.2; renderSky(); });
+        document.getElementById('resetView').addEventListener('click', () => { viewState.zoom = 1.0; viewState.offsetX = 0; viewState.offsetY = 0; renderSky(); });
+
+        canvas.addEventListener('mousedown', (e) => {
+            viewState.isDragging = true;
+            viewState.startX = e.clientX - viewState.offsetX;
+            viewState.startY = e.clientY - viewState.offsetY;
+        });
+
+        window.addEventListener('mouseup', () => { viewState.isDragging = false; });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!viewState.isDragging) return;
+            viewState.offsetX = e.clientX - viewState.startX;
+            viewState.offsetY = e.clientY - viewState.startY;
+            renderSky();
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) viewState.zoom *= 1.1;
+            else viewState.zoom /= 1.1;
+            viewState.zoom = Math.max(0.5, Math.min(viewState.zoom, 10));
+            renderSky();
+        });
+
+        window.addEventListener('resize', renderSky);
+
+        lucide.createIcons();
+        renderSky();
+    </script>
+</body>
+</html>

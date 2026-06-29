@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ma Loupe Magique</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        #video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #111;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.1s ease-out, filter 0.2s ease; /* Ajout de la transition de filtre */
+            display: none; /* Caché par défaut */
+        }
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: rgba(30, 30, 30, 0.75);
+            padding: 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .slider-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 18px;
+        }
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #444;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #007AFF;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .btn-toggle {
+            background-color: #FF3B30;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            min-width: 100px;
+        }
+        .btn-toggle.active {
+            background-color: #34C759;
+        }
+        .btn-toggle:active, .filter-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Nouveaux styles pour les filtres */
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: space-around;
+        }
+        .filter-btn {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            flex: 1;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .filter-btn.active-filter {
+            background-color: #007AFF; /* Couleur d'activation pour les filtres */
+        }
+        #filters-menu {
+            display: none; /* Caché par défaut */
+            background: rgba(40, 40, 40, 0.9);
+            border-radius: 15px;
+            padding: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        #filters-menu button {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #filters-menu button.active-filter {
+            background-color: #007AFF;
+        }
+
+        .status-text {
+            position: absolute;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            width: 100%;
+            top: 45%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="video-container">
+        <div id="status" class="status-text">Appuyez sur "ON" pour démarrer la loupe</div>
+        <video id="webcam" autoplay playsinline></video>
+    </div>
+
+    <div class="controls">
+        <div class="control-row">
+            <button id="toggle-btn" class="btn-toggle">ON</button>
+            <div class="slider-container">
+                <span>🔍</span>
+                <input type="range" id="zoom-slider" min="1" max="6" step="0.1" value="1" disabled>
+            </div>
+        </div>
+
+        <!-- Boutons de contrôle des filtres -->
+        <div class="filter-controls">
+            <button id="filters-toggle-btn" class="filter-btn" disabled>🎭 Filtres</button>
+            <button id="reset-btn" class="filter-btn" disabled>🔄 Normal</button>
+        </div>
+
+        <!-- Menu des filtres (caché par défaut) -->
+        <div id="filters-menu">
+            <button data-filter="none">Normal</button>
+            <button data-filter="grayscale(100%)">N&B</button>
+            <button data-filter="sepia(100%)">Sépia</button>
+            <button data-filter="invert(100%)">Négatif</button>
+            <button data-filter="hue-rotate(90deg)">Psyché 1</button>
+            <button data-filter="hue-rotate(180deg)">Psyché 2</button>
+            <button data-filter="blur(5px)">Flou</button>
+            <button data-filter="contrast(200%)">Contraste +</button>
+            <button data-filter="saturate(300%)">Super-Couleurs</button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('webcam');
+        const zoomSlider = document.getElementById('zoom-slider');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const statusText = document.getElementById('status');
+        
+        // Éléments pour les filtres
+        const filtersToggleBtn = document.getElementById('filters-toggle-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const filtersMenu = document.getElementById('filters-menu');
+        const filterButtons = filtersMenu.querySelectorAll('button');
+
+        let stream = null;
+        let isCameraOn = false;
+        let currentFilter = 'none';
+
+        // Fonction pour allumer la caméra
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: { facingMode: { exact: "environment" } },
+                    audio: false
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                video.style.display = "block";
+                statusText.style.display = "none";
+                
+                // Active les contrôles
+                zoomSlider.disabled = false;
+                filtersToggleBtn.disabled = false;
+                resetBtn.disabled = false;
+                
+                toggleBtn.textContent = "OFF";
+                toggleBtn.classList.add('active');
+                isCameraOn = true;
+            } catch (err) {
+                console.error("Erreur caméra arrière, essai fallback...", err);
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                    video.style.display = "block";
+                    statusText.style.display = "none";
+
+                    // Active les contrôles
+                    zoomSlider.disabled = false;
+                    filtersToggleBtn.disabled = false;
+                    resetBtn.disabled = false;
+
+                    toggleBtn.textContent = "OFF";
+                    toggleBtn.classList.add('active');
+                    isCameraOn = true;
+                } catch (fallbackErr) {
+                    statusText.textContent = "Impossible d'accéder à la caméra.";
+                }
+            }
+        }
+
+        // Fonction pour éteindre la caméra
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            video.style.display = "none";
+            statusText.style.display = "block";
+            statusText.textContent = "Loupe éteinte";
+            
+            // Reset du zoom et des filtres
+            zoomSlider.value = 1;
+            video.style.transform = "scale(1)";
+            applyFilter('none'); // Réinitialise le filtre visuellement
+
+            // Désactive les contrôles
+            zoomSlider.disabled = true;
+            filtersToggleBtn.disabled = true;
+            resetBtn.disabled = true;
+            filtersMenu.style.display = 'none'; // Cache le menu
+            filtersToggleBtn.classList.remove('active-filter');
+
+            toggleBtn.textContent = "ON";
+            toggleBtn.classList.remove('active');
+            isCameraOn = false;
+        }
+
+        // Appliquer un filtre CSS
+        function applyFilter(filter) {
+            currentFilter = filter;
+            video.style.filter = filter;
+            
+            // Met à jour l'état visuel des boutons de filtre
+            filterButtons.forEach(btn => {
+                if (btn.getAttribute('data-filter') === filter) {
+                    btn.classList.add('active-filter');
+                } else {
+                    btn.classList.remove('active-filter');
+                }
+            });
+
+            // Met à jour le bouton principal "Filtres"
+            if (filter === 'none') {
+                filtersToggleBtn.classList.remove('active-filter');
+            } else {
+                filtersToggleBtn.classList.add('active-filter');
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // ON/OFF
+        toggleBtn.addEventListener('click', () => {
+            if (isCameraOn) {
+                stopCamera();
+            } else {
+                startCamera();
+            }
+        });
+
+        // Zoom
+        zoomSlider.addEventListener('input', (e) => {
+            const zoomValue = e.target.value;
+            video.style.transform = `scale(${zoomValue})`;
+        });
+
+        // Afficher/Cacher le menu des filtres
+        filtersToggleBtn.addEventListener('click', () => {
+            if (filtersMenu.style.display === 'grid') {
+                filtersMenu.style.display = 'none';
+            } else {
+                filtersMenu.style.display = 'grid';
+            }
+        });
+
+        // Réinitialiser (Filtre Normal)
+        resetBtn.addEventListener('click', () => {
+            applyFilter('none');
+            filtersMenu.style.display = 'none'; // Ferme le menu
+        });
+
+        // Sélection d'un filtre dans le menu
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filterValue = button.getAttribute('data-filter');
+                applyFilter(filterValue);
+                // Optionnel : fermer le menu après sélection
+                // filtersMenu.style.display = 'none'; 
+            });
+        });
+
+    </script>
+</body>
+</html>

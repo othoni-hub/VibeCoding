@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHROMA — Cube Chromatique & Plan de Coupe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        html, body {
+            position: fixed;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500/30">
+
+    <div class="flex flex-col h-screen w-screen p-3 sm:p-4 gap-3 sm:gap-4 overflow-hidden">
+        
+        <div class="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 min-h-0">
+            <div class="w-full lg:w-96 max-h-[40vh] lg:max-h-full flex flex-col justify-between bg-slate-900/70 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-2xl z-10 overflow-y-auto shrink-0">
+                
+                <div>
+                    <div class="mb-4 lg:mb-6">
+                        <span class="px-2.5 py-1 text-[10px] sm:text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 rounded-full uppercase">Labo Couleur</span>
+                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight mt-1.5 bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                            C.H.R.O.M.A.
+                        </h1>
+                        <p class="text-[10px] uppercase font-mono tracking-wider text-indigo-400/80 mt-0.5">
+                            Chromatic Hyper-cube Rendering & Observation Modular Application
+                        </p>
+                    </div>
+
+                    <hr class="border-slate-800 my-3 lg:my-4 hidden sm:block" />
+
+                    <div class="space-y-4 lg:space-y-6">
+                        <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                            <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span> Réglages du plan
+                        </h2>
+
+                        <div class="space-y-1 sm:space-y-2">
+                            <div class="flex justify-between text-xs font-medium">
+                                <label for="heightSlider" class="text-slate-300">Translation (Haut / Bas)</label>
+                                <span id="heightVal" class="font-mono text-indigo-400">0.00</span>
+                            </div>
+                            <input type="range" id="heightSlider" min="-1" max="1" step="0.01" value="0" 
+                                   class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div class="space-y-1 sm:space-y-2">
+                            <div class="flex justify-between text-xs font-medium">
+                                <label for="rotHSlider" class="text-slate-300">Rotation Horizontale (Y)</label>
+                                <span id="rotHVal" class="font-mono text-indigo-400">0°</span>
+                            </div>
+                            <input type="range" id="rotHSlider" min="0" max="360" step="1" value="0" 
+                                   class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div class="space-y-1 sm:space-y-2">
+                            <div class="flex justify-between text-xs font-medium">
+                                <label for="rotVSlider" class="text-slate-300">Rotation Verticale (X)</label>
+                                <span id="rotVVal" class="font-mono text-indigo-400">0°</span>
+                            </div>
+                            <input type="range" id="rotVSlider" min="-90" max="90" step="1" value="0" 
+                                   class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-800 my-4 lg:my-5" />
+
+                    <div id="pixel-inspector" class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-3 hidden">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[11px] font-bold uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">
+                                🎯 Pixel inspecté
+                            </h3>
+                            <div id="inspector-preview" class="w-5 h-5 rounded border border-white/20 shadow"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 font-mono text-xs">
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-800/50">
+                                <div class="text-[9px] text-slate-500 uppercase">Composantes</div>
+                                <div id="inspector-rgb" class="text-slate-200 font-bold mt-0.5">R:0 V:0 B:0</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-800/50">
+                                <div class="text-[9px] text-slate-500 uppercase">Hexadécimal</div>
+                                <div id="inspector-hex" class="text-indigo-400 font-bold mt-0.5">#000000</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-800/50 col-span-2">
+                                <div class="text-[9px] text-slate-500 uppercase">Coordonnées Cube (X, Y, Z)</div>
+                                <div id="inspector-coords" class="text-slate-300 mt-0.5 text-[11px]">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr id="inspector-divider" class="border-slate-800 my-4 hidden" />
+
+                    <div class="grid grid-cols-2 lg:grid-cols-1 gap-2 text-xs sm:text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="showCubeOutline" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                            <span>Arêtes blanches</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="showPlane" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                            <span>Plan de coupe 3D</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                            <input type="checkbox" id="showAxes" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                            <span>Axes RVB</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/50 border border-slate-800/60 rounded-xl p-3 text-[11px] text-slate-400 space-y-1 mt-4 hidden sm:block">
+                    <p class="font-medium text-slate-300">🎮 Interactions :</p>
+                    <p>• Zone 3D : Faites tourner et zoomer le cube.</p>
+                    <p>• Zone 2D : Cliquez pour analyser un pixel.</p>
+                </div>
+            </div>
+
+            <div class="flex-1 relative rounded-2xl border border-slate-800/80 bg-slate-950 overflow-hidden shadow-inner h-full w-full">
+                <div id="canvas-container" class="w-full h-full absolute inset-0"></div>
+                
+                <div class="absolute top-3 right-3 w-40 h-44 sm:w-48 sm:h-52 bg-slate-900/80 backdrop-blur-lg border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col pointer-events-auto transition-all duration-200">
+                    <div class="bg-slate-950/60 px-2 py-1 border-b border-slate-800 text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-indigo-400 text-center select-none">
+                        Coupe 2D (Cliquable)
+                    </div>
+                    <div class="flex-1 relative bg-black/40 cursor-crosshair">
+                        <canvas id="canvas2d" class="w-full h-full absolute inset-0"></canvas>
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-3 right-3 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-mono border border-slate-800 text-slate-400 flex gap-3 pointer-events-none shadow-lg">
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span> Axe X (Rouge)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span> Axe Y (Vert)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Axe Z (Bleu)</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center text-[11px] sm:text-xs text-slate-500 font-medium tracking-wide py-1 border-t border-slate-900 shrink-0">
+            Créé par <span class="text-slate-300 font-semibold">Olivier Thöni</span>, vibe-codé avec l’aide de <span class="text-indigo-400 font-semibold">Gemini 3.5 Flash</span>
+        </footer>
+    </div>
+
+    <script>
+        const hSlider = document.getElementById('heightSlider');
+        const rotHSlider = document.getElementById('rotHSlider');
+        const rotVSlider = document.getElementById('rotVSlider');
+        const hVal = document.getElementById('heightVal');
+        const rotHVal = document.getElementById('rotHVal');
+        const rotVVal = document.getElementById('rotVVal');
+        const showCubeOutline = document.getElementById('showCubeOutline');
+        const showPlane = document.getElementById('showPlane');
+        const showAxes = document.getElementById('showAxes');
+        const container = document.getElementById('canvas-container');
+        
+        // Inspecteur UI
+        const pixelInspector = document.getElementById('pixel-inspector');
+        const inspectorDivider = document.getElementById('inspector-divider');
+        const inspectorPreview = document.getElementById('inspector-preview');
+        const inspectorRgb = document.getElementById('inspector-rgb');
+        const inspectorHex = document.getElementById('inspector-hex');
+        const inspectorCoords = document.getElementById('inspector-coords');
+
+        // Canvas 2D
+        const canvas2d = document.getElementById('canvas2d');
+        const ctx2d = canvas2d.getContext('2d');
+
+        let scene, camera, renderer, controls;
+        let particleSystem, cuttingPlaneMesh, cubeOutline, axesGroup;
+        
+        const volumePoints = [];
+        const facePoints = [];
+        let pointsDansLaCoupe = []; // Stockage local temporaire pour le tracking du clic
+        let geometry;
+
+        const density = 35; 
+
+        let planeNormal = new THREE.Vector3(0, 1, 0);
+        let planeConstant = 0;
+        
+        // Coordonnées locales du marqueur de clic sélectionné (U, V)
+        let selectedLocalPoint = null;
+
+        function init3D() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020617);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 50);
+            camera.position.set(2.2, 2.2, 2.8);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.07;
+
+            const resize2D = () => {
+                canvas2d.width = canvas2d.clientWidth * window.devicePixelRatio;
+                canvas2d.height = canvas2d.clientHeight * window.devicePixelRatio;
+                if(particleSystem) updatePlane(); 
+            };
+            window.addEventListener('resize', resize2D);
+            resize2D();
+
+            for (let r = 0; r < density; r++) {
+                for (let v = 0; v < density; v++) {
+                    for (let b = 0; b < density; b++) {
+                        const rRatio = r / (density - 1);
+                        const vRatio = v / (density - 1);
+                        const bRatio = b / (density - 1);
+
+                        const x = rRatio - 0.5;
+                        const y = vRatio - 0.5;
+                        const z = bRatio - 0.5;
+
+                        const isFace = (r === 0 || r === density - 1 || 
+                                        v === 0 || v === density - 1 || 
+                                        b === 0 || b === density - 1);
+
+                        const pointData = { x, y, z, r: rRatio, g: vRatio, b: bRatio };
+
+                        volumePoints.push(pointData);
+                        if (isFace) {
+                            facePoints.push(pointData);
+                        }
+                    }
+                }
+            }
+
+            geometry = new THREE.BufferGeometry();
+
+            const material = new THREE.PointsMaterial({
+                size: 0.035,
+                vertexColors: true, 
+                transparent: false,
+                sizeAttenuation: true
+            });
+
+            particleSystem = new THREE.Points(geometry, material);
+            scene.add(particleSystem);
+
+            const outlineGeo = new THREE.BoxGeometry(1, 1, 1);
+            const edges = new THREE.EdgesGeometry(outlineGeo);
+            cubeOutline = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 }));
+            scene.add(cubeOutline);
+
+            axesGroup = new THREE.Group();
+            const axisLength = 0.8;
+            const arrowRadius = 0.02;
+            const arrowLength = 0.08;
+
+            const dirX = new THREE.Vector3(1, 0, 0);
+            const arrowX = new THREE.ArrowHelper(dirX, new THREE.Vector3(-0.5, -0.5, -0.5), axisLength, 0xef4444, arrowLength, arrowRadius);
+            axesGroup.add(arrowX);
+
+            const dirY = new THREE.Vector3(0, 1, 0);
+            const arrowY = new THREE.ArrowHelper(dirY, new THREE.Vector3(-0.5, -0.5, -0.5), axisLength, 0x22c55e, arrowLength, arrowRadius);
+            axesGroup.add(arrowY);
+
+            const dirZ = new THREE.Vector3(0, 0, 1);
+            const arrowZ = new THREE.ArrowHelper(dirZ, new THREE.Vector3(-0.5, -0.5, -0.5), axisLength, 0x3b82f6, arrowLength, arrowRadius);
+            axesGroup.add(arrowZ);
+
+            scene.add(axesGroup);
+
+            const planeGeo = new THREE.CircleGeometry(0.88, 64);
+            const planeMat = new THREE.MeshBasicMaterial({
+                color: 0x6366f1,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.08
+            });
+            cuttingPlaneMesh = new THREE.Mesh(planeGeo, planeMat);
+            
+            const planeEdgeGeo = new THREE.BufferGeometry().setFromPoints(new THREE.Path().absarc(0, 0, 0.88, 0, Math.PI * 2).getPoints(64));
+            const planeEdgeMat = new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.3 });
+            const planeEdge = new THREE.Line(planeEdgeGeo, planeEdgeMat);
+            cuttingPlaneMesh.add(planeEdge);
+            scene.add(cuttingPlaneMesh);
+
+            const resizeObserver = new ResizeObserver(() => onResize());
+            resizeObserver.observe(container);
+
+            // Gestionnaire de Clic sur le Canvas 2D
+            canvas2d.addEventListener('click', handleCanvas2DClick);
+
+            updatePlane();
+            setTimeout(() => { onResize(); }, 100);
+        }
+
+        function updatePlane() {
+            if (!geometry) return;
+
+            const h = parseFloat(hSlider.value);
+            const rotH = parseFloat(rotHSlider.value) * (Math.PI / 180);
+            const rotV = parseFloat(rotVSlider.value) * (Math.PI / 180);
+
+            hVal.textContent = h.toFixed(2);
+            rotHVal.textContent = rotHSlider.value + '°';
+            rotVVal.textContent = rotVSlider.value + '°';
+
+            const nx = Math.cos(rotV) * Math.sin(rotH);
+            const ny = Math.sin(rotV);
+            const nz = Math.cos(rotV) * Math.cos(rotH);
+            
+            planeNormal.set(nx, ny, nz).normalize();
+            planeConstant = h * 0.866; 
+
+            const targetLookAt = new THREE.Vector3().copy(planeNormal).multiplyScalar(planeConstant);
+            cuttingPlaneMesh.position.copy(targetLookAt);
+            const lookTarget = new THREE.Vector3().addVectors(cuttingPlaneMesh.position, planeNormal);
+            cuttingPlaneMesh.lookAt(lookTarget);
+
+            const currentPositions = [];
+            const currentColors = [];
+            const thickness = 0.025; 
+
+            pointsDansLaCoupe = []; // Reset pour la détection de clic
+
+            let uAxis = new THREE.Vector3();
+            let vAxis = new THREE.Vector3();
+            if (Math.abs(planeNormal.y) > 0.99) {
+                uAxis.set(1, 0, 0);
+            } else {
+                uAxis.set(0, 1, 0).cross(planeNormal).normalize();
+            }
+            vAxis.copy(planeNormal).cross(uAxis).normalize();
+
+            ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+            const scale2d = Math.min(canvas2d.width, canvas2d.height) * 0.52; 
+            const centerX = canvas2d.width / 2;
+            const centerY = canvas2d.height / 2;
+
+            ctx2d.fillStyle = "rgba(15, 23, 42, 0.4)";
+            ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+            for (let i = 0; i < volumePoints.length; i++) {
+                const pt = volumePoints[i];
+                const distanceToPlane = pt.x * planeNormal.x + pt.y * planeNormal.y + pt.z * planeNormal.z - planeConstant;
+
+                if (Math.abs(distanceToPlane) < thickness) {
+                    currentPositions.push(pt.x, pt.y, pt.z);
+                    currentColors.push(pt.r, pt.g, pt.b);
+
+                    const rx = pt.x - targetLookAt.x;
+                    const ry = pt.y - targetLookAt.y;
+                    const rz = pt.z - targetLookAt.z;
+
+                    const localX = rx * uAxis.x + ry * uAxis.y + rz * uAxis.z;
+                    const localY = rx * vAxis.x + ry * vAxis.y + rz * vAxis.z;
+
+                    const pixelX = centerX + localX * scale2d;
+                    const pixelY = centerY - localY * scale2d;
+
+                    // Enregistrement pour pouvoir comparer lors du clic utilisateur
+                    pointsDansLaCoupe.push({ pt, localX, localY, pixelX, pixelY });
+
+                    ctx2d.fillStyle = `rgb(${Math.floor(pt.r * 255)}, ${Math.floor(pt.g * 255)}, ${Math.floor(pt.b * 255)})`;
+                    ctx2d.fillRect(pixelX - 1.5, pixelY - 1.5, 3, 3);
+                }
+            }
+
+            for (let i = 0; i < facePoints.length; i++) {
+                const pt = facePoints[i];
+                const distanceToPlane = pt.x * planeNormal.x + pt.y * planeNormal.y + pt.z * planeNormal.z - planeConstant;
+
+                if (distanceToPlane <= 0) {
+                    currentPositions.push(pt.x, pt.y, pt.z);
+                    currentColors.push(pt.r, pt.g, pt.b);
+                }
+            }
+
+            // Dessiner le réticule/cible sur le pixel sélectionné s'il existe toujours
+            if (selectedLocalPoint) {
+                const targetPixelX = centerX + selectedLocalPoint.x * scale2d;
+                const targetPixelY = centerY - selectedLocalPoint.y * scale2d;
+                
+                ctx2d.strokeStyle = '#ffffff';
+                ctx2d.lineWidth = 2;
+                ctx2d.beginPath();
+                ctx2d.arc(targetPixelX, targetPixelY, 6, 0, Math.PI * 2);
+                ctx2d.stroke();
+                
+                ctx2d.fillStyle = '#ffffff';
+                ctx2d.beginPath();
+                ctx2d.arc(targetPixelX, targetPixelY, 1.5, 0, Math.PI * 2);
+                ctx2d.fill();
+            }
+
+            particleSystem.geometry.setAttribute('position', new THREE.Float32BufferAttribute(currentPositions, 3));
+            particleSystem.geometry.setAttribute('color', new THREE.Float32BufferAttribute(currentColors, 3));
+            
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.color.needsUpdate = true;
+        }
+
+        // --- GESTION DU CLIC ET RECHERCHE DU PROCHE VOISIN INVERSE ---
+        function handleCanvas2DClick(event) {
+            const rect = canvas2d.getBoundingClientRect();
+            // Prise en compte du ratio pixel d'affichage de l'écran (Retina/4K)
+            const clickX = (event.clientX - rect.left) * window.devicePixelRatio;
+            const clickY = (event.clientY - rect.top) * window.devicePixelRatio;
+
+            let closestPoint = null;
+            let minDistance = Infinity;
+            
+            // Seuil de tolérance du clic en pixels
+            const maxClickDistance = 15 * window.devicePixelRatio;
+
+            for (let i = 0; i < pointsDansLaCoupe.length; i++) {
+                const p2d = pointsDansLaCoupe[i];
+                const dist = Math.hypot(p2d.pixelX - clickX, p2d.pixelY - clickY);
+                
+                if (dist < minDistance && dist < maxClickDistance) {
+                    minDistance = dist;
+                    closestPoint = p2d;
+                }
+            }
+
+            if (closestPoint) {
+                // Sauvegarde du point local pour pérenniser l'affichage du réticule au prochain move de slider
+                selectedLocalPoint = { x: closestPoint.localX, y: closestPoint.localY };
+                
+                const data = closestPoint.pt;
+                const r255 = Math.floor(data.r * 255);
+                const g255 = Math.floor(data.g * 255);
+                const b255 = Math.floor(data.b * 255);
+                
+                // Conversion Hexadécimale propre
+                const hex = "#" + ((1 << 24) + (r255 << 16) + (g255 << 8) + b255).toString(16).slice(1).toUpperCase();
+
+                // Mise à jour de l'UI de l'inspecteur
+                inspectorPreview.style.backgroundColor = hex;
+                inspectorRgb.textContent = `R:${r255} V:${g255} B:${b255}`;
+                inspectorHex.textContent = hex;
+                // Coordonnées géométriques décalées pour correspondre au cube
+                inspectorCoords.textContent = `X: ${data.x.toFixed(3)} | Y: ${data.y.toFixed(3)} | Z: ${data.z.toFixed(3)}`;
+
+                // Rendre l'inspecteur visible
+                pixelInspector.classList.remove('hidden');
+                inspectorDivider.classList.remove('hidden');
+                
+                // Re-calcul immédiat pour dessiner le cercle de sélection
+                updatePlane();
+            }
+        }
+
+        hSlider.addEventListener('input', updatePlane);
+        rotHSlider.addEventListener('input', () => { selectedLocalPoint = null; updatePlane(); }); // Reset focus si rotation globale
+        rotVSlider.addEventListener('input', () => { selectedLocalPoint = null; updatePlane(); });
+        showCubeOutline.addEventListener('change', (e) => cubeOutline.visible = e.target.checked);
+        showPlane.addEventListener('change', (e) => cuttingPlaneMesh.visible = e.target.checked);
+        showAxes.addEventListener('change', (e) => axesGroup.visible = e.target.checked);
+
+        function onResize() {
+            if (!container || !renderer) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            updatePlane();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        init3D();
+        animate();
+    </script>
+</body>
+</html>

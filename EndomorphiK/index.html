@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisateur d'Endomorphismes 3D - Correction Mathématique</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .matrix-input {
+            background: rgba(31, 41, 55, 0.7);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            transition: all 0.2s ease;
+        }
+        .matrix-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+            outline: none;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 4px; }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col m-0 p-0">
+
+    <header class="bg-gray-900/90 backdrop-blur border-b border-gray-800 p-4 flex justify-between items-center z-10 shadow-lg">
+        <div>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                Laboratoire d'Endomorphismes & Morphing Continu
+            </h1>
+            <p class="text-xs text-emerald-400 mt-0.5">✓ Solveur de Cardan & Analyse géométrique 3D corrigés</p>
+        </div>
+        <div class="text-xs bg-gray-800 px-3 py-1.5 rounded-md border border-gray-700 text-gray-400">
+            Navigation 3D : Clic gauche = Rotation | Molette = Zoom
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <aside class="w-100 bg-gray-900/60 backdrop-blur-md border-r border-gray-800 p-5 overflow-y-auto flex flex-col gap-4 z-10 shadow-2xl">
+            
+            <section class="bg-gray-800/30 p-3 rounded-xl border border-gray-800">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1.5">1. Bibliothèque géométrique</h2>
+                <select id="select-preset" class="w-full bg-gray-950 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500 cursor-pointer">
+                    <option value="id">Identité (Id)</option>
+                    <option value="homot">Homothétie de rapport 3/2</option>
+                    <option value="inv">Symétrie centrale / Inversion (O)</option>
+                    <option value="proj_xy">Projection orthogonale sur le plan (Oxy)</option>
+                    <option value="proj_z">Projection orthogonale sur la droite (Oz)</option>
+                    <option value="sym_xy">Symétrie orthogonale par rapport au plan (Oxy)</option>
+                    <option value="sym_z">Symétrie orthogonale par rapport à la droite (Oz)</option>
+                    <option value="rot_z">Rotation d'axe (Oz) [Angle: 45°]</option>
+                    <option value="rot_x">Rotation d'axe (Ox) [Angle: 90°]</option>
+                    <option value="sim_z">Similitude (Rotation Oz + Dilatation)</option>
+                    <option value="cis">Cisaillement (Shear) le long de (Ox)</option>
+                </select>
+                <div class="mt-2 flex gap-2">
+                    <button id="load-to-m" class="flex-1 bg-amber-600/80 hover:bg-amber-600 text-white font-medium py-1.5 px-3 rounded text-xs transition cursor-pointer">Injecter dans M</button>
+                    <button id="load-to-a" class="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-2 rounded border border-gray-700 text-xs transition cursor-pointer">[A]</button>
+                    <button id="load-to-b" class="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-2 rounded border border-gray-700 text-xs transition cursor-pointer">[B]</button>
+                </div>
+            </section>
+
+            <section class="bg-gray-800/30 p-3 rounded-xl border border-gray-800 space-y-2">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-1">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">2. Composition (A & B)</h2>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <div class="grid grid-cols-3 gap-1 font-mono text-[11px]">
+                            <input type="text" id="a00" value="1" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a01" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a02" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a10" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a11" value="1" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a12" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a20" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a21" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="a22" value="1" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="grid grid-cols-3 gap-1 font-mono text-[11px]">
+                            <input type="text" id="b00" value="1" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b01" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b02" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b10" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b11" value="1" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b12" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b20" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b21" value="0" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                            <input type="text" id="b22" value="1" class="matrix-input text-center p-0.5 rounded bg-gray-950/40">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-1">
+                    <button id="btn-comp-ab" class="flex-1 bg-indigo-700/60 hover:bg-indigo-600 text-white py-1 rounded text-[11px] cursor-pointer">M = A ∘ B</button>
+                    <button id="btn-comp-ba" class="flex-1 bg-purple-700/60 hover:bg-purple-600 text-white py-1 rounded text-[11px] cursor-pointer">M = B ∘ A</button>
+                </div>
+            </section>
+
+            <section class="bg-gray-800/50 p-4 rounded-xl border border-blue-900/50 shadow-inner">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-2 flex justify-between items-center">
+                    <span>3. Matrice Active Evaluée (M)</span>
+                </h2>
+                <div class="grid grid-cols-3 gap-2 max-w-[240px] mx-auto my-1">
+                    <input type="text" id="m00" value="1.5" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m01" value="0" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m02" value="0" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m10" value="0" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m11" value="0.5" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m12" value="0" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m20" value="0" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m21" value="0" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                    <input type="text" id="m22" value="1" class="matrix-input text-center p-1.5 rounded text-sm font-mono font-bold text-blue-300">
+                </div>
+                <button id="btn-calc" class="w-full mt-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-1.5 rounded-lg text-xs cursor-pointer">
+                    METTRE À JOUR LA GÉOMÉTRIE
+                </button>
+            </section>
+
+            <section class="bg-gray-800/40 p-3 rounded-xl border border-gray-800 space-y-2">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-fuchsia-400">Options d'affichage</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="toggle-tetra" class="w-full bg-blue-600 text-white py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 shadow-sm text-center">
+                        Tétraèdres : ON
+                    </button>
+                    <button id="toggle-eigen" class="w-full bg-blue-600 text-white py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 shadow-sm text-center">
+                        Élém. Propres : ON
+                    </button>
+                </div>
+            </section>
+
+            <section class="bg-slate-900 border border-cyan-900/60 p-4 rounded-xl space-y-3 shadow-md shadow-cyan-950/20">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex justify-between items-center">
+                    <span>Contrôle Temporel (Morphing)</span>
+                    <span id="time-display" class="font-mono text-[11px] bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-800">t = 0.00</span>
+                </h2>
+                
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-500 font-mono">T=0</span>
+                    <input type="range" id="morph-slider" min="0" max="1" step="0.005" value="0" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                    <span class="text-[10px] text-gray-500 font-mono">T=1</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="btn-play" class="bg-cyan-700 hover:bg-cyan-600 text-white font-medium py-1 px-2 rounded text-xs transition cursor-pointer">▶ Play</button>
+                    <button id="btn-pause" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-1 px-2 rounded text-xs border border-gray-700 transition cursor-pointer">❚❚ Pause</button>
+                    <button id="btn-reset" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-1 px-2 rounded text-xs border border-gray-700 transition cursor-pointer">↺ Reset</button>
+                </div>
+            </section>
+
+            <section class="bg-gray-800/20 p-3 rounded-xl border border-gray-800 flex-1 flex flex-col gap-2 min-h-[140px] overflow-hidden">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">4. Polynôme & Spectre de M</h2>
+                <div id="poly-display" class="font-mono text-center py-1 text-xs text-gray-300 bg-gray-950/60 rounded border border-gray-800"></div>
+                <div id="eigen-results" class="space-y-1.5 overflow-y-auto flex-1 pr-1"></div>
+            </section>
+        </aside>
+
+        <main class="flex-1 relative bg-[#060911]">
+            <div id="canvas-container" class="w-full h-full"></div>
+            
+            <div class="absolute bottom-6 left-6 bg-gray-900/85 backdrop-blur-md p-4 rounded-xl border border-gray-800 text-xs space-y-2 pointer-events-none max-w-xs">
+                <div class="font-semibold text-gray-300 mb-1 text-[11px] uppercase tracking-wider text-blue-400">Repère & Éléments Propres</div>
+                <div class="flex items-center gap-2"><span class="w-3.5 h-1 bg-white inline-block"></span> <span class="text-gray-400">Axes Cartésiens (Ox, Oy, Oz)</span></div>
+                <div class="flex items-center gap-2"><span class="w-3.5 h-0.5 border-t border-dashed border-amber-500 inline-block"></span> <span class="text-amber-400 font-semibold">Droite propre / Axe invariant</span></div>
+                <div class="flex items-center gap-2"><span class="w-3.5 h-1 bg-emerald-500 inline-block"></span> <span class="text-emerald-400">Vecteur propre initial v</span></div>
+                <div class="flex items-center gap-2"><span class="w-3.5 h-1 bg-rose-500 inline-block"></span> <span class="text-rose-400">Image transformée f(v)</span></div>
+                <div class="border-t border-gray-800 my-1 pt-1"></div>
+                <div class="flex items-center gap-2"><span class="w-3.5 h-2 bg-white/20 border border-white/40 inline-block rounded"></span> <span class="text-gray-300 font-semibold">Tétraèdre Initial Fixe (t=0)</span></div>
+                <div class="flex items-center gap-2"><span class="w-3.5 h-2 bg-cyan-500/20 border border-cyan-400/60 inline-block rounded"></span> <span class="text-cyan-400 font-semibold">Tétraèdre Image Fixe (t=1)</span></div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-sky-400 opacity-80 animate-pulse"></span> <span class="text-gray-200">Cristal en Morphing (t)</span></div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-950/80 border-t border-gray-900 text-center py-1.5 z-10 text-[10px] tracking-wider text-gray-600 font-mono">
+        Auteur : Olivier THÖNI, vibe-codé avec l’aide de Gemini 3
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // --- PARSEUR MATHÉMATIQUE SÉCURISÉ ---
+        function parseMathExpression(str) {
+            if (!str) return 0;
+            let clean = str.toLowerCase().replace(/\s+/g, '');
+            clean = clean.replace(/sqrt/g, 'Math.sqrt').replace(/pi/g, 'Math.PI');
+            try {
+                const evaluator = new Function(`return (${clean});`);
+                const res = evaluator();
+                return isNaN(res) ? 0 : res;
+            } catch (e) { return 0; }
+        }
+
+        const PRESETS = {
+            id:       [["1", "0", "0"], ["0", "1", "0"], ["0", "0", "1"]],
+            homot:    [["3/2", "0", "0"], ["0", "3/2", "0"], ["0", "0", "3/2"]],
+            inv:      [["-1", "0", "0"], ["0", "-1", "0"], ["0", "0", "-1"]],
+            proj_xy:  [["1", "0", "0"], ["0", "1", "0"], ["0", "0", "0"]],
+            proj_z:   [["0", "0", "0"], ["0", "0", "0"], ["0", "0", "1"]],
+            sym_xy:   [["1", "0", "0"], ["0", "1", "0"], ["0", "0", "-1"]],
+            sym_z:    [["-1", "0", "0"], ["0", "-1", "0"], ["0", "0", "1"]],
+            rot_z:    [["sqrt(2)/2", "-sqrt(2)/2", "0"], ["sqrt(2)/2", "sqrt(2)/2", "0"], ["0", "0", "1"]], 
+            rot_x:    [["1", "0", "0"], ["0", "0", "-1"], ["0", "1", "0"]], 
+            sim_z:    [["1", "-1", "0"], ["1", "1", "0"], ["0", "0", "1/2"]],
+            cis:      [["1", "1", "0"], ["0", "1", "0"], ["0", "0", "1"]]
+        };
+
+        const ARETE_COULEURS = [0xff4b4b, 0x4b7bff, 0x4bff4b, 0xffbc4b, 0xff4bdf, 0x4bffff];
+        const SOMMETS_BASE = [[0,0,0], [1.3,0,0], [0,1.4,0], [0.3,0.3,1.4]];
+        const SEGMENTS = [[0,1], [0,2], [0,3], [1,2], [2,3], [3,1]];
+
+        let scene, camera, renderer, controls;
+        let staticObjects = [], morphObjects = [];
+        
+        let currentT = 0.0;
+        let isPlaying = false;
+        let speed = 0.004; 
+
+        let showTetrahedrons = true;
+        let showEigenElements = true;
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x060911);
+            scene.fog = new THREE.FogExp2(0x060911, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.up.set(0, 0, 1); 
+            camera.position.set(6, -8, 5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            dirLight.position.set(6, -6, 10);
+            scene.add(dirLight);
+
+            const gridHelper = new THREE.GridHelper(20, 20, 0xffffff, 0xffffff);
+            gridHelper.material.opacity = 0.06;
+            gridHelper.material.transparent = true;
+            gridHelper.rotateX(Math.PI / 2); 
+            scene.add(gridHelper);
+
+            buildCartesianAxis(new THREE.Vector3(4, 0, 0), 0xffffff, 'X');
+            buildCartesianAxis(new THREE.Vector3(0, 4, 0), 0xffffff, 'Y');
+            buildCartesianAxis(new THREE.Vector3(0, 0, 4), 0xffffff, 'Z');
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                if (isPlaying) {
+                    currentT += speed;
+                    if (currentT > 1.0) currentT = 0.0;
+                    document.getElementById('morph-slider').value = currentT;
+                    updateMorphingRender();
+                }
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function buildCartesianAxis(target, hexColor, labelText) {
+            const dir = target.clone().normalize();
+            const len = target.length();
+            const geo = new THREE.CylinderGeometry(0.012, 0.012, len, 8);
+            geo.translate(0, len/2, 0); geo.rotateX(Math.PI/2);
+            const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: hexColor, transparent: true, opacity: 0.4 }));
+            mesh.lookAt(target); scene.add(mesh);
+            scene.add(new THREE.ArrowHelper(dir, target.clone().sub(dir.clone().multiplyScalar(0.2)), 0.18, hexColor, 0.12, 0.05));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.font = 'Bold 54px sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(labelText, 32, 32);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(spriteMat);
+            
+            const labelPos = target.clone().add(dir.clone().multiplyScalar(0.35));
+            sprite.position.copy(labelPos);
+            sprite.scale.set(0.45, 0.45, 1);
+            scene.add(sprite);
+        }
+
+        // --- ENVELOPPE MATHÉMATIQUE SÉCURISÉE ---
+        function getMatrixFromUI(prefix) {
+            return [
+                [parseMathExpression(document.getElementById(prefix+'00').value), parseMathExpression(document.getElementById(prefix+'01').value), parseMathExpression(document.getElementById(prefix+'02').value)],
+                [parseMathExpression(document.getElementById(prefix+'10').value), parseMathExpression(document.getElementById(prefix+'11').value), parseMathExpression(document.getElementById(prefix+'12').value)],
+                [parseMathExpression(document.getElementById(prefix+'20').value), parseMathExpression(document.getElementById(prefix+'21').value), parseMathExpression(document.getElementById(prefix+'22').value)]
+            ];
+        }
+
+        function setMatrixToUI(prefix, stringMatrix) {
+            for(let i=0; i<3; i++) for(let j=0; j<3; j++) document.getElementById(`${prefix}${i}${j}`).value = stringMatrix[i][j];
+        }
+
+        function multiplyMatrices(A, B) {
+            let C = [[0,0,0],[0,0,0],[0,0,0]];
+            for(let i=0; i<3; i++) for(let j=0; j<3; j++) for(let k=0; k<3; k++) C[i][j] += A[i][k] * B[k][j];
+            return C;
+        }
+
+        function applyTransform(A, v) {
+            return [
+                A[0][0]*v[0] + A[0][1]*v[1] + A[0][2]*v[2],
+                A[1][0]*v[0] + A[1][1]*v[1] + A[1][2]*v[2],
+                A[2][0]*v[0] + A[2][1]*v[1] + A[2][2]*v[2]
+            ];
+        }
+
+        function computeCharacteristicPolynomial(A) {
+            const trA = A[0][0] + A[1][1] + A[2][2];
+            const A2 = multiplyMatrices(A, A);
+            const trA2 = A2[0][0] + A2[1][1] + A2[2][2];
+            const c2 = trA; 
+            const c1 = 0.5 * (c2 * trA - trA2);
+            const c0 = A[0][0]*(A[1][1]*A[2][2] - A[1][2]*A[2][1]) - A[0][1]*(A[1][0]*A[2][2] - A[1][2]*A[2][0]) + A[0][2]*(A[1][0]*A[2][1] - A[1][1]*A[2][0]);
+            return { c2, c1, c0 };
+        }
+
+        // CORRECTION MAJEURE DU SOLVEUR ANALYTIQUE DE CARDAN
+        function solveCubic(c2, c1, c0) {
+            let roots = [];
+            const p = c1 - (c2 * c2) / 3; 
+            
+            // Correction fondamentale de signe opérée sur q ci-dessous :
+            const q = - (2 * c2 * c2 * c2) / 27 + (c2 * c1) / 3 - c0; 
+            
+            const discriminant = (q * q) / 4 + (p * p * p) / 27; 
+            const eps = 1e-6;
+
+            if (discriminant > eps) {
+                const u = Math.cbrt(-q / 2 + Math.sqrt(discriminant)); 
+                const v = Math.cbrt(-q / 2 - Math.sqrt(discriminant));
+                roots.push(u + v + c2 / 3);
+            } else if (Math.abs(discriminant) <= eps) {
+                if (Math.abs(p) <= eps) {
+                    roots.push(c2 / 3);
+                } else { 
+                    roots.push((3 * q) / p + c2 / 3); 
+                    roots.push((-3 * q) / (2 * p) + c2 / 3); 
+                }
+            } else {
+                const r = Math.sqrt(-(p * p * p) / 27); 
+                const phi = Math.acos(-q / (2 * r)); 
+                const s = 2 * Math.sqrt(-p / 3);
+                roots.push(s * Math.cos(phi / 3) + c2 / 3); 
+                roots.push(s * Math.cos((phi + 2 * Math.PI) / 3) + c2 / 3); 
+                roots.push(s * Math.cos((phi + 4 * Math.PI) / 3) + c2 / 3);
+            }
+            
+            let uniqueRoots = []; 
+            roots.forEach(r => { 
+                if (!uniqueRoots.some(ur => Math.abs(ur - r) < 1e-4)) uniqueRoots.push(r); 
+            });
+            return uniqueRoots.sort((x, y) => y - x);
+        }
+
+        // CORRECTION DE L'EXTRACTION DES BASES DES SOUS-ESPACES (APPROCHE ANALYTIQUE VECTORIELLE)
+        function computeEigenSpace(A, lambda) {
+            // Création de B = A - lambda * I
+            let B = [];
+            for (let i = 0; i < 3; i++) {
+                B.push([]);
+                for (let j = 0; j < 3; j++) {
+                    B[i].push(A[i][j] - (i === j ? lambda : 0));
+                }
+            }
+
+            // Fonctions géométriques inline
+            const cross = (u, v) => [u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]];
+            const norm = (u) => Math.sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+
+            // Analyse du noyau par les produits vectoriels des lignes
+            let n0 = cross(B[0], B[1]);
+            let n1 = cross(B[0], B[2]);
+            let n2 = cross(B[1], B[2]);
+
+            let l0 = norm(n0), l1 = norm(n1), l2 = norm(n2);
+            let maxL = Math.max(l0, l1, l2);
+            const eps = 1e-4;
+
+            if (maxL > eps) {
+                // Rang = 2 -> Espace Propre de dimension 1 (Droite)
+                let bestN = n0;
+                if (l1 > l0 && l1 > l2) bestN = n1;
+                else if (l2 > l0 && l2 > l1) bestN = n2;
+                return { type: 'Droite', vectors: [normalizeV(bestN)] };
+            }
+
+            // Si maxL est nul, le rang est inférieur ou égal à 1
+            let r0 = norm(B[0]), r1 = norm(B[1]), r2 = norm(B[2]);
+            let maxR = Math.max(r0, r1, r2);
+
+            if (maxR > eps) {
+                // Rang = 1 -> Espace Propre de dimension 2 (Plan invariant)
+                let row = B[0];
+                if (r1 > r0 && r1 > r2) row = B[1];
+                else if (r2 > r0 && r2 > r1) row = B[2];
+
+                let a = row[0], b = row[1], c = row[2];
+                let v1, v2;
+                if (Math.abs(a) > eps) {
+                    v1 = [-b, a, 0]; v2 = [-c, 0, a];
+                } else if (Math.abs(b) > eps) {
+                    v1 = [1, 0, 0]; v2 = [0, -c, b];
+                } else {
+                    v1 = [1, 0, 0]; v2 = [0, 1, 0];
+                }
+                return { type: 'Plan', vectors: [normalizeV(v1), normalizeV(v2)] };
+            }
+
+            // Rang = 0 -> Tout l'espace est propre (Homothétie pure)
+            return { type: 'Espace Complet', vectors: [[1,0,0], [0,1,0], [0,0,1]] };
+        }
+
+        function normalizeV(v) { 
+            const n = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]); 
+            return n === 0 ? [0,0,0] : [v[0]/n, v[1]/n, v[2]/n]; 
+        }
+
+        // --- PIPELINE DE CALCUL TECHNIQUE ---
+        function runPipeline() {
+            staticObjects.forEach(obj => scene.remove(obj));
+            staticObjects = [];
+
+            const M = getMatrixFromUI('m');
+            const poly = computeCharacteristicPolynomial(M);
+            
+            document.getElementById('poly-display').innerText = `P(X) = X³ - (${poly.c2.toFixed(2)})X² + (${poly.c1.toFixed(2)})X - (${poly.c0.toFixed(2)})`;
+
+            const lambdas = solveCubic(poly.c2, poly.c1, poly.c0);
+            const resContainer = document.getElementById('eigen-results');
+            resContainer.innerHTML = '';
+
+            lambdas.forEach((lambda, idx) => {
+                const space = computeEigenSpace(M, lambda);
+                const eDiv = document.createElement('div');
+                eDiv.className = "p-1.5 bg-gray-950/60 rounded border border-gray-800 text-[11px]";
+                let vStr = space.vectors.map(v => `[${v[0].toFixed(1)},${v[1].toFixed(1)},${v[2].toFixed(1)}]`).join(', ');
+                eDiv.innerHTML = `<div class="flex justify-between font-bold text-amber-400"><span>λ${idx+1} = ${lambda.toFixed(2)}</span><span class="text-[9px] text-gray-400 font-normal">${space.type}</span></div><div class="text-gray-500 font-mono text-[9px] truncate">Base: {${vStr}}</div>`;
+                resContainer.appendChild(eDiv);
+
+                if (showEigenElements) {
+                    space.vectors.forEach(vArr => {
+                        const dir = new THREE.Vector3(...vArr);
+                        
+                        const points = [dir.clone().multiplyScalar(-15), dir.clone().multiplyScalar(15)];
+                        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                        const lineMat = new THREE.LineDashedMaterial({ color: 0xf59e0b, dashSize: 0.2, gapSize: 0.15, transparent: true, opacity: 0.5 });
+                        const line = new THREE.Line(lineGeo, lineMat);
+                        line.computeLineDistances(); 
+                        scene.add(line); staticObjects.push(line);
+
+                        const arrowV = new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.5, 0x10b981, 0.25, 0.08);
+                        scene.add(arrowV); staticObjects.push(arrowV);
+
+                        const imgLen = 1.5 * lambda;
+                        if (Math.abs(imgLen) > 0.05) {
+                            const arrowImg = new THREE.ArrowHelper(
+                                imgLen >= 0 ? dir : dir.clone().negate(), 
+                                new THREE.Vector3(0,0,0), 
+                                Math.abs(imgLen), 
+                                0xf43f5e, 0.22, 0.1
+                            );
+                            arrowImg.position.add(new THREE.Vector3(0.015, 0.015, 0.015)); 
+                            scene.add(arrowImg); staticObjects.push(arrowImg);
+                        }
+                    });
+                }
+            });
+
+            if (showTetrahedrons) {
+                const sommetsImg = SOMMETS_BASE.map(v => applyTransform(M, v));
+                drawSolidStatic(SOMMETS_BASE, 0xffffff, 0.06);
+                drawWireframeStatic(SOMMETS_BASE, 0xffffff, 0.25);
+                
+                drawSolidStatic(sommetsImg, 0x06b6d4, 0.12); 
+                drawWireframeStatic(sommetsImg, 0x22d3ee, 0.45);
+            }
+
+            updateMorphingRender();
+        }
+
+        function updateMorphingRender() {
+            morphObjects.forEach(obj => scene.remove(obj));
+            morphObjects = [];
+
+            const t = currentT;
+            document.getElementById('time-display').innerText = `t = ${t.toFixed(2)}`;
+
+            if (!showTetrahedrons) return;
+
+            const M = getMatrixFromUI('m');
+            const sommetsImg = SOMMETS_BASE.map(v => applyTransform(M, v));
+
+            const sommetsMorphed = SOMMETS_BASE.map((v0, idx) => {
+                const v1 = sommetsImg[idx];
+                return [
+                    (1 - t) * v0[0] + t * v1[0],
+                    (1 - t) * v0[1] + t * v1[1],
+                    (1 - t) * v0[2] + t * v1[2]
+                ];
+            });
+
+            const geo = new THREE.BufferGeometry();
+            const faces = [0,2,1, 0,1,3, 0,3,2, 1,2,3];
+            const vertices = []; faces.forEach(idx => vertices.push(...sommetsMorphed[idx]));
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geo.computeVertexNormals();
+            
+            const solidMesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ 
+                color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.35, flatShading: true, shininess: 80
+            }));
+            scene.add(solidMesh); morphObjects.push(solidMesh);
+
+            SEGMENTS.forEach((indices, idx) => {
+                const p1 = new THREE.Vector3(...sommetsMorphed[indices[0]]);
+                const p2 = new THREE.Vector3(...sommetsMorphed[indices[1]]);
+                const color = ARETE_COULEURS[idx % ARETE_COULEURS.length];
+                
+                const len = p1.distanceTo(p2); if (len < 0.01) return;
+                const tubeGeo = new THREE.CylinderGeometry(0.024, 0.024, len, 6);
+                tubeGeo.translate(0, len/2, 0); tubeGeo.rotateX(Math.PI/2);
+                const tubeMesh = new THREE.Mesh(tubeGeo, new THREE.MeshPhongMaterial({ color: color, transparent: true, opacity: 0.9 }));
+                tubeMesh.position.copy(p1); tubeMesh.lookAt(p2);
+                scene.add(tubeMesh); morphObjects.push(tubeMesh);
+            });
+        }
+
+        function drawSolidStatic(sommets, color, opacity) {
+            const geo = new THREE.BufferGeometry();
+            const faces = [0,2,1, 0,1,3, 0,3,2, 1,2,3];
+            const vertices = []; faces.forEach(idx => vertices.push(...sommets[idx]));
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geo.computeVertexNormals();
+            const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, transparent: true, opacity: opacity }));
+            scene.add(mesh); staticObjects.push(mesh);
+        }
+
+        function drawWireframeStatic(sommets, color, opacity) { 
+            SEGMENTS.forEach((indices) => { 
+                const p1 = new THREE.Vector3(...sommets[indices[0]]); 
+                const p2 = new THREE.Vector3(...sommets[indices[1]]); 
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]); 
+                const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: opacity })); 
+                scene.add(line); staticObjects.push(line); 
+            }); 
+        }
+
+        // --- ÉCOUTEURS D'ÉVÉNEMENTS ---
+        document.getElementById('toggle-tetra').addEventListener('click', (e) => {
+            showTetrahedrons = !showTetrahedrons;
+            e.target.innerText = `Tétraèdres : ${showTetrahedrons ? 'ON' : 'OFF'}`;
+            e.target.className = showTetrahedrons 
+                ? "w-full bg-blue-600 text-white py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 shadow-sm text-center" 
+                : "w-full bg-gray-800 text-gray-400 border border-gray-700 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 text-center";
+            runPipeline();
+        });
+
+        document.getElementById('toggle-eigen').addEventListener('click', (e) => {
+            showEigenElements = !showEigenElements;
+            e.target.innerText = `Élém. Propres : ${showEigenElements ? 'ON' : 'OFF'}`;
+            e.target.className = showEigenElements 
+                ? "w-full bg-blue-600 text-white py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 shadow-sm text-center" 
+                : "w-full bg-gray-800 text-gray-400 border border-gray-700 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 text-center";
+            runPipeline();
+        });
+
+        document.getElementById('morph-slider').addEventListener('input', (e) => {
+            isPlaying = false;
+            currentT = parseFloat(e.target.value);
+            updateMorphingRender();
+        });
+
+        document.getElementById('btn-play').addEventListener('click', () => isPlaying = true);
+        document.getElementById('btn-pause').addEventListener('click', () => isPlaying = false);
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            isPlaying = false; currentT = 0.0;
+            document.getElementById('morph-slider').value = 0;
+            updateMorphingRender();
+        });
+
+        document.getElementById('load-to-m').addEventListener('click', () => { setMatrixToUI('m', PRESETS[document.getElementById('select-preset').value]); runPipeline(); });
+        document.getElementById('load-to-a').addEventListener('click', () => setMatrixToUI('a', PRESETS[document.getElementById('select-preset').value]));
+        document.getElementById('load-to-b').addEventListener('click', () => setMatrixToUI('b', PRESETS[document.getElementById('select-preset').value]));
+
+        document.getElementById('btn-comp-ab').addEventListener('click', () => { const M = multiplyMatrices(getMatrixFromUI('a'), getMatrixFromUI('b')); for(let i=0; i<3; i++) for(let j=0; j<3; j++) document.getElementById(`m${i}${j}`).value = M[i][j].toFixed(3); runPipeline(); });
+        document.getElementById('btn-comp-ba').addEventListener('click', () => { const M = multiplyMatrices(getMatrixFromUI('b'), getMatrixFromUI('a')); for(let i=0; i<3; i++) for(let j=0; j<3; j++) document.getElementById(`m${i}${j}`).value = M[i][j].toFixed(3); runPipeline(); });
+        document.getElementById('btn-calc').addEventListener('click', runPipeline);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            init3D();
+            runPipeline();
+        });
+    </script>
+</body>
+</html>

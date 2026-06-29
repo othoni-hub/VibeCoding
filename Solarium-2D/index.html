@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Système Solaire - Simulateur Interactif</title>
+    <style>
+        body { margin: 0; background: #000; color: #eee; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.85); padding: 15px; border-radius: 8px; border: 1px solid #444; z-index: 10; }
+        #popup { display: none; position: absolute; background: rgba(20,20,20,0.95); padding: 15px; border: 1px solid #00d4ff; border-radius: 8px; color: white; width: 280px; box-shadow: 0 0 15px rgba(0,212,255,0.3); pointer-events: auto; }
+        h2 { margin-top: 0; color: #00d4ff; }
+        button { cursor: pointer; background: #00d4ff; border: none; padding: 6px 12px; border-radius: 4px; margin-top: 10px; font-weight: bold; }
+        button:hover { background: #0099bb; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <h3>Système Solaire</h3>
+    Vitesse: <input type="range" id="speed" min="0" max="1000" value="1"> <span id="val">1</span> j/min<br>
+    <button onclick="focusedPlanet = null; scale = 1;">Vue d'ensemble</button>
+</div>
+
+<div id="popup">
+    <h2 id="pName"></h2>
+    <div id="pData" style="font-size: 0.9em; line-height: 1.6;"></div>
+    <button onclick="setFocus()">Suivre cette planète</button>
+</div>
+
+<canvas id="sim"></canvas>
+
+<script>
+    const canvas = document.getElementById('sim');
+    const ctx = canvas.getContext('2d');
+    let speed = 1, scale = 1, focusedPlanet = null;
+
+    const planets = [
+        {name: "Mercure", color: "#A5A5A5", dist: 60, period: 88, rot: 58.6, mass: "0.055 M⊕"},
+        {name: "Vénus", color: "#E3BB76", dist: 90, period: 225, rot: 243, mass: "0.815 M⊕"},
+        {name: "Terre", color: "#2271B3", dist: 130, period: 365, rot: 1, mass: "1.00 M⊕"},
+        {name: "Mars", color: "#E27B58", dist: 170, period: 687, rot: 1.03, mass: "0.107 M⊕"},
+        {name: "Jupiter", color: "#D39C7E", dist: 250, period: 4333, rot: 0.41, mass: "317.8 M⊕"},
+        {name: "Saturne", color: "#C5AB6E", dist: 330, period: 10759, rot: 0.45, mass: "95.2 M⊕"},
+        {name: "Uranus", color: "#BBE1E4", dist: 390, period: 30687, rot: 0.72, mass: "14.5 M⊕"},
+        {name: "Neptune", color: "#6081FF", dist: 440, period: 60190, rot: 0.67, mass: "17.1 M⊕"},
+        {name: "Pluton", color: "#FFFFFF", dist: 500, period: 90560, rot: 6.39, mass: "0.002 M⊕"}
+    ];
+
+    planets.forEach(p => p.angle = Math.random() * Math.PI * 2);
+
+    window.addEventListener('wheel', (e) => { 
+        scale = Math.min(Math.max(0.1, scale + e.deltaY * -0.001), 10); 
+    });
+
+    function draw() {
+        // Effet de fondu (traînées)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.save();
+        let centerX = canvas.width/2;
+        let centerY = canvas.height/2;
+        
+        if (focusedPlanet) {
+            centerX -= (Math.cos(focusedPlanet.angle) * focusedPlanet.dist) * scale;
+            centerY -= (Math.sin(focusedPlanet.angle) * focusedPlanet.dist) * scale;
+        }
+
+        ctx.translate(centerX, centerY);
+        ctx.scale(scale, scale);
+
+        // Orbites
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+        planets.forEach(p => {
+            ctx.beginPath(); ctx.arc(0, 0, p.dist, 0, Math.PI * 2); ctx.stroke();
+        });
+
+        // Soleil
+        ctx.fillStyle = "yellow";
+        ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI*2); ctx.fill();
+
+        // Planètes
+        planets.forEach(p => {
+            p.angle += (2 * Math.PI / p.period) * (speed / 60);
+            let x = Math.cos(p.angle) * p.dist;
+            let y = Math.sin(p.angle) * p.dist;
+            p.screenX = x * scale + centerX;
+            p.screenY = y * scale + centerY;
+            
+            ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.restore();
+        requestAnimationFrame(draw);
+    }
+
+    canvas.onclick = (e) => {
+        let found = planets.find(p => Math.hypot(p.screenX - e.clientX, p.screenY - e.clientY) < 20);
+        const p = document.getElementById('popup');
+        if(found) {
+            p.style.display = 'block';
+            p.style.left = (e.clientX + 20) + 'px';
+            p.style.top = (e.clientY + 20) + 'px';
+            p.setAttribute('data-target', found.name);
+            document.getElementById('pName').innerText = found.name;
+            document.getElementById('pData').innerHTML = `
+                Révolution : ${found.period} jours<br>
+                Rotation : ${found.rot} jours<br>
+                Masse : ${found.mass}
+            `;
+        } else { p.style.display = 'none'; }
+    };
+
+    function setFocus() {
+        const name = document.getElementById('popup').getAttribute('data-target');
+        focusedPlanet = planets.find(p => p.name === name);
+        document.getElementById('popup').style.display = 'none';
+        scale = 2;
+    }
+
+    document.getElementById('speed').oninput = (e) => { 
+        speed = e.target.value; 
+        document.getElementById('val').innerText = speed; 
+    };
+    
+    window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.onresize();
+    draw();
+</script>
+</body>
+</html>

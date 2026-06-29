@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIMOV : Simulateur d'Inversion (CPGE ECG)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <style>
+        #animationContainer canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.75rem;
+        }
+        #bgCanvas {
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+            z-index: 1;
+        }
+        #traceCanvas {
+            z-index: 2;
+            opacity: 0.8;
+        }
+        #ballCanvas {
+            z-index: 3;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-indigo-700 text-white shadow-md p-5 text-center">
+        <h1 class="text-3xl font-black tracking-wider md:text-4xl">ASIMOV</h1>
+        <p class="text-indigo-100 text-xs md:text-sm font-medium uppercase tracking-wide mt-1">
+            <span class="font-bold text-white">A</span>lgorithmes de <span class="font-bold text-white">S</span>imulation de l'<span class="font-bold text-white">I</span>nversion des <span class="font-bold text-white">M</span>odèles et <span class="font-bold text-white">O</span>utils de <span class="font-bold text-white">V</span>isualisation
+        </p>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-5 lg:col-span-1 flex flex-col justify-between">
+            <div class="space-y-5">
+                <h2 class="text-xl font-semibold border-b border-gray-100 pb-2 text-indigo-900">Configuration</h2>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nature de la variable aléatoire</label>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-100 p-1 rounded-xl">
+                        <button id="btnContinue" onclick="setLawType('continue')" class="py-2 text-sm font-medium rounded-lg text-center bg-white text-indigo-700 shadow-sm transition">Continue</button>
+                        <button id="btnDiscrete" onclick="setLawType('discrete')" class="py-2 text-sm font-medium rounded-lg text-center text-gray-600 hover:text-gray-900 transition">Discrète</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="lawSelect" class="block text-sm font-medium text-gray-700 mb-1">Loi de probabilité</label>
+                    <select id="lawSelect" onchange="handleLawChange()" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </select>
+                </div>
+
+                <div id="dynamicInputs" class="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm">
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                            <label>Vitesse d'émission</label>
+                            <span id="speedVal">15 billes/s</span>
+                        </div>
+                        <input id="speedSlider" type="range" min="1" max="60" value="15" oninput="updateSpeed(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                    </div>
+
+                    <div class="flex gap-2 pt-1">
+                        <button id="btnPlay" onclick="toggleSimulation()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-xl transition shadow-sm flex justify-center items-center gap-2">
+                            <span>▶ Lancer</span>
+                        </button>
+                        <button onclick="resetSimulation()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100 space-y-3 mt-4">
+                <div class="flex justify-between items-center border-b border-indigo-100 pb-1.5">
+                    <h3 class="font-bold text-indigo-900 text-sm">Moments & Convergence</h3>
+                    <span class="text-xs font-mono bg-white text-indigo-700 px-2 py-0.5 rounded shadow-2xs">N = <span id="statCount">0</span></span>
+                </div>
+                <div class="text-xs space-y-2">
+                    <div class="grid grid-cols-3 font-semibold text-gray-500 text-center pb-1">
+                        <div>Indicateur</div><div>Théorie</div><div>Simulation</div>
+                    </div>
+                    <div class="grid grid-cols-3 text-center bg-white p-2 rounded-lg items-center shadow-3xs">
+                        <div class="font-medium text-left pl-1 text-gray-700">Espérance</div>
+                        <div id="theoMean" class="font-mono font-semibold text-indigo-600">-</div>
+                        <div id="simMean" class="font-mono font-bold text-emerald-600">-</div>
+                    </div>
+                    <div class="grid grid-cols-3 text-center bg-white p-2 rounded-lg items-center shadow-3xs">
+                        <div class="font-medium text-left pl-1 text-gray-700">Variance</div>
+                        <div id="theoVar" class="font-mono font-semibold text-indigo-600">-</div>
+                        <div id="simVar" class="font-mono font-bold text-emerald-600">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 id="latexTitle" class="font-semibold text-gray-700 text-sm md:text-base"></h3>
+                    <span class="text-[10px] md:text-xs px-2 py-1 bg-amber-100 text-amber-700 font-medium rounded">Traces rémanentes grises</span>
+                </div>
+                <div id="animationContainer" class="relative w-full aspect-video md:aspect-[21/9] rounded-xl overflow-hidden shadow-inner">
+                    <canvas id="bgCanvas"></canvas>    
+                    <canvas id="traceCanvas"></canvas> 
+                    <canvas id="ballCanvas"></canvas>  
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <h3 class="font-semibold text-gray-700 mb-2 text-sm md:text-base">Convergence Fréquentiste (Histogramme vs Théorie)</h3>
+                <div class="w-full h-64">
+                    <canvas id="chartAnalysis"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-100 border-t border-gray-200 p-4 text-center text-xs text-gray-500">
+        Créé par <span class="font-semibold text-gray-700">Olivier Thöni</span>, professeur agrégé de mathématiques, vibe-codé avec l’aide de <span class="font-semibold text-indigo-600">Gemini 3.5 Flash</span>
+    </footer>
+
+    <script>
+        // --- ÉTAT GLOBAL ---
+        let lawType = 'continue'; 
+        let currentLaw = 'expo';
+        let isRunning = false;
+        let speed = 15; 
+        
+        let totalBalls = 0;
+        let sumX = 0;
+        let sumXSquare = 0;
+        let bins = {}; 
+        let params = { lambda: 1, a: 0, b: 3, p: 0.5, n: 8, N_unif: 6, x0: 0, gamma: 1, mu: 0, sigma: 1 }; 
+        
+        let activeBalls = []; 
+        let xMin = 0, xMax = 5; 
+        let discreteValues = [];
+
+        const container = document.getElementById('animationContainer');
+        const bgCanvas = document.getElementById('bgCanvas'); const bgCtx = bgCanvas.getContext('2d');
+        const traceCanvas = document.getElementById('traceCanvas'); const traceCtx = traceCanvas.getContext('2d');
+        const ballCanvas = document.getElementById('ballCanvas'); const ballCtx = ballCanvas.getContext('2d');
+
+        let analysisChart = null;
+        let loopInterval = null;
+        const PADDING = { top: 20, right: 30, bottom: 30, left: 50 };
+        let logicalW = 0, logicalH = 0;
+
+        // --- OUTILS MATHÉMATIQUES AVANCÉS (NORMALE) ---
+        function rationalApproximation(t) {
+            const c = [2.515517, 0.802853, 0.010328];
+            const d = [1.432788, 0.189269, 0.001308];
+            return t - ((c[2]*t + c[1])*t + c[0]) / (((d[2]*t + d[1])*t + d[0])*t + 1.0);
+        }
+        function normInv(u) {
+            if (u <= 0) return -5; if (u >= 1) return 5;
+            if (u < 0.5) {
+                let t = Math.sqrt(-2.0 * Math.log(u));
+                return -rationalApproximation(t);
+            } else {
+                let t = Math.sqrt(-2.0 * Math.log(1.0 - u));
+                return rationalApproximation(t);
+            }
+        }
+        function normCdf(x) {
+            const b = [0.319381530, -0.356563782, 1.781477937, -1.821255978, 1.330274429];
+            const p = 0.2316419; const c = 0.39894228;
+            if (x >= 0) {
+                let t = 1.0 / (1.0 + p * x);
+                return 1.0 - c * Math.exp(-x * x / 2.0) * t * (t * (t * (t * (b[4] * t + b[3]) + b[2]) + b[1]) + b[0]);
+            } else {
+                let t = 1.0 / (1.0 - p * x);
+                return c * Math.exp(-x * x / 2.0) * t * (t * (t * (t * (b[4] * t + b[3]) + b[2]) + b[1]) + b[0]);
+            }
+        }
+
+        // --- DEFINITIONS DES LOIS ---
+        const LAWS = {
+            continue: {
+                expo: {
+                    name: "Exponentielle (λ)",
+                    params: [{id: 'lambda', label: 'Paramètre λ', min: 0.2, max: 4, step: 0.1, val: 1.0}],
+                    setRange: () => { xMin = 0; xMax = 4.5 / params.lambda; },
+                    F: (x) => x >= 0 ? 1 - Math.exp(-params.lambda * x) : 0,
+                    Finv: (u) => -Math.log(Math.max(1 - u, 1e-10)) / params.lambda,
+                    pdf: (x) => x >= 0 ? params.lambda * Math.exp(-params.lambda * x) : 0,
+                    getMoments: () => ({ mean: 1 / params.lambda, variance: 1 / Math.pow(params.lambda, 2) })
+                },
+                uniformC: {
+                    name: "Uniforme Continue [a, b]",
+                    params: [
+                        {id: 'a', label: 'Borne a', min: -3, max: 3, step: 0.5, val: 0},
+                        {id: 'b', label: 'Borne b', min: 0, max: 6, step: 0.5, val: 4}
+                    ],
+                    setRange: () => { xMin = params.a - 0.5; xMax = params.b + 0.5; },
+                    F: (x) => x < params.a ? 0 : (x > params.b ? 1 : (x - params.a)/(params.b - params.a)),
+                    Finv: (u) => params.a + u * (params.b - params.a),
+                    pdf: (x) => (x >= params.a && x <= params.b) ? 1 / (params.b - params.a) : 0,
+                    getMoments: () => ({ mean: (params.a + params.b)/2, variance: Math.pow(params.b - params.a, 2)/12 })
+                },
+                normale: {
+                    name: "Normale 𝒩(μ, σ²)",
+                    params: [
+                        {id: 'mu', label: 'Espérance μ', min: -2, max: 2, step: 0.2, val: 0},
+                        {id: 'sigma', label: 'Écart-type σ', min: 0.4, max: 2, step: 0.1, val: 1}
+                    ],
+                    setRange: () => { xMin = params.mu - 3.5 * params.sigma; xMax = params.mu + 3.5 * params.sigma; },
+                    F: (x) => normCdf((x - params.mu) / params.sigma),
+                    Finv: (u) => params.mu + params.sigma * normInv(u),
+                    pdf: (x) => (1 / (params.sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - params.mu)/params.sigma, 2)),
+                    getMoments: () => ({ mean: params.mu, variance: params.sigma * params.sigma })
+                },
+                cauchy: {
+                    name: "Cauchy (x₀, γ) [Hors LFGN]",
+                    params: [
+                        {id: 'x0', label: 'Position x₀ (Med)', min: -2, max: 2, step: 0.5, val: 0},
+                        {id: 'gamma', label: 'Échelle γ', min: 0.5, max: 3, step: 0.2, val: 1}
+                    ],
+                    setRange: () => { xMin = params.x0 - 8 * params.gamma; xMax = params.x0 + 8 * params.gamma; },
+                    F: (x) => 0.5 + Math.atan((x - params.x0) / params.gamma) / Math.PI,
+                    Finv: (u) => params.x0 + params.gamma * Math.tan(Math.PI * (u - 0.5)),
+                    pdf: (x) => 1 / (Math.PI * params.gamma * (1 + Math.pow((x - params.x0)/params.gamma, 2))),
+                    getMoments: () => ({ mean: "∞", variance: "∞" })
+                }
+            },
+            discrete: {
+                unifD: {
+                    name: "Uniforme Discrète ⟦1, N⟧",
+                    params: [{id: 'N_unif', label: 'Borne supérieure N', min: 2, max: 12, step: 1, val: 6}],
+                    setRange: () => { 
+                        xMin = 0.5; xMax = params.N_unif + 0.5; 
+                        discreteValues = Array.from({length: params.N_unif}, (_, i) => i + 1);
+                    },
+                    F: (x) => x < 1 ? 0 : (x > params.N_unif ? 1 : Math.floor(x) / params.N_unif),
+                    Finv: (u) => Math.ceil(u * params.N_unif),
+                    getMoments: () => ({ mean: (params.N_unif + 1)/2, variance: (Math.pow(params.N_unif, 2) - 1)/12 })
+                },
+                binomiale: {
+                    name: "Binomiale ℬ(n, p)",
+                    params: [
+                        {id: 'n', label: 'Essais n', min: 2, max: 15, step: 1, val: 8},
+                        {id: 'p', label: 'Succès p', min: 0.1, max: 0.9, step: 0.05, val: 0.5}
+                    ],
+                    setRange: () => { 
+                        xMin = -0.5; xMax = params.n + 0.5; 
+                        discreteValues = Array.from({length: params.n + 1}, (_, i) => i);
+                    },
+                    F: (x) => {
+                        if (x < 0) return 0; if (x >= params.n) return 1;
+                        let sum = 0; for(let k=0; k<=Math.floor(x); k++) sum += factComb(params.n, k) * Math.pow(params.p, k) * Math.pow(1-params.p, params.n-k);
+                        return sum;
+                    },
+                    Finv: (u) => {
+                        let sum = 0;
+                        for(let k=0; k<=params.n; k++) {
+                            sum += factComb(params.n, k) * Math.pow(params.p, k) * Math.pow(1-params.p, params.n-k);
+                            if (u <= sum) return k;
+                        }
+                        return params.n;
+                    },
+                    getMoments: () => ({ mean: params.n * params.p, variance: params.n * params.p * (1 - params.p) })
+                },
+                geometrique: {
+                    name: "Géométrique 𝒢(p)",
+                    params: [{id: 'p', label: 'Probabilité p', min: 0.1, max: 0.8, step: 0.05, val: 0.4}],
+                    setRange: () => { 
+                        let maxGeom = Math.ceil(Math.log(0.02) / Math.log(1 - params.p));
+                        maxGeom = Math.max(5, Math.min(20, maxGeom));
+                        xMin = 0.5; xMax = maxGeom + 0.5;
+                        discreteValues = Array.from({length: maxGeom}, (_, i) => i + 1);
+                    },
+                    F: (x) => x < 1 ? 0 : 1 - Math.pow(1 - params.p, Math.floor(x)),
+                    Finv: (u) => Math.floor(Math.log(Math.max(1 - u, 1e-10)) / Math.log(1 - params.p)) + 1,
+                    getMoments: () => ({ mean: 1 / params.p, variance: (1 - params.p) / Math.pow(params.p, 2) })
+                },
+                poisson: {
+                    name: "Poisson 𝒫(λ)",
+                    params: [{id: 'lambda', label: 'Intensité λ', min: 0.5, max: 8, step: 0.5, val: 3.0}],
+                    setRange: () => {
+                        let maxPoisson = Math.ceil(params.lambda + 4 * Math.sqrt(params.lambda)); 
+                        xMin = -0.5; xMax = maxPoisson + 0.5;
+                        discreteValues = Array.from({length: maxPoisson + 1}, (_, i) => i);
+                    },
+                    F: (x) => {
+                        if (x < 0) return 0;
+                        let sum = 0; for(let k=0; k<=Math.floor(x); k++) sum += Math.exp(-params.lambda) * Math.pow(params.lambda, k) / fact(k);
+                        return sum;
+                    },
+                    Finv: (u) => {
+                        let sum = 0; let k = 0;
+                        while (true) {
+                            sum += Math.exp(-params.lambda) * Math.pow(params.lambda, k) / fact(k);
+                            if (u <= sum || k > 40) return k;
+                            k++;
+                        }
+                    },
+                    getMoments: () => ({ mean: params.lambda, variance: params.lambda })
+                }
+            }
+        };
+
+        function factComb(n, k) {
+            if (k < 0 || k > n) return 0; if (k === 0 || k === n) return 1;
+            let res = 1; for (let i = 1; i <= k; i++) res = res * (n - i + 1) / i; return res;
+        }
+        function fact(n) {
+            let res = 1; for(let i=2; i<=n; i++) res *= i; return res;
+        }
+
+        function updateLatexTitle() {
+            const titleEl = document.getElementById('latexTitle');
+            katex.render("X = F^{-1}(U) \\text{ depuis } U \\sim \\mathcal{U}([0,1])", titleEl, { throwOnError: false });
+        }
+
+        // --- INTERFACE & INTERACTION ---
+        function setLawType(type) {
+            lawType = type;
+            document.getElementById('btnContinue').className = type === 'continue' ? 'py-2 text-sm font-medium rounded-lg text-center bg-white text-indigo-700 shadow-sm transition' : 'py-2 text-sm font-medium rounded-lg text-center text-gray-600 hover:text-gray-900 transition';
+            document.getElementById('btnDiscrete').className = type === 'discrete' ? 'py-2 text-sm font-medium rounded-lg text-center bg-white text-indigo-700 shadow-sm transition' : 'py-2 text-sm font-medium rounded-lg text-center text-gray-600 hover:text-gray-900 transition';
+            buildLawSelect();
+            handleLawChange();
+        }
+
+        function buildLawSelect() {
+            const select = document.getElementById('lawSelect'); select.innerHTML = '';
+            Object.keys(LAWS[lawType]).forEach(key => {
+                let opt = document.createElement('option'); opt.value = key; opt.innerHTML = LAWS[lawType][key].name; select.appendChild(opt);
+            });
+            currentLaw = select.value;
+        }
+
+        function handleLawChange() {
+            currentLaw = document.getElementById('lawSelect').value;
+            const lawObj = LAWS[lawType][currentLaw];
+            
+            const containerInputs = document.getElementById('dynamicInputs');
+            containerInputs.innerHTML = '';
+            lawObj.params.forEach(p => {
+                params[p.id] = p.val;
+                containerInputs.innerHTML += `
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="font-medium text-gray-600">${p.label}</label>
+                            <span id="val-${p.id}" class="font-mono text-indigo-600">${p.val}</span>
+                        </div>
+                        <input type="range" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}" 
+                            oninput="updateParam('${p.id}', this.value)" class="w-full accent-indigo-500">
+                    </div>`;
+            });
+            resetSimulation();
+        }
+
+        function updateParam(id, val) {
+            params[id] = parseFloat(val);
+            document.getElementById(`val-${id}`).innerText = val;
+            if (currentLaw === 'uniformC' && params.a >= params.b) {
+                if (id === 'a') params.b = params.a + 0.5; else params.a = params.b - 0.5;
+                handleLawChange(); return;
+            }
+            resetSimulation();
+        }
+
+        function updateSpeed(val) {
+            speed = parseInt(val);
+            document.getElementById('speedVal').innerText = `${speed} billes/s`;
+            if (isRunning) { clearInterval(loopInterval); startLoop(); }
+        }
+
+        // --- ENGINE DE SIMULATION ---
+        class MicroBall {
+            constructor(u) {
+                this.u = u; 
+                this.lawObj = LAWS[lawType][currentLaw];
+                this.xDest = this.lawObj.Finv(u);
+                this.step = 'horizontal'; 
+                this.progress = 0; 
+            }
+            update(dt) {
+                this.progress += 2.2 * dt; 
+                if (this.progress >= 1) {
+                    this.progress = 0;
+                    if (this.step === 'horizontal') {
+                        this.step = 'vertical';
+                    } else if (this.step === 'vertical') {
+                        if (this.xDest >= xMin && this.xDest <= xMax) {
+                            storePermanentTrace(this.u, this.xDest);
+                        }
+                        storeBallResult(this.xDest);
+                        return false; 
+                    }
+                }
+                return true;
+            }
+        }
+
+        function storeBallResult(x) {
+            totalBalls++;
+            sumX += x;
+            sumXSquare += (x * x);
+
+            if (lawType === 'continue') {
+                let binSize = (xMax - xMin) / 20;
+                let binIndex = Math.floor((x - xMin) / binSize);
+                if(binIndex >= 0 && binIndex < 20) {
+                    bins[binIndex] = (bins[binIndex] || 0) + 1;
+                }
+            } else {
+                bins[x] = (bins[x] || 0) + 1;
+            }
+
+            if (totalBalls % Math.max(1, Math.floor(speed/3)) === 0 || totalBalls < 5) {
+                updateStatsUI();
+                updateCharts();
+            }
+        }
+
+        function updateStatsUI() {
+            const lawObj = LAWS[lawType][currentLaw];
+            const theoretical = lawObj.getMoments();
+
+            let empMean = sumX / totalBalls;
+            let empVar = Math.max(0, (sumXSquare / totalBalls) - (empMean * empMean));
+
+            document.getElementById('statCount').innerText = totalBalls;
+            
+            if (typeof theoretical.mean === "string") {
+                document.getElementById('theoMean').innerText = theoretical.mean;
+                document.getElementById('theoVar').innerText = theoretical.variance;
+            } else {
+                document.getElementById('theoMean').innerText = theoretical.mean.toFixed(3);
+                document.getElementById('theoVar').innerText = theoretical.variance.toFixed(3);
+            }
+
+            if (totalBalls > 0) {
+                document.getElementById('simMean').innerText = empMean.toFixed(3);
+                document.getElementById('simVar').innerText = empVar.toFixed(3);
+            } else {
+                document.getElementById('simMean').innerText = "-";
+                document.getElementById('simVar').innerText = "-";
+            }
+        }
+
+        function getGraphMetrics() {
+            const graphW = logicalW - PADDING.left - PADDING.right;
+            const graphH = logicalH - PADDING.top - PADDING.bottom;
+            return {
+                toX: (x) => PADDING.left + ((x - xMin) / (xMax - xMin)) * graphW,
+                toY: (u) => PADDING.top + (1 - u) * graphH,
+                graphW, graphH
+            };
+        }
+
+        function storePermanentTrace(u, x) {
+            const m = getGraphMetrics();
+            const uY = m.toY(u); const targetX = m.toX(x);
+            traceCtx.save();
+            traceCtx.strokeStyle = 'rgba(203, 213, 225, 0.04)'; traceCtx.lineWidth = 0.5;
+            traceCtx.beginPath(); traceCtx.moveTo(PADDING.left, uY); traceCtx.lineTo(targetX, uY);      
+            traceCtx.lineTo(targetX, logicalH - PADDING.bottom); traceCtx.stroke(); traceCtx.restore();
+        }
+
+        function drawSceneBG() {
+            bgCtx.clearRect(0, 0, logicalW, logicalH);
+            const m = getGraphMetrics();
+
+            bgCtx.strokeStyle = '#475569'; bgCtx.lineWidth = 1; bgCtx.beginPath();
+            bgCtx.moveTo(PADDING.left, PADDING.top); bgCtx.lineTo(PADDING.left, logicalH - PADDING.bottom);
+            bgCtx.lineTo(logicalW - PADDING.right, logicalH - PADDING.bottom); bgCtx.stroke();
+
+            bgCtx.fillStyle = '#94a3b8'; bgCtx.font = '12px sans-serif'; bgCtx.textAlign = 'right';
+            bgCtx.fillText("1.0 (U)", PADDING.left - 8, PADDING.top + 4);
+            bgCtx.fillText("0.0", PADDING.left - 8, logicalH - PADDING.bottom + 4);
+
+            const lawObj = LAWS[lawType][currentLaw];
+            lawObj.setRange(); 
+
+            bgCtx.strokeStyle = '#6366f1'; bgCtx.lineWidth = 2.5; bgCtx.beginPath();
+
+            if (lawType === 'continue') {
+                for (let pX = 0; pX <= m.graphW; pX++) {
+                    let mathX = xMin + (pX / m.graphW) * (xMax - xMin);
+                    bgCtx.lineTo(m.toX(mathX), m.toY(lawObj.F(mathX)));
+                }
+                bgCtx.stroke();
+            } else {
+                let lastYPixel = m.toY(0);
+                discreteValues.forEach((val) => {
+                    let nextYPixel = m.toY(lawObj.F(val));
+                    bgCtx.beginPath(); bgCtx.moveTo(m.toX(val - 0.5), lastYPixel); bgCtx.lineTo(m.toX(val), lastYPixel); bgCtx.stroke();
+                    bgCtx.fillStyle = '#6366f1'; bgCtx.beginPath(); bgCtx.arc(m.toX(val), nextYPixel, 3.5, 0, 2*Math.PI); bgCtx.fill();
+                    lastYPixel = nextYPixel;
+                });
+                bgCtx.beginPath(); bgCtx.moveTo(m.toX(discreteValues[discreteValues.length-1]), lastYPixel); bgCtx.lineTo(logicalW - PADDING.right, lastYPixel); bgCtx.stroke();
+            }
+        }
+
+        function drawActiveBalls() {
+            ballCtx.clearRect(0, 0, logicalW, logicalH);
+            const m = getGraphMetrics();
+
+            activeBalls.forEach((ball) => {
+                const clampedX = Math.max(xMin, Math.min(xMax, ball.xDest));
+                const uY = m.toY(ball.u); const targetX = m.toX(clampedX);
+                const curveY = m.toY(ball.lawObj.F(clampedX));
+                let currentX, currentY;
+
+                ballCtx.save();
+                if (ball.step === 'horizontal') {
+                    currentX = PADDING.left + ball.progress * (targetX - PADDING.left);
+                    ballCtx.strokeStyle = 'rgba(251, 146, 60, 0.3)'; ballCtx.lineWidth = 1;
+                    ballCtx.beginPath(); ballCtx.moveTo(PADDING.left, uY); ballCtx.lineTo(currentX, uY); ballCtx.stroke();
+                    ballCtx.fillStyle = '#fb923c'; currentY = uY;
+                } else if (ball.step === 'vertical') {
+                    currentX = targetX; currentY = curveY + ball.progress * (logicalH - PADDING.bottom - curveY);
+                    ballCtx.strokeStyle = 'rgba(52, 211, 153, 0.3)'; ballCtx.lineWidth = 1;
+                    ballCtx.beginPath(); ballCtx.moveTo(targetX, curveY); ballCtx.lineTo(targetX, currentY); ballCtx.stroke();
+                    ballCtx.fillStyle = '#34d399';
+                }
+                ballCtx.shadowBlur = 4; ballCtx.shadowColor = ballCtx.fillStyle;
+                ballCtx.beginPath(); ballCtx.arc(currentX, currentY, 3, 0, 2 * Math.PI); ballCtx.fill();
+                ballCtx.restore();
+            });
+        }
+
+        function startLoop() {
+            loopInterval = setInterval(() => {
+                if (activeBalls.length < 25) activeBalls.push(new MicroBall(Math.random()));
+            }, 1000 / speed);
+        }
+
+        function toggleSimulation() {
+            const btn = document.getElementById('btnPlay');
+            if (!isRunning) {
+                isRunning = true; btn.innerHTML = '<span>⏸ Pause</span>';
+                btn.className = "flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 px-4 rounded-xl transition shadow-sm flex justify-center items-center gap-2";
+                startLoop();
+            } else {
+                isRunning = false; btn.innerHTML = '<span>▶ Lancer</span>';
+                btn.className = "flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-xl transition shadow-sm flex justify-center items-center gap-2";
+                clearInterval(loopInterval);
+            }
+        }
+
+        function resetSimulation() {
+            if (isRunning) toggleSimulation();
+            totalBalls = 0; sumX = 0; sumXSquare = 0; bins = {}; activeBalls = [];
+            traceCtx.clearRect(0, 0, logicalW, logicalH);
+            LAWS[lawType][currentLaw].setRange();
+            updateStatsUI(); drawSceneBG(); drawActiveBalls(); initChartAnalysis();
+        }
+
+        let lastTime = performance.now();
+        function ticket(currentTime) {
+            const dt = Math.min((currentTime - lastTime) / 1000, 0.1); lastTime = currentTime;
+            if (isRunning && activeBalls.length > 0) {
+                for (let i = activeBalls.length - 1; i >= 0; i--) {
+                    if (!activeBalls[i].update(dt)) activeBalls.splice(i, 1);
+                }
+            }
+            drawActiveBalls(); requestAnimationFrame(ticket);
+        }
+
+        // --- CHART.JS ---
+        function initChartAnalysis() {
+            if (analysisChart) analysisChart.destroy();
+            const ctxChart = document.getElementById('chartAnalysis').getContext('2d');
+            let labels = []; let theoreticalData = [];
+            const lawObj = LAWS[lawType][currentLaw];
+
+            if (lawType === 'continue') {
+                let binSize = (xMax - xMin) / 20;
+                for (let i = 0; i < 20; i++) {
+                    let midX = xMin + (i + 0.5) * binSize;
+                    labels.push(midX.toFixed(2)); theoreticalData.push(lawObj.pdf(midX));
+                }
+            } else {
+                discreteValues.forEach(val => {
+                    labels.push(`k=${val}`);
+                    let pk = lawObj.F(val) - lawObj.F(val - 0.5); 
+                    theoreticalData.push(pk);
+                });
+            }
+
+            analysisChart = new Chart(ctxChart, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Fréquence de la Simulation', data: Array(labels.length).fill(0), backgroundColor: 'rgba(52, 211, 153, 0.7)', borderColor: '#10b981', borderWidth: 1 },
+                        { label: lawType === 'continue' ? 'Densité Théorique f(x)' : 'Masse de probabilité P(X=k)', data: theoreticalData, type: lawType === 'continue' ? 'line' : 'bar', borderColor: '#6366f1', borderWidth: 2, pointRadius: 1, tension: 0.15, fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } },
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (!analysisChart) return;
+            let empiricalData = [];
+            if (lawType === 'continue') {
+                let binSize = (xMax - xMin) / 20;
+                for (let i = 0; i < 20; i++) empiricalData.push((bins[i] || 0) / totalBalls / binSize);
+            } else {
+                discreteValues.forEach(val => empiricalData.push((bins[val] || 0) / totalBalls));
+            }
+            analysisChart.data.datasets[0].data = empiricalData;
+            analysisChart.update('none');
+        }
+
+        function resizeAllCanvases() {
+            const rect = container.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+            logicalW = rect.width; logicalH = rect.height;
+            [bgCanvas, traceCanvas, ballCanvas].forEach(canv => {
+                canv.width = logicalW * dpr; canv.height = logicalH * dpr;
+                const ctx = canv.getContext('2d'); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(dpr, dpr);
+            });
+        }
+
+        window.addEventListener('resize', () => { resizeAllCanvases(); drawSceneBG(); });
+
+        setLawType('continue'); 
+        resizeAllCanvases(); 
+        drawSceneBG(); 
+        updateLatexTitle();
+        requestAnimationFrame(ticket);
+    </script>
+</body>
+</html>

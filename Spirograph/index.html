@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpiroMaths v3 - Arithmétique & Engrenages</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --panel-bg: #ffffff;
+            --primary: #1a73e8;
+            --secondary: #ea4335;
+            --text-main: #202124;
+            --border: #dadce0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout global split-screen */
+        .app-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Zone de dessin (Canvases superposés) */
+        .visualization-space {
+            flex: 1;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset -2px 0 8px rgba(0,0,0,0.05);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 600px;
+            height: 600px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #wheelCanvas {
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #trailCanvas {
+            z-index: 1;
+        }
+
+        /* Panneau de configuration latéral */
+        .control-panel {
+            width: 420px;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #5f6368;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #5f6368;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+        }
+
+        /* Groupe de contrôles */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .control-label span.value {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        input[type="range"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        /* Boutons d'action */
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #btnPlay {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #btnPlay:hover { background-color: #1557b0; }
+
+        #btnReset {
+            background-color: #f1f3f4;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        #btnReset:hover { background-color: #e8eaed; }
+
+        /* Tableau de bord Arithmétique (HUD) */
+        .hud-panel {
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .hud-item span.label { color: #5f6368; }
+        .hud-item span.calc { font-weight: 600; font-family: monospace; font-size: 1rem;}
+
+        .counter-box {
+            background: #e8f0fe;
+            border: 1px solid #aecbfa;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            color: #174ea6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Espace de rendu graphique -->
+    <div class="visualization-space">
+        <div class="canvas-wrapper">
+            <canvas id="trailCanvas" width="600" height="600"></canvas>
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
+        </div>
+    </div>
+
+    <!-- Panneau de configuration arithmétique -->
+    <div class="control-panel">
+        <div>
+            <h1>SpiroMaths v3</h1>
+            <div class="subtitle">Laboratoire d'Arithmétique & Trochoïdes</div>
+        </div>
+
+        <!-- Section 1 : Paramètres des roues -->
+        <div class="control-group">
+            <div class="section-title">Configuration Mécanique</div>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Grande Roue fixe (R) :</span>
+                    <span id="lblR" class="value">120 dents</span>
+                </div>
+                <input type="range" id="paramR" min="20" max="200" step="1" value="120">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Petite Roue mobile (r) :</span>
+                    <span id="lblr" class="value">50 dents</span>
+                </div>
+                <input type="range" id="paramr" min="5" max="120" step="1" value="50">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Position du Crayon (d) :</span>
+                    <span id="lbld" class="value">60 %</span>
+                </div>
+                <input type="range" id="paramd" min="10" max="100" step="1" value="60">
+            </div>
+        </div>
+
+        <!-- Section 2 : Options Graphiques -->
+        <div class="control-group">
+            <div class="section-title">Options Graphiques</div>
+            
+            <div class="control-group">
+                <label class="control-label">Type d'engrènement :</label>
+                <select id="paramMode">
+                    <option value="interne">Mode INTERNE (Hypotrochoïde)</option>
+                    <option value="externe">Mode EXTERNE (Épitrochoïde)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">👁️ Style visuel :</label>
+                <select id="viewMode">
+                    <option value="gears">Engrenages mécaniques (Dents)</option>
+                    <option value="circle">Cercles géométriques (Lisses)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Vitesse de traçage :</span>
+                    <span id="lblSpeed" class="value">0.5 dent/cadre</span>
+                </div>
+                <input type="range" id="paramSpeed" min="0.05" max="2" step="0.05" value="0.5">
+            </div>
+        </div>
+
+        <!-- Section 3 : Actions -->
+        <div class="actions-row">
+            <button id="btnPlay">Démarrer</button>
+            <button id="btnReset">Réinitialiser</button>
+        </div>
+
+        <!-- Section 4 : Tableau de Bord Arithmétique -->
+        <div class="control-group">
+            <div class="section-title">Analyse Arithmétique (3ème)</div>
+            <div class="hud-panel">
+                <div class="hud-item">
+                    <span class="label">PGCD (R, r) :</span>
+                    <span id="hudPGCD" class="calc">10</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">PPCM (R, r) :</span>
+                    <span id="hudPPCM" class="calc">300 dents</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">Fraction irréductible R/r :</span>
+                    <span id="hudFraction" class="calc">12 / 5</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">Nombre de pétales théorique :</span>
+                    <span id="hudPetals" class="calc" style="color: var(--primary);">12</span>
+                </div>
+                
+                <div class="counter-box">
+                    ⚙️ Engrènement : <span id="toothCounter">0</span> / <span id="totalTeeth">300</span> dents
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialisation des éléments
+    const trailCanvas = document.getElementById('trailCanvas');
+    const wheelCanvas = document.getElementById('wheelCanvas');
+    const ctxTrail = trailCanvas.getContext('2d');
+    const ctxWheel = wheelCanvas.getContext('2d');
+
+    const paramR = document.getElementById('paramR');
+    const paramr = document.getElementById('paramr');
+    const paramd = document.getElementById('paramd');
+    const paramMode = document.getElementById('paramMode');
+    const viewMode = document.getElementById('viewMode');
+    const paramSpeed = document.getElementById('paramSpeed');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnReset = document.getElementById('btnReset');
+
+    const lblR = document.getElementById('lblR');
+    const lblr = document.getElementById('lblr');
+    const lbld = document.getElementById('lbld');
+    const lblSpeed = document.getElementById('lblSpeed');
+    const hudPGCD = document.getElementById('hudPGCD');
+    const hudPPCM = document.getElementById('hudPPCM');
+    const hudFraction = document.getElementById('hudFraction');
+    const hudPetals = document.getElementById('hudPetals');
+    const toothCounter = document.getElementById('toothCounter');
+    const totalTeeth = document.getElementById('totalTeeth');
+
+    let R = parseInt(paramR.value);
+    let r = parseInt(paramr.value);
+    let dPercent = parseInt(paramd.value);
+    let mode = paramMode.value;
+    let styleMode = viewMode.value;
+    let speedTeethPerFrame = parseFloat(paramSpeed.value);
+
+    let theta = 0;
+    let isPlaying = false;
+    let animationId = null;
+    let lastPenX = null;
+    let lastPenY = null;
+    let scale = 1;
+
+    // Arithmétique
+    function mathGCD(a, b) {
+        return b === 0 ? a : mathGCD(b, a % b);
+    }
+
+    function mathLCM(a, b) {
+        return (a * b) / mathGCD(a, b);
+    }
+
+    function updateArithmetic() {
+        R = parseInt(paramR.value);
+        r = parseInt(paramr.value);
+        dPercent = parseInt(paramd.value);
+        mode = paramMode.value;
+        styleMode = viewMode.value;
+        speedTeethPerFrame = parseFloat(paramSpeed.value);
+
+        lblR.textContent = `${R} dents`;
+        lblr.textContent = `${r} dents`;
+        lbld.textContent = `${dPercent} %`;
+        lblSpeed.textContent = `${speedTeethPerFrame} dent/cadre`;
+
+        const pgcd = mathGCD(R, r);
+        const ppcm = mathLCM(R, r);
+        const numSimp = R / pgcd;
+        const denSimp = r / pgcd;
+
+        hudPGCD.textContent = pgcd;
+        hudPPCM.textContent = `${ppcm} dents`;
+        hudFraction.textContent = `${numSimp} / ${denSimp}`;
+        hudPetals.textContent = numSimp;
+        totalTeeth.textContent = ppcm;
+
+        const maxRadiusNeeded = (mode === 'interne') ? R : (R + 2 * r);
+        const size = Math.min(trailCanvas.width, trailCanvas.height);
+        scale = (size / 2 - 30) / maxRadiusNeeded; 
+    }
+
+    // Géométrie fondamentale
+    function computeGeometry(t) {
+        const cx0 = trailCanvas.width / 2;
+        const cy0 = trailCanvas.height / 2;
+        
+        const R_px = R * scale;
+        const r_px = r * scale;
+        const d_px = (dPercent / 100) * r_px;
+
+        let cx, cy, mx, my, gearRotation;
+
+        if (mode === 'interne') {
+            cx = cx0 + (R_px - r_px) * Math.cos(t);
+            cy = cy0 + (R_px - r_px) * Math.sin(t);
+            mx = cx + d_px * Math.cos(((R - r) / r) * t);
+            my = cy - d_px * Math.sin(((R - r) / r) * t);
+            gearRotation = -((R - r) / r) * t;
+        } else {
+            cx = cx0 + (R_px + r_px) * Math.cos(t);
+            cy = cy0 + (R_px + r_px) * Math.sin(t);
+            mx = cx - d_px * Math.cos(((R + r) / r) * t);
+            my = cy - d_px * Math.sin(((R + r) / r) * t);
+            gearRotation = Math.PI - ((R + r) / r) * t;
+        }
+
+        return { cx, cy, mx, my, gearRotation };
+    }
+
+    // Dessin mécanique proportionnel
+    function drawGear(ctx, cx, cy, radius, numTeeth, rotationAngle, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        if (styleMode === 'circle') return;
+
+        const toothDepth = 5; 
+        for (let i = 0; i < numTeeth; i++) {
+            let angle = (i * 2 * Math.PI / numTeeth) + rotationAngle;
+            
+            let xStart = cx + radius * Math.cos(angle);
+            let yStart = cy + radius * Math.sin(angle);
+            let xEnd = cx + (radius + toothDepth) * Math.cos(angle);
+            let yEnd = cy + (radius + toothDepth) * Math.sin(angle);
+            
+            ctx.beginPath();
+            ctx.moveTo(xStart, yStart);
+            ctx.lineTo(xEnd, yEnd);
+            ctx.stroke();
+        }
+    }
+
+    // Boucle de rendu
+    function renderLoop() {
+        if (!isPlaying) return;
+
+        const ppcm = mathLCM(R, r);
+        const dTheta = (speedTeethPerFrame * 2 * Math.PI) / R;
+        let currentTeeth = Math.floor((theta / (2 * Math.PI)) * R);
+
+        if (currentTeeth >= ppcm) {
+            toothCounter.textContent = ppcm;
+            isPlaying = false;
+            btnPlay.textContent = "Terminé !";
+            return;
+        }
+
+        toothCounter.textContent = currentTeeth;
+
+        const pos = computeGeometry(theta);
+
+        if (lastPenX !== null && lastPenY !== null) {
+            ctxTrail.strokeStyle = '#6200ee';
+            ctxTrail.lineWidth = 2;
+            ctxTrail.beginPath();
+            ctxTrail.moveTo(lastPenX, lastPenY);
+            ctxTrail.lineTo(pos.mx, pos.my);
+            ctxTrail.stroke();
+        }
+        lastPenX = pos.mx;
+        lastPenY = pos.my;
+
+        ctxWheel.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+        
+        const cx0 = wheelCanvas.width / 2;
+        const cy0 = wheelCanvas.height / 2;
+
+        drawGear(ctxWheel, cx0, cy0, R * scale, R, 0, '#1a73e8');
+        drawGear(ctxWheel, pos.cx, pos.cy, r * scale, r, pos.gearRotation, '#ea4335');
+
+        ctxWheel.strokeStyle = '#5f6368';
+        ctxWheel.lineWidth = 1;
+        ctxWheel.beginPath();
+        ctxWheel.moveTo(pos.cx, pos.cy);
+        ctxWheel.lineTo(pos.mx, pos.my);
+        ctxWheel.stroke();
+
+        ctxWheel.fillStyle = '#34a853';
+        ctxWheel.beginPath();
+        ctxWheel.arc(pos.mx, pos.my, 4, 0, 2 * Math.PI);
+        ctxWheel.fill();
+
+        theta += dTheta;
+
+        animationId = requestAnimationFrame(renderLoop);
+    }
+
+    // Réinitialisation de l'état mécanique
+    function resetSpiro() {
+        isPlaying = false;
+        if (animationId) cancelAnimationFrame(animationId);
+        btnPlay.textContent = "Démarrer";
+        
+        ctxTrail.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+        ctxWheel.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+        
+        theta = 0;
+        lastPenX = null;
+        lastPenY = null;
+        toothCounter.textContent = "0";
+        
+        updateArithmetic();
+        
+        const pos = computeGeometry(0);
+        const cx0 = wheelCanvas.width / 2;
+        const cy0 = wheelCanvas.height / 2;
+        drawGear(ctxWheel, cx0, cy0, R * scale, R, 0, '#1a73e8');
+        drawGear(ctxWheel, pos.cx, pos.cy, r * scale, r, pos.gearRotation, '#ea4335');
+        ctxWheel.beginPath();
+        ctxWheel.moveTo(pos.cx, pos.cy);
+        ctxWheel.lineTo(pos.mx, pos.my);
+        ctxWheel.stroke();
+        ctxWheel.fillStyle = '#34a853';
+        ctxWheel.beginPath();
+        ctxWheel.arc(pos.mx, pos.my, 4, 0, 2 * Math.PI);
+        ctxWheel.fill();
+    }
+
+    // Événements
+    btnPlay.addEventListener('click', () => {
+        if (btnPlay.textContent === "Terminé !") {
+            resetSpiro();
+            return;
+        }
+        isPlaying = !isPlaying;
+        btnPlay.textContent = isPlaying ? "Pause" : "Reprendre";
+        if (isPlaying) renderLoop();
+    });
+
+    btnReset.addEventListener('click', resetSpiro);
+
+    [paramR, paramr, paramd, paramMode, viewMode, paramSpeed].forEach(element => {
+        element.addEventListener('input', () => {
+            if (!isPlaying) {
+                resetSpiro();
+            } else {
+                updateArithmetic();
+            }
+        });
+    });
+
+    // Configuration de départ
+    resetSpiro();
+</script>
+
+</body>
+</html>

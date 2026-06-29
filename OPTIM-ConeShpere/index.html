@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O.P.T.I.M. - Optimisation Géométrique</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-gray-800 p-4 shadow-md border-b border-gray-700 text-center">
+        <h1 class="text-2xl font-black tracking-widest text-indigo-400 font-mono">
+            O.P.T.I.M.
+        </h1>
+        <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider font-medium">
+            <span class="text-indigo-400 font-bold">O</span>ptimisation 
+            <span class="text-indigo-400 font-bold">P</span>ar 
+            <span class="text-indigo-400 font-bold">T</span>rois dimensions de l’
+            <span class="text-indigo-400 font-bold">I</span>nscription 
+            <span class="text-indigo-400 font-bold">M</span>athématique
+        </p>
+    </header>
+
+    <main class="flex-1 p-4 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <div class="flex flex-col gap-4">
+            <div class="bg-gray-800 p-3 rounded-xl shadow-lg border border-gray-700 flex flex-col h-[380px]">
+                <h2 class="text-sm font-semibold text-gray-400 mb-2">Vue 3D Interactive (avec Hauteur et Rayon pivotants)</h2>
+                <div id="threejs-container" class="w-full flex-1 rounded-lg overflow-hidden bg-gray-950 relative"></div>
+            </div>
+            
+            <div class="bg-gray-800 p-3 rounded-xl shadow-lg border border-gray-700 flex flex-col h-[320px]">
+                <h2 class="text-sm font-semibold text-gray-400 mb-2">Coupe 2D Verticale & Cotes Géométriques</h2>
+                <canvas id="canvas2d" class="w-full h-full bg-gray-950 rounded-lg"></canvas>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <div class="bg-gray-800 p-5 rounded-xl shadow-lg border border-gray-700 space-y-4">
+                <h2 class="text-sm font-semibold text-gray-400">Paramètres et Calculs ($R = 1$)</h2>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <label for="height-slider" class="font-medium text-indigo-300">Hauteur du cône ($h$) :</label>
+                        <span id="height-val" class="font-mono bg-gray-900 px-2 py-0.5 rounded text-indigo-400 font-bold">1.33</span>
+                    </div>
+                    <input type="range" id="height-slider" min="0.01" max="1.99" step="0.01" value="1.33" 
+                           class="w-full accent-indigo-500 bg-gray-700 h-2 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <span class="text-xs text-gray-400 block">Rayon base cône ($r$)</span>
+                        <span id="cone-r-val" class="text-lg font-mono font-semibold text-emerald-400">0.94</span>
+                    </div>
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <span class="text-xs text-gray-400 block">Rapport des Volumes</span>
+                        <span id="ratio-val" class="text-lg font-mono font-semibold text-amber-400">29.63 %</span>
+                    </div>
+                </div>
+                
+                <div id="optimal-alert" class="hidden text-center text-xs bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 py-1.5 rounded-lg font-medium animate-pulse">
+                    ✨ Position Optimale Atteinte ! ($h = \frac{4}{3}R \approx 1.33$)
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-3 rounded-xl shadow-lg border border-gray-700 flex flex-col flex-1 min-h-[250px]">
+                <h2 class="text-sm font-semibold text-gray-400 mb-2">Courbe du Rapport des Volumes $V_{cône} / V_{sphère}$</h2>
+                <canvas id="canvas-graph" class="w-full flex-1 bg-gray-950 rounded-lg"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-center p-3 text-xs text-gray-500 border-t border-gray-700">
+        Créé par Olivier Thöni, vibe-codé avec l’aide de Gemini 3.5 flash
+    </footer>
+
+    <script>
+        // --- CONSTANTES ET ETAT ---
+        const R = 1.0; 
+        let h = 1.333; 
+
+        // Eléments DOM
+        const slider = document.getElementById('height-slider');
+        const heightVal = document.getElementById('height-val');
+        const coneRVal = document.getElementById('cone-r-val');
+        const ratioVal = document.getElementById('ratio-val');
+        const optimalAlert = document.getElementById('optimal-alert');
+
+        // Canvases
+        const canvas2d = document.getElementById('canvas2d');
+        const ctx2d = canvas2d.getContext('2d');
+        const canvasGraph = document.getElementById('canvas-graph');
+        const ctxGraph = canvasGraph.getContext('2d');
+
+        // --- MATHS ---
+        function getConeRadius(h) {
+            return Math.sqrt(Math.max(0, 2 * R * h - h * h));
+        }
+
+        function getVolumeRatio(h) {
+            return (2 * h * h - h * h * h) / 4;
+        }
+
+        // --- INITIALISATION THREE.JS (3D) ---
+        const container3D = document.getElementById('threejs-container');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(45, container3D.clientWidth / container3D.clientHeight, 0.1, 10);
+        camera.position.set(2.2, 1.4, 2.2);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container3D.clientWidth, container3D.clientHeight);
+        container3D.appendChild(renderer.domElement);
+
+        // Lumières
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 5, 5);
+        scene.add(dirLight);
+
+        // Groupe pivotant global pour que tout tourne ensemble (cône + lignes + axes)
+        const rotationGroup = new THREE.Group();
+        scene.add(rotationGroup);
+
+        // Sphère (Filaire + Transparent)
+        const sphereGeo = new THREE.SphereGeometry(R, 32, 32);
+        const sphereMat = new THREE.MeshPhongMaterial({
+            color: 0x6366f1,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.12
+        });
+        const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+        rotationGroup.add(sphereMesh);
+
+        // Contour de la sphère
+        const edgeGeo = new THREE.EdgesGeometry(sphereGeo);
+        const edgeMat = new THREE.LineBasicMaterial({ color: 0x4f46e5, opacity: 0.3, transparent: true });
+        const sphereEdges = new THREE.LineSegments(edgeGeo, edgeMat);
+        rotationGroup.add(sphereEdges);
+
+        // Éléments dynamiques
+        let coneMesh;
+        let axisGroup = new THREE.Group();
+        rotationGroup.add(axisGroup);
+
+        function updateCone3D() {
+            // Nettoyage ancien cône
+            if (coneMesh) rotationGroup.remove(coneMesh);
+            
+            // Nettoyage anciennes lignes de côtes 3D
+            while(axisGroup.children.length > 0){
+                axisGroup.remove(axisGroup.children[0]);
+            }
+
+            const rCone = getConeRadius(h);
+            
+            // Cône
+            const coneGeo = new THREE.ConeGeometry(rCone, h, 32);
+            const coneMat = new THREE.MeshPhongMaterial({
+                color: 0x10b981,
+                transparent: true,
+                opacity: 0.6,
+                side: THREE.DoubleSide
+            });
+            coneMesh = new THREE.Mesh(coneGeo, coneMat);
+            coneMesh.position.y = R - h / 2;
+            rotationGroup.add(coneMesh);
+
+            // --- AJOUT DES VECTEURS ET TRACÉS DE CÔTES EN 3D ---
+            // Ligne Hauteur (Axe central du cône : du sommet (0, R, 0) à la base (0, R - h, 0))
+            const hPoints = [new THREE.Vector3(0, R, 0), new THREE.Vector3(0, R - h, 0)];
+            const hGeo = new THREE.BufferGeometry().setFromPoints(hPoints);
+            const hMat = new THREE.LineBasicMaterial({ color: 0x6366f1, linewidth: 2 });
+            const hLine = new THREE.Line(hGeo, hMat);
+            axisGroup.add(hLine);
+
+            // Ligne Rayon (De la base centrale (0, R - h, 0) vers le bord de la base (rCone, R - h, 0))
+            const rPoints = [new THREE.Vector3(0, R - h, 0), new THREE.Vector3(rCone, R - h, 0)];
+            const rGeo = new THREE.BufferGeometry().setFromPoints(rPoints);
+            const rMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
+            const rLine = new THREE.Line(rGeo, rMat);
+            axisGroup.add(rLine);
+
+            // Petites flèches/indicateurs aux extrémités pour le style
+            const topDotGeo = new THREE.SphereGeometry(0.02, 8, 8);
+            const topDotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const topDot = new THREE.Mesh(topDotGeo, topDotMat);
+            topDot.position.set(0, R, 0);
+            axisGroup.add(topDot);
+
+            const baseDot = topDot.clone();
+            baseDot.position.set(0, R - h, 0);
+            axisGroup.add(baseDot);
+
+            const rDot = topDot.clone();
+            rDot.material = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+            rDot.position.set(rCone, R - h, 0);
+            axisGroup.add(rDot);
+        }
+
+        // --- DESSIN 2D (COUPE AVEC ANNOTATIONS DE TEXTE) ---
+        function resizeCanvases() {
+            canvas2d.width = canvas2d.clientWidth * window.devicePixelRatio;
+            canvas2d.height = canvas2d.clientHeight * window.devicePixelRatio;
+            canvasGraph.width = canvasGraph.clientWidth * window.devicePixelRatio;
+            canvasGraph.height = canvasGraph.clientHeight * window.devicePixelRatio;
+        }
+
+        function draw2D() {
+            const w = canvas2d.width;
+            const hCanvas = canvas2d.height;
+            ctx2d.clearRect(0, 0, w, hCanvas);
+            
+            const scale = Math.min(w, hCanvas) * 0.38; 
+            const cx = w / 2;
+            const cy = hCanvas / 2;
+
+            // Dessin Sphère (Cercle)
+            ctx2d.beginPath();
+            ctx2d.arc(cx, cy, R * scale, 0, 2 * Math.PI);
+            ctx2d.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+            ctx2d.lineWidth = 2;
+            ctx2d.stroke();
+
+            // Calculs géométriques
+            const rCone = getConeRadius(h);
+            const topY = cy - R * scale;
+            const baseY = topY + h * scale;
+            const leftX = cx - rCone * scale;
+            const rightX = cx + rCone * scale;
+
+            // Dessin Cône Triangle
+            ctx2d.beginPath();
+            ctx2d.moveTo(cx, topY);
+            ctx2d.lineTo(rightX, baseY);
+            ctx2d.lineTo(leftX, baseY);
+            ctx2d.closePath();
+            ctx2d.fillStyle = 'rgba(16, 185, 129, 0.25)';
+            ctx2d.fill();
+            ctx2d.strokeStyle = '#10b981';
+            ctx2d.lineWidth = 3;
+            ctx2d.stroke();
+
+            // --- CÔTES ET ANNOTATIONS GÉOMÉTRIQUES EN 2D ---
+            ctx2d.lineWidth = 2;
+            ctx2d.font = Math.round(11 * window.devicePixelRatio) + 'px monospace';
+
+            // Flèche Hauteur h (Tracée légèrement décalée à gauche de l'axe central)
+            const offsetH = 15 * window.devicePixelRatio;
+            ctx2d.beginPath();
+            ctx2d.moveTo(cx - offsetH, topY);
+            ctx2d.lineTo(cx - offsetH, baseY);
+            ctx2d.strokeStyle = '#6366f1';
+            ctx2d.stroke();
+
+            // Flèches d'extrémité pour h
+            drawArrowhead(ctx2d, cx - offsetH, topY, -Math.PI/2, '#6366f1');
+            drawArrowhead(ctx2d, cx - offsetH, baseY, Math.PI/2, '#6366f1');
+
+            // Texte h
+            ctx2d.fillStyle = '#a5b4fc';
+            ctx2d.textAlign = 'right';
+            ctx2d.fillText(`h = ${h.toFixed(2)}`, cx - offsetH - 8, (topY + baseY) / 2 + 4);
+
+            // Flèche Rayon r (Sur la ligne de base, du centre vers la droite)
+            ctx2d.beginPath();
+            ctx2d.moveTo(cx, baseY);
+            ctx2d.lineTo(rightX, baseY);
+            ctx2d.strokeStyle = '#f59e0b';
+            ctx2d.stroke();
+
+            // Flèche d'extrémité pour r
+            drawArrowhead(ctx2d, rightX, baseY, 0, '#f59e0b');
+
+            // Points d'ancrage
+            ctx2d.fillStyle = '#ffffff';
+            ctx2d.beginPath(); ctx2d.arc(cx, baseY, 3, 0, 2*Math.PI); ctx2d.fill();
+
+            // Texte r
+            ctx2d.fillStyle = '#fde047';
+            ctx2d.textAlign = 'center';
+            ctx2d.fillText(`r = ${rCone.toFixed(2)}`, (cx + rightX) / 2, baseY - 8);
+        }
+
+        function drawArrowhead(ctx, x, y, angle, color) {
+            const size = 5 * window.devicePixelRatio;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-size, -size/1.5);
+            ctx.lineTo(-size, size/1.5);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // --- DESSIN GRAPHIQUE ---
+        function drawGraph() {
+            const w = canvasGraph.width;
+            const hCanvas = canvasGraph.height;
+            ctxGraph.clearRect(0, 0, w, hCanvas);
+
+            const padding = 40 * window.devicePixelRatio;
+            const graphW = w - 2 * padding;
+            const graphH = hCanvas - 2 * padding;
+
+            // Axes
+            ctxGraph.beginPath();
+            ctxGraph.moveTo(padding, padding);
+            ctxGraph.lineTo(padding, hCanvas - padding);
+            ctxGraph.lineTo(w - padding, hCanvas - padding);
+            ctxGraph.strokeStyle = '#4b5563';
+            ctxGraph.lineWidth = 2;
+            ctxGraph.stroke();
+
+            // Tracé Courbe
+            ctxGraph.beginPath();
+            for (let xStr = 0; xStr <= graphW; xStr++) {
+                const pctX = xStr / graphW;
+                const localH = pctX * 2.0; 
+                const ratio = getVolumeRatio(localH);
+
+                const screenX = padding + xStr;
+                const screenY = (hCanvas - padding) - (ratio / 0.35) * graphH;
+
+                if (xStr === 0) ctxGraph.moveTo(screenX, screenY);
+                else ctxGraph.lineTo(screenX, screenY);
+            }
+            ctxGraph.strokeStyle = '#6366f1';
+            ctxGraph.lineWidth = 3;
+            ctxGraph.stroke();
+
+            // Point Mobile
+            const currentRatio = getVolumeRatio(h);
+            const ptX = padding + (h / 2.0) * graphW;
+            const ptY = (hCanvas - padding) - (currentRatio / 0.35) * graphH;
+
+            ctxGraph.beginPath();
+            ctxGraph.arc(ptX, ptY, 6 * window.devicePixelRatio, 0, 2 * Math.PI);
+            ctxGraph.fillStyle = '#10b981';
+            ctxGraph.fill();
+            ctxGraph.strokeStyle = '#ffffff';
+            ctxGraph.lineWidth = 2;
+            ctxGraph.stroke();
+
+            // Légendes
+            ctxGraph.fillStyle = '#9ca3af';
+            ctxGraph.font = Math.round(11 * window.devicePixelRatio) + 'px monospace';
+            ctxGraph.textAlign = 'center';
+            ctxGraph.fillText("h=0", padding, hCanvas - padding + 20 * window.devicePixelRatio);
+            ctxGraph.fillText("h=2R (Max)", padding + graphW, hCanvas - padding + 20 * window.devicePixelRatio);
+            ctxGraph.textAlign = 'left';
+            ctxGraph.fillText("V_cône / V_sphère", padding, padding - 12 * window.devicePixelRatio);
+        }
+
+        // --- MISE À JOUR GLOBAL ---
+        function updateAll() {
+            h = parseFloat(slider.value);
+            const rCone = getConeRadius(h);
+            const ratio = getVolumeRatio(h);
+
+            // Interface Textuelle
+            heightVal.innerText = h.toFixed(2);
+            coneRVal.innerText = rCone.toFixed(2);
+            ratioVal.innerText = (ratio * 100).toFixed(2) + " %";
+
+            // Alerte Optimum
+            if (Math.abs(h - 1.33) < 0.02) {
+                optimalAlert.classList.remove('hidden');
+            } else {
+                optimalAlert.classList.add('hidden');
+            }
+
+            // Rafraîchissement des modules graphiques
+            updateCone3D();
+            draw2D();
+            drawGraph();
+        }
+
+        // --- ENREGISTREMENT ET ÉCOUTEURS ---
+        slider.addEventListener('input', updateAll);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container3D.clientWidth / container3D.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container3D.clientWidth, container3D.clientHeight);
+            
+            resizeCanvases();
+            updateAll();
+        });
+
+        // Boucle d'animation (rotation automatique uniforme du groupe complet)
+        function animate() {
+            requestAnimationFrame(animate);
+            rotationGroup.rotation.y += 0.005; 
+            renderer.render(scene, camera);
+        }
+
+        // Lancement
+        resizeCanvases();
+        updateAll();
+        animate();
+
+    </script>
+</body>
+</html>

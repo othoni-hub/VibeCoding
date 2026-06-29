@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O.S.C.A.R. - Studio</title>
+    <!-- Tailwind CSS pour le style moderne -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+        }
+        input[type="range"] {
+            accent-color: #6366f1;
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500/30">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+        <div>
+            <h1 class="text-xl font-bold tracking-wider bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                O.S.C.A.R.
+            </h1>
+            <p class="text-xs text-slate-400 font-mono tracking-tight">Oscilloscope Synchronisé de Courbes et Analyses Résonantes</p>
+        </div>
+        
+        <!-- Controls du dashboard -->
+        <div class="flex flex-wrap items-center gap-6 bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <!-- Taille -->
+            <div id="ctrl-size" class="flex flex-col gap-1 transition-opacity duration-200">
+                <label class="text-xs font-semibold text-slate-400 flex justify-between">
+                    Matrice: <span id="matrix-size-val">4x4</span>
+                </label>
+                <input type="range" id="matrix-size" min="2" max="6" value="4" class="w-28 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+            
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-semibold text-slate-400 flex justify-between">
+                    Vitesse: <span id="speed-val">1x</span>
+                </label>
+                <input type="range" id="speed" min="0" max="3" step="0.1" value="1" class="w-28 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Interrupteur Mode Fondu -->
+            <div class="flex items-center gap-2 bg-slate-800/40 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                <span class="text-xs font-semibold text-slate-400">Mode Fondu</span>
+                <button id="btn-fade" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-slate-700 focus:outline-none">
+                    <span id="fade-dot" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+                </button>
+            </div>
+
+            <!-- Boutons Actions -->
+            <div class="flex items-center gap-2">
+                <button id="btn-pause" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 font-medium text-sm rounded-lg transition-colors cursor-pointer">
+                    Pause
+                </button>
+                <button id="btn-back" class="hidden px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm rounded-lg transition-all cursor-pointer shadow-lg shadow-cyan-600/20 items-center gap-1 animate-fade-in">
+                    ← Grille complète
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center justify-center p-6 gap-4">
+        <!-- Wrapper du Canvas avec curseur interactif -->
+        <div class="w-full max-w-3xl bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80 backdrop-blur-sm shadow-2xl flex justify-center items-center relative group">
+            <canvas id="lissajous-canvas" class="w-full aspect-square max-w-[650px] rounded-xl cursor-pointer"></canvas>
+            
+            <!-- Badge indicateur d'état -->
+            <div id="focus-badge" class="absolute top-6 left-6 bg-slate-900/90 border border-cyan-500/40 text-cyan-400 text-xs px-2.5 py-1 rounded-full font-mono opacity-0 pointer-events-none transition-opacity duration-300">
+                FOCUS MODE
+            </div>
+        </div>
+        
+        <!-- Informations d'état dynamiques -->
+        <div class="text-center text-xs text-slate-500 max-w-md h-4">
+            <span id="info-text">Survolez et cliquez sur une courbe pour l'étudier en détail.</span>
+        </div>
+    </main>
+
+    <!-- Footer de signature -->
+    <footer class="w-full text-center py-4 border-t border-slate-900 text-[11px] text-slate-600 font-mono tracking-wide">
+        Créé par Olivier Thöni, vibe-codé avec l’aide de Gemini 3.5 Flash
+    </footer>
+
+    <script>
+        // --- State Management ---
+        const canvas = document.getElementById('lissajous-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let matrixSize = 4;
+        let speed = 1;
+        let isPlaying = true;
+        let isFadeMode = false;
+        let phase = 0;
+        
+        // Système d'isolation (Focus)
+        let focusMode = false;
+        let focusRow = 0;
+        let focusCol = 0;
+
+        const THEME = {
+            bg: '#0b0f19',
+            bgFade: 'rgba(11, 15, 25, 0.06)', // Alpha bas pour l'effet de traînée phosphorescente
+            gridLines: '#1e293b',
+            textMain: '#94a3b8',
+            accentCyan: '#22d3ee',
+            accentIndigo: '#6366f1'
+        };
+
+        // --- DOM Elements & Event Listeners ---
+        const sizeInput = document.getElementById('matrix-size');
+        const sizeVal = document.getElementById('matrix-size-val');
+        const ctrlSize = document.getElementById('ctrl-size');
+        
+        sizeInput.addEventListener('input', (e) => {
+            matrixSize = parseInt(e.target.value);
+            sizeVal.textContent = `${matrixSize}x${matrixSize}`;
+        });
+
+        const speedInput = document.getElementById('speed');
+        const speedVal = document.getElementById('speed-val');
+        speedInput.addEventListener('input', (e) => {
+            speed = parseFloat(e.target.value);
+            speedVal.textContent = `${speed}x`;
+        });
+
+        // Toggle Mode Fondu
+        const btnFade = document.getElementById('btn-fade');
+        const fadeDot = document.getElementById('fade-dot');
+        btnFade.addEventListener('click', () => {
+            isFadeMode = !isFadeMode;
+            if(isFadeMode) {
+                btnFade.classList.replace('bg-slate-700', 'bg-indigo-600');
+                fadeDot.classList.replace('translate-x-0', 'translate-x-4');
+            } else {
+                btnFade.classList.replace('bg-indigo-600', 'bg-slate-700');
+                fadeDot.classList.replace('translate-x-4', 'translate-x-0');
+            }
+        });
+
+        // Pause
+        const btnPause = document.getElementById('btn-pause');
+        btnPause.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            btnPause.textContent = isPlaying ? 'Pause' : 'Reprendre';
+        });
+
+        // Bouton Retour de l'isolation
+        const btnBack = document.getElementById('btn-back');
+        btnBack.addEventListener('click', exitFocusMode);
+
+        // --- Gestion des Clics (Isolation) ---
+        canvas.addEventListener('click', (e) => {
+            if (focusMode) return; // Déjà isolé, on utilise le bouton pour sortir
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            // Position du clic relative à la taille logique du canvas
+            const displaySize = canvas.width / (window.devicePixelRatio || 1);
+            const clickX = (e.clientX - rect.left) * (displaySize / rect.width);
+            const clickY = (e.clientY - rect.top) * (displaySize / rect.height);
+
+            const totalCols = matrixSize + 1;
+            const cellSize = displaySize / totalCols;
+
+            // Déterminer la case cliquée
+            const col = Math.floor(clickX / cellSize);
+            const row = Math.floor(clickY / cellSize);
+
+            // Si on clique sur une vraie intersection (pas les headers)
+            if (col > 0 && row > 0 && col < totalCols && row < totalCols) {
+                enterFocusMode(row, col);
+            }
+        });
+
+        function enterFocusMode(row, col) {
+            focusMode = true;
+            focusRow = row;
+            focusCol = col;
+            
+            // UI Updates
+            btnBack.classList.remove('hidden');
+            btnBack.classList.add('flex');
+            document.getElementById('focus-badge').classList.remove('opacity-0');
+            ctrlSize.classList.add('opacity-30', 'pointer-events-none');
+            document.getElementById('info-text').innerHTML = `Courbe isolée : <span class="text-cyan-400 font-bold">X: ${col}Hz</span> | <span class="text-indigo-400 font-bold">Y: ${row}Hz</span>`;
+            
+            // On force un clear complet immédiat pour éviter les artefacts de transition
+            ctx.fillStyle = THEME.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function exitFocusMode() {
+            focusMode = false;
+            btnBack.classList.replace('flex', 'hidden');
+            document.getElementById('focus-badge').classList.add('opacity-0');
+            ctrlSize.classList.remove('opacity-30', 'pointer-events-none');
+            document.getElementById('info-text').textContent = "Survolez et cliquez sur une courbe pour l'étudier en détail.";
+            
+            ctx.fillStyle = THEME.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // --- Resize Engine ---
+        function resizeCanvas() {
+            const size = Math.min(canvas.clientWidth, 800);
+            const scale = window.devicePixelRatio || 1;
+            canvas.width = size * scale;
+            canvas.height = size * scale;
+            ctx.scale(scale, scale);
+            
+            // Éviter le flash blanc au resize
+            ctx.fillStyle = THEME.bg;
+            ctx.fillRect(0, 0, size, size);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 50);
+
+        // --- Moteur Graphique ---
+        function draw() {
+            const displaySize = canvas.width / (window.devicePixelRatio || 1);
+            
+            // Effet Fondu vs Clear Brut
+            if (isFadeMode) {
+                ctx.fillStyle = THEME.bgFade;
+                ctx.fillRect(0, 0, displaySize, displaySize);
+            } else {
+                ctx.fillStyle = THEME.bg;
+                ctx.fillRect(0, 0, displaySize, displaySize);
+            }
+
+            if (isPlaying) {
+                phase += 0.015 * speed;
+            }
+
+            if (focusMode) {
+                // --- MODE ISOLATION (FOCUS) ---
+                const cx = displaySize / 2;
+                const cy = displaySize / 2;
+                const radius = displaySize * 0.38; // Grande taille pour apprécier les détails
+
+                // Grille fine de background en mode focus
+                ctx.strokeStyle = 'rgba(30, 41, 59, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.ax = cx; ctx.ay = cy;
+                ctx.arc(cx, cy, radius, 0, Math.PI*2);
+                ctx.stroke();
+
+                // Tracé de la courbe géante
+                ctx.beginPath();
+                ctx.lineWidth = 2.5;
+                const gradient = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+                gradient.addColorStop(0, THEME.accentIndigo);
+                gradient.addColorStop(0.5, '#a855f7'); // Note pourpre transitoire
+                gradient.addColorStop(1, THEME.accentCyan);
+                ctx.strokeStyle = gradient;
+
+                const steps = 250; // Plus de détails en grand écran
+                for (let i = 0; i <= steps; i++) {
+                    const t = (i / steps) * Math.PI * 2;
+                    const x = cx + radius * Math.sin(focusCol * t + phase);
+                    const y = cy + radius * Math.sin(focusRow * t);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // HUD Textuel discret aux 4 coins de la zone focus
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+                ctx.font = '12px monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Freq_X (Col): ${focusCol} Hz`, cx - radius, cy - radius - 15);
+                ctx.textAlign = 'right';
+                ctx.fillText(`Freq_Y (Row): ${focusRow} Hz`, cx + radius, cy - radius - 15);
+
+            } else {
+                // --- MODE GRILLE COMPLÈTE ---
+                const totalCols = matrixSize + 1; 
+                const cellSize = displaySize / totalCols;
+                const radius = (cellSize * 0.75) / 2;
+
+                for (let row = 0; row < totalCols; row++) {
+                    for (let col = 0; col < totalCols; col++) {
+                        if (row === 0 && col === 0) continue;
+
+                        const cx = col * cellSize + cellSize / 2;
+                        const cy = row * cellSize + cellSize / 2;
+
+                        // Dessin des Headers d'axes
+                        if (row === 0 || col === 0) {
+                            // On saute le dessin des headers si le mode fondu est actif pour éviter qu'ils bavent
+                            if (isFadeMode) {
+                                ctx.fillStyle = THEME.bg;
+                                ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                            }
+                            
+                            ctx.strokeStyle = THEME.gridLines;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                            ctx.stroke();
+
+                            ctx.fillStyle = row === 0 ? THEME.accentCyan : THEME.accentIndigo;
+                            ctx.beginPath();
+                            const freq = row === 0 ? col : row;
+                            const rx = cx + radius * Math.cos(phase * freq);
+                            const ry = cy + radius * Math.sin(phase * freq);
+                            ctx.arc(rx, ry, 3, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            ctx.fillStyle = THEME.textMain;
+                            ctx.font = '10px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(`${freq}Hz`, cx, cy);
+                            continue;
+                        }
+
+                        // Dessin des courbes d'intersection
+                        ctx.beginPath();
+                        ctx.lineWidth = 1.5;
+                        const gradient = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+                        gradient.addColorStop(0, THEME.accentIndigo);
+                        gradient.addColorStop(1, THEME.accentCyan);
+                        ctx.strokeStyle = gradient;
+
+                        const steps = 100;
+                        for (let i = 0; i <= steps; i++) {
+                            const t = (i / steps) * Math.PI * 2;
+                            const x = cx + radius * Math.sin(col * t + phase);
+                            const y = cy + radius * Math.sin(row * t);
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // Run !
+        requestAnimationFrame(draw);
+    </script>
+</body>
+</html>

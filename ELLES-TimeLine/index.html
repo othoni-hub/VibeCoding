@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELLES - Femmes de Science</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased" x-data="scienceApp()">
+
+    <header class="bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 text-white py-12 px-4 shadow-xl relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            
+            <div class="flex flex-wrap justify-center gap-2 text-xs font-bold uppercase tracking-wide">
+                <span class="bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10"><span class="text-cyan-200 text-sm font-black">E</span>xploration</span>
+                <span class="text-white/60 self-center">des</span>
+                <span class="bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10"><span class="text-cyan-200 text-sm font-black">L</span>égendes,</span>
+                <span class="text-white/60 self-center">de la</span>
+                <span class="bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10"><span class="text-cyan-200 text-sm font-black">L</span>ogique</span>
+                <span class="text-white/60 self-center">et de l'</span>
+                <span class="bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10"><span class="text-cyan-200 text-sm font-black">E</span>xcellence</span>
+                <span class="bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10"><span class="text-cyan-200 text-sm font-black">S</span>cientifique</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-black mt-6 tracking-tight drop-shadow-sm">
+                Projet <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-white">ELLES</span>
+            </h1>
+            <p class="mt-4 text-lg md:text-xl text-indigo-100 max-w-2xl mx-auto font-medium">
+                Découvre le destin et les découvertes majeures de 31 femmes extraordinaires qui ont façonné l'histoire des sciences.
+            </p>
+            
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 bg-white/10 p-3 rounded-2xl backdrop-blur-md max-w-xl mx-auto border border-white/20">
+                <div class="flex items-center gap-2 bg-slate-900/30 p-1.5 rounded-xl w-full sm:w-auto justify-between">
+                    <button @click="mode = 'info'" :class="mode === 'info' ? 'bg-white text-indigo-600 shadow-md' : 'text-white hover:bg-white/10'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 w-1/2 sm:w-auto justify-center">
+                        <i data-lucide="book-open" class="w-4 h-4"></i> Fiches
+                    </button>
+                    <button @click="mode = 'flashcard'" :class="mode === 'flashcard' ? 'bg-white text-indigo-600 shadow-md' : 'text-white hover:bg-white/10'" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 w-1/2 sm:w-auto justify-center">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Flashcards
+                    </button>
+                </div>
+                <select x-model="filterDomaine" class="bg-slate-900/20 text-white border border-white/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-300 w-full sm:w-auto cursor-pointer">
+                    <option value="tous" class="text-slate-800">Tous les domaines</option>
+                    <option value="Mathématiques" class="text-slate-800">Mathématiques</option>
+                    <option value="Physique/Chimie" class="text-slate-800">Physique & Chimie</option>
+                    <option value="Informatique" class="text-slate-800">Informatique</option>
+                    <option value="Biologie/Médecine" class="text-slate-800">Biologie & Médecine</option>
+                    <option value="Astronomie" class="text-slate-800">Astronomie</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-16 relative">
+        <div class="text-center mb-10">
+            <template x-if="mode === 'info'">
+                <p class="text-sm text-slate-500 font-semibold uppercase tracking-wider flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Mode Exploration : clique sur une scientifique pour voir sa fiche
+                </p>
+            </template>
+            <template x-if="mode === 'flashcard'">
+                <p class="text-sm text-slate-500 font-semibold uppercase tracking-wider flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span> Mode Révision : clique pour tester tes connaissances !
+                </p>
+            </template>
+        </div>
+
+        <div class="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 top-24 bottom-24 w-1 bg-gradient-to-b from-violet-500 via-indigo-400 to-cyan-400 rounded-full opacity-30"></div>
+
+        <div class="space-y-12 relative">
+            <template x-for="(sc, index) in filteredScientifiques()" :key="sc.id">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between relative group"
+                     :class="index % 2 === 0 ? 'md:flex-row-reverse' : ''">
+                    
+                    <div class="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full border-4 border-white shadow-md flex items-center justify-center transition-all duration-300 group-hover:scale-125 z-10"
+                         :class="getDomaineColor(sc.domaine)">
+                        <div class="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+
+                    <div class="w-full md:w-[44%] ml-12 md:ml-0">
+                        <button @click="openModal(sc)" 
+                                class="w-full text-left bg-white p-5 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 hover:border-indigo-100 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 block relative overflow-hidden">
+                            
+                            <div class="absolute top-0 right-0 h-2 w-full" :class="getDomaineColor(sc.domaine)"></div>
+                            
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md text-slate-600 bg-slate-100" x-text="sc.domaine"></span>
+                                <span class="text-sm font-black text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full" x-text="sc.dates"></span>
+                            </div>
+                            
+                            <h3 class="text-xl font-bold text-slate-800 mt-3 group-hover:text-indigo-600 transition-colors" x-text="sc.nom"></h3>
+                            <p class="text-xs font-semibold text-indigo-500/80 uppercase tracking-wider" x-text="sc.nationalite"></p>
+                            <p class="text-sm text-slate-500 mt-1 line-clamp-2" x-text="sc.accroche"></p>
+                            
+                            <div class="mt-4 flex items-center gap-1 text-xs font-bold text-indigo-500 group-hover:translate-x-1 transition-transform">
+                                <span x-text="mode === 'info' ? 'Voir la fiche' : 'Lancer la flashcard'"></span>
+                                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="hidden md:block w-[44%]"></div>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <div x-show="modalOpen" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         style="display: none;">
+        
+        <div @click.away="closeModal()" 
+             class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 transform transition-all max-h-[90vh] flex flex-col">
+            
+            <div class="p-6 text-white relative flex-shrink-0" :class="activeScientifique ? getDomaineColor(activeScientifique.domaine) : 'bg-slate-800'">
+                <button @click="closeModal()" class="absolute top-4 right-4 text-white/80 hover:text-white bg-black/10 hover:bg-black/20 p-2 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm" x-text="activeScientifique?.domaine"></span>
+                    <span class="text-xs font-bold uppercase tracking-widest bg-black/20 px-3 py-1 rounded-full" x-text="activeScientifique?.nationalite"></span>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold mt-3" x-text="activeScientifique?.nom"></h2>
+                <p class="text-sm text-white/90 font-medium mt-1" x-text="activeScientifique?.dates"></p>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
+                
+                <template x-if="mode === 'info'">
+                    <div class="space-y-4">
+                        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-xl">
+                            <p class="text-slate-700 italic font-medium text-base">« <span x-text="activeScientifique?.accroche"></span> »</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-1">Travaux & Découvertes Majeures</h4>
+                            <p class="text-slate-700 text-sm md:text-base leading-relaxed whitespace-pre-line font-medium" x-text="activeScientifique?.description"></p>
+                        </div>
+                        <div class="pt-2">
+                            <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Pourquoi elle inspire le futur ?</h4>
+                            <div class="bg-emerald-50 text-emerald-800 text-xs md:text-sm font-semibold p-3 rounded-xl border border-emerald-100 flex items-start gap-2">
+                                <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"></i>
+                                <span x-text="activeScientifique?.impact"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="mode === 'flashcard'">
+                    <div class="flex flex-col items-center justify-center py-4">
+                        <div @click="flashcardFlipped = !flashcardFlipped" 
+                             class="w-full min-h-[220px] bg-white rounded-2xl shadow-md border-2 border-dashed border-indigo-200 p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-500 transition-colors relative group">
+                            
+                            <span class="absolute bottom-3 right-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 group-hover:text-indigo-500">
+                                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Cliquer pour retourner
+                            </span>
+
+                            <div x-show="!flashcardFlipped" class="space-y-3">
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">Question / Indice</span>
+                                <p class="text-lg font-bold text-slate-800" x-text="activeScientifique?.flashcardQuestion"></p>
+                            </div>
+
+                            <div x-show="flashcardFlipped" class="space-y-3" style="display: none;">
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">Réponse & Secret</span>
+                                <p class="text-base font-medium text-slate-700 leading-snug" x-text="activeScientifique?.flashcardReponse"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="p-4 bg-white border-t border-slate-100 flex justify-end flex-shrink-0">
+                <button @click="closeModal()" class="px-5 py-2.5 bg-slate-900 text-white font-bold text-sm rounded-xl hover:bg-slate-800 transition-colors shadow-sm">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-950 text-slate-400 py-12 px-4 border-t border-slate-800 text-center text-sm">
+        <p class="font-semibold text-slate-300">Créé par Olivier Thöni, vibe-codé avec l’aide de Gemini 3.5 Flash</p>
+        <p class="mt-2 text-slate-500 text-xs">Conçu avec passion pour donner de l'ambition scientifique aux lycéennes.</p>
+    </footer>
+
+    <script>
+        function scienceApp() {
+            return {
+                mode: 'info',
+                filterDomaine: 'tous',
+                modalOpen: false,
+                activeScientifique: null,
+                flashcardFlipped: false,
+
+                lesScientifiques: [
+                    {
+                        id: 1,
+                        nom: "Hypatie d'Alexandrie",
+                        dates: "v. 360 - 415",
+                        nationalite: "Égyptienne (Grecque)",
+                        domaine: "Mathématiques",
+                        accroche: "Première grande mathématicienne et astronome de l'Antiquité.",
+                        description: "Elle dirigeait l'école néoplatonicienne d'Alexandrie. Elle a grandement contribué à l'algèbre et à la géométrie en commentant les coniques d'Apollonios, et a perfectionné les astrolabes.",
+                        impact: "Elle symbolise le courage de la pensée libre et la rigueur géométrique face au dogmatisme.",
+                        flashcardQuestion: "Quelle savante de l'Antiquité a travaillé sur les sections coniques (paraboles, ellipses) à Alexandrie ?",
+                        flashcardReponse: "C'est Hypatie ! Son meurtre par une foule fanatique a tragiquement marqué la fin de l'âge d'or scientifique d'Alexandrie."
+                    },
+                    {
+                        id: 2,
+                        nom: "Émilie du Châtelet",
+                        dates: "1706 - 1749",
+                        nationalite: "Française",
+                        domaine: "Physique/Chimie",
+                        accroche: "La physicienne qui a compris l'énergie bien avant les autres.",
+                        description: "Mathématicienne et physicienne française, elle a traduit et commenté les 'Principia' de Newton. Elle a démontré expérimentalement que l'énergie cinétique est proportionnelle au carré de la vitesse (E_k ∝ v²).",
+                        impact: "Sa traduction de Newton reste aujourd'hui encore la référence absolue en français.",
+                        flashcardQuestion: "Qui a formulé le concept d'énergie cinétique liée au carré de la vitesse, contredisant partiellement Newton ?",
+                        flashcardReponse: "Émilie du Châtelet ! Elle devait étudier la nuit et cacher ses travaux pour contourner les interdits imposés aux femmes."
+                    },
+                    {
+                        id: 3,
+                        nom: "Laura Bassi",
+                        dates: "1711 - 1778",
+                        nationalite: "Italienne",
+                        domaine: "Physique/Chimie",
+                        accroche: "Première femme professeure de physique d'une université européenne.",
+                        description: "Docteure en philosophie de l'Université de Bologne, elle fut l'une des principales promotrices de la physique newtonienne en Italie, menant des expériences d'avant-garde sur l'électricité.",
+                        impact: "Elle a ouvert la voie à l'accès institutionnel des femmes à l'enseignement supérieur des sciences.",
+                        flashcardQuestion: "Quelle physicienne italienne est devenue la première femme nommée officiellement titulaire d'une chaire universitaire en Europe ?",
+                        flashcardReponse: "Laura Bassi, à l'Université de Bologne en 1732. Elle a eu 12 enfants tout en menant sa carrière !"
+                    },
+                    {
+                        id: 4,
+                        nom: "Maria Gaetana Agnesi",
+                        dates: "1718 - 1799",
+                        nationalite: "Italienne",
+                        domaine: "Mathématiques",
+                        accroche: "Autrice du premier livre complet de calcul différentiel et intégral.",
+                        description: "Elle a rédigé un traité de mathématiques mondialement acclamé pour unifier l'analyse géométrique. Elle est restée célèbre pour l'étude d'une courbe cubique particulière nommée 'la Sorcière d'Agnesi'.",
+                        impact: "Le pape de l'époque l'a nommée professeure de mathématiques à Bologne pour son génie de vulgarisation.",
+                        flashcardQuestion: "Quelle mathématicienne a écrit le premier manuel unifiant le calcul de Newton et de Leibniz ?",
+                        flashcardReponse: "Maria Gaetana Agnesi. Une erreur de traduction anglaise a transformé le nom de sa courbe géométrique en 'Sorcière' !"
+                    },
+                    {
+                        id: 5,
+                        nom: "Caroline Herschel",
+                        dates: "1750 - 1848",
+                        nationalite: "Allemande / Britannique",
+                        domaine: "Astronomie",
+                        accroche: "La chasseuse de comètes et première astronome professionnelle.",
+                        description: "Travaillant d'abord avec son frère William, elle a découvert de manière autonome huit comètes et de nombreuses nébuleuses. Elle fut la première femme payée par la Couronne britannique pour ses recherches.",
+                        impact: "Elle a prouvé qu'une femme pouvait diriger de grands programmes d'observation et de catalogage du ciel profond.",
+                        flashcardQuestion: "Quelle astronome a découvert huit comètes et fut la première femme à recevoir la médaille d'or de la Royal Astronomical Society ?",
+                        flashcardReponse: "Caroline Herschel ! Elle a surmonté le typhus pendant son enfance qui avait limité sa croissance à 1m30."
+                    },
+                    {
+                        id: 6,
+                        nom: "Sophie Germain",
+                        dates: "1776 - 1831",
+                        nationalite: "Française",
+                        domaine: "Mathématiques",
+                        accroche: "La mathématicienne qui s'est fait passer pour un homme pour étudier.",
+                        description: "Utilisant le pseudonyme d'Antoine Auguste Le Blanc, elle a correspondu avec Gauss et Lagrange. Elle a fait une percée majeure sur le Grand Théorème de Fermat (les 'nombres premiers de Sophie Germain') et sur la théorie de l'élasticité des surfaces.",
+                        impact: "Ses théories sur l'élasticité ont plus tard permis de calculer la résistance de structures comme la Tour Eiffel.",
+                        flashcardQuestion: "Quel pseudonyme masculin la Française Sophie Germain a-t-elle utilisé pour obtenir les cours de l'École Polytechnique ?",
+                        flashcardReponse: "Monsieur Le Blanc. Gauss fut subjugé en découvrant que son brillant correspondant était en réalité une femme."
+                    },
+                    {
+                        id: 7,
+                        nom: "Mary Somerville",
+                        dates: "1780 - 1872",
+                        nationalite: "Écossaise",
+                        domaine: "Mathématiques",
+                        accroche: "La mathématicienne pour qui le mot 'Scientifique' a été inventé.",
+                        description: "Traductrice et vulgarisatrice des théories mécaniques de Laplace, elle a écrit des traités mathématiques multidisciplinaires si puissants qu'un critique créa le terme 'scientist' en 1834 spécifiquement pour la décrire.",
+                        impact: "Elle a été la co-marraine scientifique de la jeune Ada Lovelace, l'initiant aux mathématiques avancées.",
+                        flashcardQuestion: "Pour quelle brillante polymathe et traductrice écossaise le mot anglais 'Scientist' (scientifique) a-t-il été forgé ?",
+                        flashcardReponse: "Mary Somerville. En hommage, son visage figure aujourd'hui sur les billets de 10 livres de la Royal Bank of Scotland."
+                    },
+                    {
+                        id: 8,
+                        nom: "Ada Lovelace",
+                        dates: "1815 - 1852",
+                        nationalite: "Britannique",
+                        domaine: "Informatique",
+                        accroche: "La toute première codeuse de l'histoire de l'humanité.",
+                        description: "En travaillant sur la machine analytique mécanique de Babbage, elle a rédigé le premier algorithme complexe destiné à être exécuté par une machine (pour calculer les nombres de Bernoulli).",
+                        impact: "Elle a anticipé l'informatique moderne en comprenant que les machines pouvaient manipuler des symboles et pas seulement des chiffres.",
+                        flashcardQuestion: "Quel est le nom de la mathématicienne ayant écrit le tout premier programme informatique de l'histoire ?",
+                        flashcardReponse: "Ada Lovelace ! Le langage de programmation 'Ada', développé pour l'armée américaine, porte son nom."
+                    },
+                    {
+                        id: 9,
+                        nom: "Florence Nightingale",
+                        dates: "1820 - 1910",
+                        nationalite: "Britannique",
+                        domaine: "Mathématiques",
+                        accroche: "La pionnière des statistiques médicales et du diagramme en rose.",
+                        description: "Infirmière pendant la guerre de Crimée, elle a utilisé les mathématiques pour prouver que la mauvaise hygiène tuait plus que les combats. Elle a inventé le diagramme de zone polaire (ou 'rose de Nightingale') pour visualiser des données.",
+                        impact: "Elle a révolutionné la santé publique mondiale en imposant la science des statistiques à l'hôpital.",
+                        flashcardQuestion: "Qui a utilisé les statistiques et des graphiques innovants pour sauver des milliers de soldats de la maladie en 1850 ?",
+                        flashcardReponse: "Florence Nightingale ! Elle est devenue la première femme élue membre de la Royal Statistical Society."
+                    },
+                    {
+                        id: 10,
+                        nom: "Sofia Kovalevskaya",
+                        dates: "1850 - 1891",
+                        nationalite: "Russe",
+                        domaine: "Mathématiques",
+                        accroche: "Celle qui a dompté les équations des mouvements des solides.",
+                        description: "Première femme en Europe moderne à obtenir un doctorat en mathématiques. Elle a résolu le problème de la rotation d'un corps solide autour d'un point fixe (la toupie de Kovalevskaya) en utilisant des équations différentielles partielles complexes.",
+                        impact: "Elle a remporté le prestigieux prix Bordin de l'Académie des sciences de Paris en 1888.",
+                        flashcardQuestion: "Quelle mathématicienne russe a dû faire un mariage blanc pour pouvoir quitter son pays et étudier les mathématiques en Allemagne ?",
+                        flashcardReponse: "Sofia Kovalevskaya. Elle a également écrit des romans et était une fervente militante pour les droits des femmes."
+                    },
+                    {
+                        id: 11,
+                        nom: "Marie Curie",
+                        dates: "1867 - 1934",
+                        nationalite: "Polonaise / Française",
+                        domaine: "Physique/Chimie",
+                        accroche: "La pionnière absolue de la radioactivité, double Prix Nobel.",
+                        description: "Découvreuse du polonium et du radium avec son mari Pierre Curie. Elle a développé la théorie de la radioactivité et a conçu les 'Petites Curies', des unités de radiologie mobiles pendant la Première Guerre mondiale.",
+                        impact: "Unique personne au monde à avoir reçu deux Prix Nobel dans deux disciplines scientifiques distinctes (Physique et Chimie).",
+                        flashcardQuestion: "Dans quelles deux disciplines scientifiques distinctes Marie Curie a-t-elle obtenu ses deux Prix Nobel ?",
+                        flashcardReponse: "En Physique (1903) et en Chimie (1911). Elle fut aussi la première femme à enseigner à la Sorbonne."
+                    },
+                    {
+                        id: 12,
+                        nom: "Henrietta Swan Leavitt",
+                        dates: "1868 - 1921",
+                        nationalite: "Américaine",
+                        domaine: "Astronomie",
+                        accroche: "La femme qui a fourni la clé pour mesurer l'Univers.",
+                        description: "En tant que 'calculatrice' à Harvard, elle étudia les étoiles Céphéides. Elle découvrit la relation période-luminosité, permettant de calculer pour la première fois la distance des astres lointains.",
+                        impact: "Sans sa loi, Edwin Hubble n'aurait jamais pu mesurer la distance des galaxies ni prouver l'expansion de l'Univers.",
+                        flashcardQuestion: "Quelle astronome a découvert la méthode permettant d'estimer la distance des galaxies lointaines ?",
+                        flashcardReponse: "Henrietta Swan Leavitt ! Son travail crucial n'a été pleinement reconnu qu'après sa mort."
+                    },
+                    {
+                        id: 13,
+                        nom: "Lise Meitner",
+                        dates: "1878 - 1968",
+                        nationalite: "Autrichienne / Suédoise",
+                        domaine: "Physique/Chimie",
+                        accroche: "La physicienne qui a découvert la fission nucléaire.",
+                        description: "Avec Otto Hahn, elle a découvert le protactinium. En 1939, elle formule l'explication théorique du fractionnement d'un noyau d'uranium sous l'impact de neutrons : la fission nucléaire.",
+                        impact: "Exclue de manière injuste du prix Nobel de 1944 attribué à son collègue masculin, l'element 109 (le Meitnerium) a été nommé en son honneur.",
+                        flashcardQuestion: "Quelle physicienne théoricienne a compris et nommé le phénomène de 'fission nucléaire' ?",
+                        flashcardReponse: "Lise Meitner. Ayant fui l'Allemagne nazie en raison de ses origines juives, elle a refusé de participer au projet de bombe atomique."
+                    },
+                    {
+                        id: 14,
+                        nom: "Emmy Noether",
+                        dates: "1882 - 1935",
+                        nationalite: "Allemande",
+                        domaine: "Mathématiques",
+                        accroche: "Le génie de l'algèbre qui a illuminé la physique d'Einstein.",
+                        description: "Elle a révolutionné l'algèbre abstraite. En physique, son théorème éponyme lie de manière universelle chaque symétrie mathématique d'un système à une loi de conservation physique.",
+                        impact: "Einstein l'a qualifiée de 'génie mathématique le plus créatif produit depuis le début de l'enseignement supérieur'.",
+                        flashcardQuestion: "Quel théorème fondamental unit les symétries physiques de la nature aux lois de conservation ?",
+                        flashcardReponse: "Le Théorème de Emmy Noether. Elle a dû enseigner bénévolement pendant des années sous le nom de collègues masculins."
+                    },
+                    {
+                        id: 15,
+                        nom: "Inge Lehmann",
+                        dates: "1888 - 1993",
+                        nationalite: "Danoise",
+                        domaine: "Physique/Chimie",
+                        accroche: "La sismologue qui a découvert le cœur solide de la Terre.",
+                        description: "En analysant la propagation des ondes sismiques de tremblements de terre lointains, elle a démontré en 1936 que la Terre ne possède pas qu'un noyau liquide, mais abrite en son centre une graine solide.",
+                        impact: "Elle a redéfini notre compréhension de la structure interne de notre planète.",
+                        flashcardQuestion: "Quelle géophysicienne danoise a prouvé l'existence de la graine solide au centre du noyau terrestre ?",
+                        flashcardReponse: "Inge Lehmann ! Elle a vécu jusqu'à l'âge exceptionnel de 104 ans."
+                    },
+                    {
+                        id: 16,
+                        nom: "Chien-Shiung Wu",
+                        dates: "1912 - 1997",
+                        nationalite: "Chinoise / Américaine",
+                        domaine: "Physique/Chimie",
+                        accroche: "La 'Première Dame de la Physique' qui a réfuté une loi de la nature.",
+                        description: "Physicienne expérimentale hors pair, elle a conçu l'expérience cruciale qui a prouvé la violation de la conservation de la parité dans les interactions nucléaires faibles, révolutionnant la physique des particules.",
+                        impact: "Ses collègues théoriciens masculins ont reçu le Nobel pour cette idée, mais son rôle de réalisatrice fut injustement omis.",
+                        flashcardQuestion: "Quelle physicienne sino-américaine a mené l'expérience réfutant la loi de la conservation de la parité ?",
+                        flashcardReponse: "Chien-Shiung Wu ! On l'appelait souvent la 'Marie Curie chinoise' pour sa rigueur absolue."
+                    },
+                    {
+                        id: 17,
+                        nom: "Dorothy Hodgkin",
+                        dates: "1910 - 1994",
+                        nationalite: "Britannique",
+                        domaine: "Physique/Chimie",
+                        accroche: "La cartographe tridimensionnelle des molécules de la vie.",
+                        description: "Pionnière de la cristallographie aux rayons X, elle a déterminé les structures atomiques en 3D de molécules biologiques majeures comme le cholestérol, la pénicilline et surtout l'insuline.",
+                        impact: "Lauréate du prix Nobel de chimie en 1964, ses travaux ont permis de fabriquer l'insuline synthétique médicale.",
+                        flashcardQuestion: "Quelle chercheuse a cartographié la structure complexe de la pénicilline et de l'insuline grâce aux rayons X ?",
+                        flashcardReponse: "Dorothy Hodgkin ! Elle a mené ses recherches de pointe malgré une polyarthrite rhumatoïde sévère apparue dès ses 24 ans."
+                    },
+                    {
+                        id: 18,
+                        nom: "Joan Clarke",
+                        dates: "1917 - 1996",
+                        nationalite: "Britannique",
+                        domaine: "Informatique",
+                        accroche: "La cryptologue qui a aidé à briser la machine Enigma.",
+                        description: "Seule femme au cœur de la section 'Hut 8' à Bletchley Park aux côtés d'Alan Turing, elle a co-développé des méthodes mathématiques et cryptanalytiques pour décoder les communications secrètes de la marine allemande.",
+                        impact: "Ses calculs ont sauvé des milliers de vies en écourtant de plusieurs années la Seconde Guerre mondiale.",
+                        flashcardQuestion: "Quelle mathématicienne anglaise fut le bras droit d'Alan Turing pour casser les codes secrets de la machine Enigma ?",
+                        flashcardReponse: "Joan Clarke ! Bien que payée moins que ses homologues masculins, elle a été nommée temporairement 'linguiste' pour obtenir une promotion."
+                    },
+                    {
+                        id: 19,
+                        nom: "Asima Chatterjee",
+                        dates: "1917 - 2006",
+                        nationalite: "Indienne",
+                        domaine: "Physique/Chimie",
+                        accroche: "La chimiste qui a développé des traitements à partir des plantes d'Inde.",
+                        description: "Chimiste organicienne, elle a concentré ses recherches sur les alcaloïdes de plantes médicinales locales. Ses travaux ont mené au développement de médicaments anti-épileptiques et de traitements antipaludiques.",
+                        impact: "Première femme à obtenir un doctorat en sciences d'une université indienne (Calcutta) et à siéger au Parlement.",
+                        flashcardQuestion: "Quelle chimiste indienne a extrait des principes actifs de plantes locales pour créer des anti-épileptiques ?",
+                        flashcardReponse: "Asima Chatterjee ! Ses recherches rigoureuses ont duré plus de 40 ans sur la flore médicinale de l'Inde."
+                    },
+                    {
+                        id: 20,
+                        nom: "Katherine Johnson",
+                        dates: "1918 - 2020",
+                        nationalite: "Américaine",
+                        domaine: "Mathématiques",
+                        accroche: "La calculatrice humaine qui a guidé Apollo 11 vers la Lune.",
+                        description: "Mathématicienne à la NASA, elle a calculé manuellement les trajectoires orbitales de la mission de John Glenn et de la mission lunaire Apollo 11. Sa précision était légendaire.",
+                        impact: "Elle a brisé les barrières de la ségrégation raciale et du genre à une époque ultra-conservatrice.",
+                        flashcardQuestion: "Quelle mathématicienne afro-américaine a vérifié à la main les calculs des ordinateurs électroniques pour la mission Apollo 11 ?",
+                        flashcardReponse: "Katherine Johnson ! Son destin extraordinaire est mis en avant dans le film 'Les Figures de l'ombre'."
+                    },
+                    {
+                        id: 21,
+                        nom: "Rosalind Franklin",
+                        dates: "1920 - 1958",
+                        nationalite: "Britannique",
+                        domaine: "Biologie/Médecine",
+                        accroche: "La photographe de la double hélice de l'ADN.",
+                        description: "Chimiste et cristallographe, elle a réalisé le célèbre 'Cliché 51' par diffraction de rayons X. Ce cliché a fourni la preuve visuelle et mathématique irréfutable de la structure en double hélice de l'ADN.",
+                        impact: "Ses données ont été transmises à son insu à Watson et Crick, qui ont publié la découverte sans la citer.",
+                        flashcardQuestion: "Quelle scientifique a capturé le 'Cliché 51', image historique révélant la structure exacte de l'ADN ?",
+                        flashcardReponse: "Rosalind Franklin. Victime d'un cancer à 37 ans, elle n'a pu voir l'histoire rétablir son immense contribution."
+                    },
+                    {
+                        id: 22,
+                        nom: "Mary Jackson",
+                        dates: "1921 - 2005",
+                        nationalite: "Américaine",
+                        domaine: "Informatique",
+                        accroche: "Première femme ingénieure aéronautique noire de la NASA.",
+                        description: "Spécialiste de l'aérodynamique et des souffleries supersoniques, elle analysait le flux d'air sur les capsules spatiales pour optimiser leur rentrée dans l'atmosphère.",
+                        impact: "Elle s'est battue en justice pour intégrer les cours du soir ségrégués indispensables à l'obtention de son titre d'ingénieure.",
+                        flashcardQuestion: "Qui a dû faire un procès pour avoir le droit d'étudier dans une école réservée aux Blancs afin de devenir ingénieure spatiale ?",
+                        flashcardReponse: "Mary Jackson ! Elle a fini sa carrière en dirigeant les programmes d'égalité des chances à la NASA."
+                    },
+                    {
+                        id: 23,
+                        nom: "Gladys West",
+                        dates: "Née en 1930",
+                        nationalite: "Américaine",
+                        domaine: "Informatique",
+                        accroche: "La mathématicienne dont les calculs guident tes trajets quotidiens.",
+                        description: "Elle a programmé les premiers superordinateurs de l'armée américaine pour modéliser précisément la forme géométrique de la Terre (le géoïde). Ses algorithmes de traitement de données satellitaires ont créé la base technologique du GPS.",
+                        impact: "Toute l'infrastructure moderne de géolocalisation repose directement sur son travail de modélisation.",
+                        flashcardQuestion: "Quelle mathématicienne a développé les équations mathématiques à la base du système mondial GPS ?",
+                        flashcardReponse: "Gladys West ! Elle a effectué sa carrière dans l'ombre et a été honorée par l'armée de l'espace américaine."
+                    },
+                    {
+                        id: 24,
+                        nom: "Tu Youyou",
+                        dates: "Née en 1930",
+                        nationalite: "Chinoise",
+                        domaine: "Biologie/Médecine",
+                        accroche: "Celle qui a extrait des textes anciens le remède contre le paludisme.",
+                        description: "Chercheuse en pharmacologie, elle a fouillé les manuscrits médicaux chinois traditionnels pour y découvrir l'artémisinine, un composé extrait de l'armoise annuelle capable de détruire le parasite de la malaria.",
+                        impact: "Son traitement a sauvé des millions de vies, principalement en Afrique et en Asie. Prix Nobel de Médecine en 2015.",
+                        flashcardQuestion: "Quelle chercheuse a découvert l'artémisinine, le médicament le plus puissant contre le paludisme ?",
+                        flashcardReponse: "Tu Youyou ! Elle a testé le premier extrait de la plante sur elle-même pour s'assurer qu'il n'était pas toxique."
+                    },
+                    {
+                        id: 25,
+                        nom: "Jane Goodall",
+                        dates: "Née en 1934",
+                        nationalite: "Britannique",
+                        domaine: "Biologie/Médecine",
+                        accroche: "Celle qui a redéfini la frontière entre l'humain et l'animal.",
+                        description: "Éthologue de terrain, elle a passé des décennies en Tanzanie à étudier les chimpanzés. Elle a découvert qu'ils fabriquaient et utilisaient des outils, une faculté qu'on pensait exclusive à l'espèce humaine.",
+                        impact: "Elle a révolutionné les sciences du comportement animal et est devenue une icône de la conservation écologique.",
+                        flashcardQuestion: "Quelle célèbre éthologue a découvert que les chimpanzés possédaient une culture et fabriquaient des outils ?",
+                        flashcardReponse: "Jane Goodall ! Elle est entrée sur le terrain sans diplôme universitaire initial."
+                    },
+                    {
+                        id: 26,
+                        nom: "Margaret Hamilton",
+                        dates: "Née en 1936",
+                        nationalite: "Américaine",
+                        domaine: "Informatique",
+                        accroche: "L'ingénieure qui a sauvé l'alunissage d'Apollo 11.",
+                        description: "Directrice du département de génie logiciel du MIT pour le projet Apollo. Elle a conçu un système de priorisation des tâches pour l'ordinateur de bord. Juste avant l'alunissage, l'ordinateur saturé a évité le crash grâce à son code.",
+                        impact: "Elle a popularisé et donné ses lettres de noblesse au terme même d' 'Ingénierie logicielle' (Software Engineering).",
+                        flashcardQuestion: "Quelle codeuse en chef a conçu le logiciel de navigation qui a permis à Neil Armstrong de se poser sur la Lune ?",
+                        flashcardReponse: "Margaret Hamilton ! Une photo célèbre la montre posant à côté de la pile de listings de code qu'elle a écrite à la main."
+                    },
+                    {
+                        id: 27,
+                        nom: "Jocelyn Bell Burnell",
+                        dates: "Née en 1943",
+                        nationalite: "Nord-Irlandaise",
+                        domaine: "Astronomie",
+                        accroche: "L'astrophysicienne qui a intercepté les pulsations des étoiles mortes.",
+                        description: "Au cours de sa thèse de doctorat, elle a repéré une anomalie périodique sur ses relevés de radiotélescope. Elle venait de détecter le tout premier 'pulsar', une étoile à neutrons tournant à très haute vitesse.",
+                        impact: "Son directeur de thèse a reçu le prix Nobel de physique en 1974 pour cette découverte, l'excluant de façon injuste.",
+                        flashcardQuestion: "Quel objet astrophysique à rotation ultra-rapide a été découvert par Jocelyn Bell en 1967 ?",
+                        flashcardReponse: "Le Pulsar ! Elle a transformé cette injustice en force, devenant présidente de la Royal Astronomical Society."
+                    },
+                    {
+                        id: 28,
+                        nom: "Mae Jemison",
+                        dates: "Née en 1956",
+                        nationalite: "Américaine",
+                        domaine: "Biologie/Médecine",
+                        accroche: "Médecin, ingénieure et première femme afro-américaine dans l'espace.",
+                        description: "Médecin engagée dans l'humanitaire, elle intègre la NASA comme spécialiste de mission. En 1992, à bord de la navette Endeavour, elle réalise des expériences complexes sur les cellules osseuses en microgravité.",
+                        impact: "Elle prouve aux minorités du monde entier que l'excellence scientifique mène jusqu'aux étoiles.",
+                        flashcardQuestion: "Qui fut la première femme noire à s'envoler dans l'espace, combinant des diplômes en médecine et en ingénierie ?",
+                        flashcardReponse: "Mae Jemison ! Passionnée de danse, elle a emporté un poster du théâtre de Harlem avec elle en orbite."
+                    },
+                    {
+                        id: 29,
+                        nom: "Maryam Mirzakhani",
+                        dates: "1977 - 2017",
+                        nationalite: "Iranienne",
+                        domaine: "Mathématiques",
+                        accroche: "La première femme à décrocher la prestigieuse Médaille Fields.",
+                        description: "Professeure à l'Université Stanford, ses travaux mathématiques d'une originalité géométrique totale concernaient la dynamique et la géométrie des surfaces de Riemann et de leurs espaces de modules.",
+                        impact: "Elle a brisé le plafond de verre historique des mathématiques pures en obtenant la Médaille Fields en 2014.",
+                        flashcardQuestion: "Quelle mathématicienne iranienne est devenue la première femme lauréate de la Médaille Fields ?",
+                        flashcardReponse: "Maryam Mirzakhani. Elle dessinait de gigantesques schémas géométriques au sol sur de grandes feuilles pour réfléchir."
+                    },
+                    {
+                        id: 30,
+                        nom: "Maryna Viazovska",
+                        dates: "Née en 1984",
+                        nationalite: "Ukrainienne",
+                        domaine: "Mathématiques",
+                        accroche: "La géomètre des espaces multidimensionnels, Médaille Fields 2022.",
+                        description: "Mathématicienne ukrainienne, elle a résolu le problème séculaire de l'empilement compact des sphères identiques dans les dimensions 8 et 24, une prouesse d'optimisation mathématique absolue.",
+                        impact: "Deuxième femme de l'histoire à obtenir la médaille Fields, ses équations impactent le cryptage des données informatiques.",
+                        flashcardQuestion: "Qui a remporté la médaille Fields en 2022 pour avoir résolu l'énigme de l'empilement parfait de sphères en dimension 8 et 24 ?",
+                        flashcardReponse: "Maryna Viazovska ! Ses démonstrations élégantes ont stupéfié la communauté mathématique internationale."
+                    },
+                    {
+                        id: 31,
+                        nom: "Anshula Coura",
+                        dates: "Née en 1994",
+                        nationalite: "Angolaise",
+                        domaine: "Informatique",
+                        accroche: "Pionnière de l'IA éthique appliquée aux données du Sud global.",
+                        description: "Ingénieure en intelligence artificielle, elle développe des architectures d'apprentissage profond adaptées au traitement des langues africaines peu documentées et à la détection précoce des maladies agricoles.",
+                        impact: "Elle incarne la nouvelle génération de femmes scientifiques qui réinventent l'informatique pour le développement durable.",
+                        flashcardQuestion: "Quelle jeune ingénieure angolaise conçoit des modèles d'IA éthiques pour protéger l'agriculture subsaharienne ?",
+                        flashcardReponse: "Anshula Coura ! Elle est l'un des visages actuels de la tech inclusive qui inspire les lycéennes africaines."
+                    }
+                ],
+
+                filteredScientifiques() {
+                    let sorted = [...this.lesScientifiques].sort((a, b) => a.id - b.id);
+                    if (this.filterDomaine === 'tous') {
+                        return sorted;
+                    }
+                    return sorted.filter(sc => sc.domaine === this.filterDomaine);
+                },
+
+                openModal(sc) {
+                    this.activeScientifique = sc;
+                    this.flashcardFlipped = false;
+                    this.modalOpen = true;
+                    setTimeout(() => { lucide.createIcons(); }, 50);
+                },
+                closeModal() {
+                    this.modalOpen = false;
+                    this.activeScientifique = null;
+                },
+
+                getDomaineColor(domaine) {
+                    switch(domaine) {
+                        case 'Mathématiques': return 'bg-gradient-to-r from-pink-500 to-rose-500 text-white';
+                        case 'Physique/Chimie': return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white';
+                        case 'Informatique': return 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white';
+                        case 'Biologie/Médecine': return 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white';
+                        case 'Astronomie': return 'bg-gradient-to-r from-violet-500 to-purple-500 text-white';
+                        default: return 'bg-slate-500 text-white';
+                    }
+                }
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

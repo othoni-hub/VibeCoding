@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ V.I.B.E.S. ⚡ - Oscilloscope Virtuel</title>
+    <style>
+        :root {
+            --bg-color: #12131C;
+            --panel-bg: #1A1B26;
+            --accent: #00ffcc;
+            --accent-x: #ff007f;
+            --text: #c0caf5;
+            --muted: #565f89;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .header-container {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            color: var(--accent);
+            margin: 0 0 5px 0;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            font-size: 2rem;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 1px solid #2f334d;
+        }
+
+        canvas {
+            background: #07080d;
+            border: 2px solid #24283b;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 320px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .slider-x { accent-color: var(--accent-x) !important; }
+
+        select, button {
+            background: #24283b;
+            color: var(--text);
+            border: 1px solid var(--accent);
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        select:hover, button:hover {
+            background: var(--accent);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .mode-container {
+            display: flex;
+            gap: 10px;
+        }
+        .mode-container button { flex: 1; }
+        .btn-active { background: var(--accent); color: var(--bg-color); }
+
+        footer {
+            margin-top: auto;
+            padding: 20px 0 10px 0;
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>⚡ V.I.B.E.S. ⚡</h1>
+        <p class="subtitle">Visualisateur d'Impulsions et de Boucles d'Entrées Simulées</p>
+    </div>
+
+    <div class="container">
+        <canvas id="oscillo" width="600" height="400"></canvas>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Mode d'affichage :</label>
+                <div class="mode-container">
+                    <button id="mode-yt" class="btn-active">Mode Y=f(t)</button>
+                    <button id="mode-xy">Mode X-Y (Lissajous)</button>
+                </div>
+            </div>
+
+            <hr style="border-color: #24283b; width: 100%; margin: 5px 0;">
+
+            <!-- VOIE Y (Axe Vertical / Signal Principal) -->
+            <div style="color: var(--accent); font-weight: bold; font-size: 0.9rem;">VOIE Y (Vertical)</div>
+            <div class="control-group">
+                <label>Fréquence Y: <span id="val-fy">2.0</span> Hz</label>
+                <input type="range" id="param-fy" min="0.5" max="10" step="0.1" value="2">
+            </div>
+            <div class="control-group">
+                <label>Amplitude Y: <span id="val-ay">100</span> V</label>
+                <input type="range" id="param-ay" min="10" max="180" step="5" value="100">
+            </div>
+
+            <!-- VOIE X (Axe Horizontal en mode XY / Déphasage) -->
+            <div style="color: var(--accent-x); font-weight: bold; font-size: 0.9rem; margin-top: 5px;">VOIE X / CONFIG</div>
+            <div class="control-group">
+                <label>Fréquence X (Mode XY): <span id="val-fx">2.0</span> Hz</label>
+                <input type="range" id="param-fx" class="slider-x" min="0.5" max="10" step="0.1" value="2">
+            </div>
+            <div class="control-group">
+                <label>Déphasage (ΔΦ): <span id="val-phase">0</span>°</label>
+                <input type="range" id="param-phase" class="slider-x" min="0" max="360" step="5" value="0">
+            </div>
+
+            <hr style="border-color: #24283b; width: 100%; margin: 5px 0;">
+            <button id="btn-pause">PAUSE</button>
+        </div>
+    </div>
+
+    <footer>
+        Créé par Olivier Thöni, vibe-codé avec Gemini 3.5 Flash
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('oscillo');
+        const ctx = canvas.getContext('2d');
+
+        // Boutons de mode
+        const modeYTBtn = document.getElementById('mode-yt');
+        const modeXYBtn = document.getElementById('mode-xy');
+        const btnPause = document.getElementById('btn-pause');
+
+        // Sliders & Values
+        const inputs = {
+            fy: document.getElementById('param-fy'),
+            ay: document.getElementById('param-ay'),
+            fx: document.getElementById('param-fx'),
+            phase: document.getElementById('param-phase')
+        };
+        const labels = {
+            fy: document.getElementById('val-fy'),
+            ay: document.getElementById('val-ay'),
+            fx: document.getElementById('val-fx'),
+            phase: document.getElementById('val-phase')
+        };
+
+        let currentMode = 'YT'; // 'YT' ou 'XY'
+        let isRunning = true;
+        let time = 0;
+
+        // Mise à jour des labels des sliders
+        function updateLabels() {
+            Object.keys(inputs).forEach(key => { labels[key].innerText = inputs[key].value; });
+        }
+        Object.keys(inputs).forEach(key => inputs[key].addEventListener('input', updateLabels));
+
+        // Toggle Modes
+        modeYTBtn.addEventListener('click', () => { currentMode = 'YT'; modeYTBtn.classList.add('btn-active'); modeXYBtn.classList.remove('btn-active'); });
+        modeXYBtn.addEventListener('click', () => { currentMode = 'XY'; modeXYBtn.classList.add('btn-active'); modeYTBtn.classList.remove('btn-active'); });
+        btnPause.addEventListener('click', () => { isRunning = !isRunning; btnPause.innerText = isRunning ? "PAUSE" : "REPRENDRE"; });
+
+        // Grille de l'oscilloscope
+        function drawGrid() {
+            ctx.strokeStyle = '#141b24'; ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+            for (let y = 0; y < canvas.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+            ctx.strokeStyle = '#24384f'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(0, canvas.height / 2); ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height); ctx.stroke();
+        }
+
+        // Affichage digital des mesures (Vmax, Veff)
+        function drawMeasurements(vMax) {
+            const vEff = vMax / Math.sqrt(2);
+
+            ctx.fillStyle = 'rgba(20, 24, 35, 0.85)';
+            ctx.fillRect(15, 15, 180, 65);
+            ctx.strokeStyle = '#24384f';
+            ctx.strokeRect(15, 15, 180, 65);
+
+            ctx.font = '12px "Courier New"';
+            ctx.fillStyle = '#00ffcc';
+            ctx.fillText(`⚡ MESURES LIVE`, 25, 32);
+            ctx.fillStyle = '#c0caf5';
+            ctx.fillText(`Umax : ${vMax.toFixed(1)} V`, 25, 50);
+            ctx.fillText(`Ueff : ${vEff.toFixed(1)} V`, 25, 67);
+        }
+
+        // Boucle d'animation
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Effet rémanence (Motion blur rétro)
+            ctx.fillStyle = 'rgba(7, 8, 13, 0.25)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+
+            const p = {
+                fy: parseFloat(inputs.fy.value),
+                ay: parseFloat(inputs.ay.value),
+                fx: parseFloat(inputs.fx.value),
+                phase: parseFloat(inputs.phase.value) * (Math.PI / 180) // conversion en radians
+            };
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 6;
+
+            if (currentMode === 'YT') {
+                // --- MODE NORMAL Y = f(t) ---
+                ctx.strokeStyle = '#00ffcc';
+                ctx.shadowColor = '#00ffcc';
+
+                for (let x = 0; x < canvas.width; x++) {
+                    const tInput = (x / canvas.width) * 5 + time;
+                    const y = centerY - Math.sin(tInput * p.fy) * p.ay;
+                    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                drawMeasurements(p.ay);
+
+            } else {
+                // --- MODE X-Y (Lissajous) ---
+                ctx.strokeStyle = '#ff007f';
+                ctx.shadowColor = '#ff007f';
+
+                const resolution = 300;
+                for (let i = 0; i <= resolution; i++) {
+                    const t = (i / resolution) * Math.PI * 4 + time; 
+                    
+                    const xPos = centerX + Math.sin(t * p.fx + p.phase) * (p.ay * 1.2);
+                    const yPos = centerY - Math.sin(t * p.fy) * p.ay;
+
+                    if (i === 0) ctx.moveTo(xPos, yPos); else ctx.lineTo(xPos, yPos);
+                }
+                ctx.stroke();
+            }
+
+            ctx.shadowBlur = 0;
+            if (isRunning) {
+                time += 0.02;
+            }
+        }
+
+        // Init
+        updateLabels();
+        animate();
+    </script>
+</body>
+</html>

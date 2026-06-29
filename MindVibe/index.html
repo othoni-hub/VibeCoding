@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindVibe Pro - Mindmapping Markdown & LaTeX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        
+        .canvas-bg {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+        }
+        .dark .canvas-bg {
+            background-color: #0f172a;
+            background-image: radial-gradient(#334155 1.5px, transparent 1.5px);
+        }
+
+        .node-transition { transition: transform 0.2s ease-out; }
+        .node-content, .node-content * { pointer-events: none; }
+        .node-content img { max-width: 140px; border-radius: 6px; margin-top: 5px; }
+        .katex-display { margin: 0.3em 0; overflow: auto; }
+        
+        .dragging { opacity: 0.4; transform: scale(0.95); filter: blur(1px); }
+        .drop-target { box-shadow: 0 0 0 4px #6366f1 !important; transform: scale(1.05); }
+        
+        .magnet-zone { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 10; pointer-events: auto; transition: background 0.2s; border-radius: 12px; }
+        .magnet-left { left: 0; }
+        .magnet-right { right: 0; }
+        .magnet-zone.drag-over { background: rgba(99, 102, 241, 0.15); }
+
+        /* Poignée de redimensionnement */
+        .resize-handle {
+            position: absolute;
+            right: 2px;
+            top: 25%;
+            bottom: 25%;
+            width: 6px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 3px;
+            cursor: ew-resize;
+            transition: background 0.2s, width 0.2s;
+            z-index: 40;
+        }
+        .resize-handle:hover {
+            background: #6366f1;
+            width: 8px;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col bg-slate-50 text-slate-800">
+
+    <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between z-30 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none">
+                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">MindVibe <span class="text-indigo-600">Pro</span></h1>
+                <p class="text-[9px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mt-0.5">
+                    <span class="text-indigo-500 font-bold">M</span>apping <span class="text-indigo-500 font-bold">I</span>deation <span class="text-indigo-500 font-bold">N</span>etworking <span class="text-indigo-500 font-bold">D</span>evelopment • <span class="text-indigo-500 font-bold">V</span>isual <span class="text-indigo-500 font-bold">I</span>nsight <span class="text-indigo-500 font-bold">B</span>rainstorming <span class="text-indigo-500 font-bold">E</span>volution
+                </p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 mr-2">
+                <button onclick="undo()" id="btn-undo" class="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-lg disabled:opacity-30 disabled:pointer-events-none transition" title="Annuler">
+                    <i data-lucide="undo-2" class="w-4 h-4"></i>
+                </button>
+                <button onclick="redo()" id="btn-redo" class="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-lg disabled:opacity-30 disabled:pointer-events-none transition" title="Rétablir (Annuler l'annulation)">
+                    <i data-lucide="redo-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                <button onclick="setDirection('bi')" id="btn-bi" class="px-3 py-1.5 rounded-lg transition-all">BILATÉRAL</button>
+                <button onclick="setDirection('uni')" id="btn-uni" class="px-3 py-1.5 rounded-lg transition-all">UNILATÉRAL</button>
+            </div>
+
+            <button onclick="toggleDarkMode()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition" title="Changer de thème">
+                <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+            </button>
+
+            <button onclick="resetToNewCanvas()" class="px-3 py-1.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900 shadow-sm flex items-center gap-2 transition">
+                <i data-lucide="file-plus-2" class="w-4 h-4"></i> Nouvelle carte
+            </button>
+            
+            <button onclick="toggleModal('modal-help', true)" class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition flex items-center gap-1 text-sm font-medium">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+            </button>
+            <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <button onclick="exportSVG()" class="px-3 py-1.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2 transition">
+                <i data-lucide="download" class="w-4 h-4"></i> Exporter SVG
+            </button>
+            <button onclick="openJSONModal()" class="px-3 py-1.5 rounded-xl text-sm font-semibold bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 flex items-center gap-2 shadow-lg transition">
+                <i data-lucide="code-2" class="w-4 h-4"></i> Données JSON
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex relative overflow-hidden">
+        
+        <div id="edit-panel" class="absolute left-6 top-6 bottom-6 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl border border-slate-200 dark:border-slate-800 rounded-3xl p-6 z-40 flex flex-col gap-5 transform transition-all duration-300">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2 text-lg">
+                    <i data-lucide="edit-3" class="w-5 h-5 text-indigo-500"></i> Édition du nœud
+                </h3>
+            </div>
+            
+            <div class="flex-1 flex flex-col gap-4 overflow-y-auto pr-1">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Contenu (Markdown / LaTeX)</label>
+                    <textarea id="node-text" class="w-full h-44 p-4 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 outline-none font-medium transition-all" placeholder="Écrivez ici..."></textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center block">Couleur de la branche</label>
+                    <div class="flex justify-between" id="color-picker"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-2 mt-2">
+                    <button onclick="actionAddChild()" class="py-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Ajouter un sous-nœud
+                    </button>
+                    <button onclick="actionDeleteNode()" class="py-3 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvas-container" class="flex-1 h-full w-full canvas-bg relative cursor-grab active:cursor-grabbing select-none overflow-hidden">
+            <svg id="svg-master" class="absolute top-0 left-0 w-full h-full pointer-events-none" style="overflow: visible;">
+                <g id="svg-links"></g>
+            </svg>
+            <div id="mindmap-content" class="absolute origin-center node-transition" style="top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1);"></div>
+        </div>
+
+        <footer class="absolute bottom-4 right-6 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-2xl shadow-sm transition-all">
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <i data-lucide="code-2" class="w-3.5 h-3.5 text-indigo-500"></i>
+                Créé par <span class="font-semibold text-slate-800 dark:text-slate-200">Olivier Thöni</span>, vibe-codé avec l’aide de <span class="font-semibold text-indigo-600 dark:text-indigo-400">Gemini 3.5 flash</span>
+            </p>
+        </footer>
+    </div>
+
+    <div id="modal-help" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-[32px] max-w-xl w-full p-8 shadow-2xl border border-slate-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <i data-lucide="help-circle" class="text-indigo-600"></i> Centre d'aide MindVibe
+                </h3>
+                <button onclick="toggleModal('modal-help', false)" class="text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-full transition"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="space-y-6 text-slate-600 dark:text-slate-400 text-sm">
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2"><i data-lucide="mouse-pointer-2" class="w-4 h-4 text-indigo-500"></i> Navigation & Arborescence</h4>
+                    <ul class="list-disc pl-5 space-y-1.5">
+                        <li><strong>Glisser-déposer :</strong> Déplacez un nœud sur un autre pour restructurer la hiérarchie.</li>
+                        <li><strong>Bulle centrale (Bilateral) :</strong> Déposez votre nœud sur le côté gauche ou droit de la bulle centrale pour l'aimanter du côté voulu.</li>
+                        <li><strong>Raccourcis clavier de base :</strong> <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded text-xs">Tab</kbd> : Ajouter Enfant | <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded text-xs">Suppr</kbd> : Supprimer | <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded text-xs">Espace</kbd> : Réduire/Déplier.</li>
+                        <li><strong>Réordonner verticalement :</strong> Sélectionnez un nœud et utilisez les flèches <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded text-xs">↑ Haut</kbd> et <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded text-xs">↓ Bas</kbd> pour changer sa position par rapport à ses frères et sœurs.</li>
+                        <li><strong>Redimensionner en longueur :</strong> Sélectionnez un nœud et étirez son bord droit via sa poignée de redimensionnement dédiée.</li>
+                    </ul>
+                </div>
+
+                <hr class="border-slate-100 dark:border-slate-800" />
+
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-indigo-500"></i> Guide de syntaxe (Markdown & LaTeX)</h4>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 font-mono text-xs space-y-3 border border-slate-100 dark:border-slate-800/80">
+                        <div>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">// Titres & Formatage</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300"># Titre Principal H1<br>## Sous-titre H2<br>**Texte en Gras** et *Italique*</p>
+                        </div>
+                        <div>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">// Listes à puces</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300">- Élément de liste A<br>- Élément de liste B</p>
+                        </div>
+                        <div>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">// Médias & Liens hypertexte</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300">[Texte du Lien](https://exemple.com)<br>![Description Image](https://url-image.jpg)</p>
+                        </div>
+                        <div>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">// Équations LaTeX (Inline)</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300">La formule en ligne s'écrit : $E = mc^2$</p>
+                        </div>
+                        <div>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">// Équations LaTeX (Bloc centré)</span>
+                            <p class="mt-1 text-slate-700 dark:text-slate-300">$$\n\\int_{a}^{b} x^2 dx = \\frac{b^3 - a^3}{3}\n$$</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-json" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-[32px] max-w-2xl w-full p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="braces" class="text-indigo-500"></i> Structure des données de la carte
+                </h3>
+                <button onclick="toggleModal('modal-json', false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Vous pouvez modifier ou coller une autre structure JSON valide ci-dessous pour importer instantanément une nouvelle arborescence.</p>
+            <textarea id="json-code" class="w-full h-72 p-5 font-mono text-xs bg-slate-950 text-emerald-400 rounded-2xl outline-none border border-slate-800 focus:ring-2 focus:ring-indigo-500"></textarea>
+            <div class="mt-5 flex justify-between gap-3">
+                <button onclick="importJSON()" class="px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 shadow-lg transition">Importer ce JSON</button>
+                <button onclick="copyJSON()" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg transition">Copier dans le presse-papier</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DONNÉES & HISTORIQUE ---
+        const STORAGE_KEY = 'mindvibe_pro_v2_data';
+        const DEFAULT_DATA = {
+            id: "root", text: "# Formules & Idées\nSélectionnez pour éditer", color: "#6366f1", expanded: true, side: "center", width: 220,
+            children: [
+                { id: "c1", text: "## Rendu Markdown\n- **Gras** & *Italique*", color: "#10b981", expanded: true, side: "right", width: 200, children: [] },
+                { id: "c2", text: "## Physique\nFormule en bloc :\n$$\\int_{a}^{b} x^2 dx = \\frac{b^3 - a^3}{3}$$\nEt en ligne : $E = mc^2$", color: "#f59e0b", expanded: true, side: "left", width: 260, children: [] }
+            ]
+        };
+
+        let mindmapData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+        let selectedNodeId = "root";
+        let mapDirection = "bi";
+        let panX = 0, panY = 0, scale = 1;
+        let isPanning = false, startX, startY;
+        const colors = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#64748b"];
+
+        let undoStack = [];
+        let redoStack = [];
+
+        window.onload = () => {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            }
+            lucide.createIcons();
+            initColorPicker();
+            setupCanvasInteraction();
+            pushState();
+            renderMindmap();
+            selectNode(selectedNodeId);
+            document.getElementById('node-text').addEventListener('input', (e) => {
+                updateNodeProperty(selectedNodeId, 'text', e.target.value);
+            });
+            document.addEventListener('keydown', handleKeyDown);
+        };
+
+        // --- HISTORIQUE (UNDO / REDO) ---
+        function pushState() {
+            if (undoStack.length > 50) undoStack.shift();
+            undoStack.push(JSON.stringify(mindmapData));
+            redoStack = [];
+            updateUndoRedoButtons();
+        }
+
+        function undo() {
+            if (undoStack.length <= 1) return;
+            redoStack.push(undoStack.pop());
+            mindmapData = JSON.parse(undoStack[undoStack.length - 1]);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(mindmapData));
+            renderMindmap();
+            updateUndoRedoButtons();
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            const state = redoStack.pop();
+            undoStack.push(state);
+            mindmapData = JSON.parse(state);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(mindmapData));
+            renderMindmap();
+            updateUndoRedoButtons();
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('btn-undo').disabled = undoStack.length <= 1;
+            document.getElementById('btn-redo').disabled = redoStack.length === 0;
+        }
+
+        function saveData() {
+            const currentState = JSON.stringify(mindmapData);
+            if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentState) {
+                pushState();
+            }
+            localStorage.setItem(STORAGE_KEY, currentState);
+        }
+
+        // --- REVENIR A LA CARTE PAR DÉFAUT ---
+        function resetToNewCanvas() {
+            if (confirm("Réinitialiser et recharger la carte par défaut de la 1ère connexion ?")) {
+                mindmapData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                selectedNodeId = "root";
+                panX = 0; panY = 0; scale = 1;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(mindmapData));
+                pushState();
+                updateCanvas();
+                renderMindmap();
+                selectNode(selectedNodeId);
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', isDark);
+            setTimeout(renderLinks, 50);
+        }
+
+        // --- ARBRE DE RENDU ---
+        function renderMindmap() {
+            const content = document.getElementById('mindmap-content');
+            content.innerHTML = '';
+            
+            const containerDiv = document.createElement('div');
+            containerDiv.className = "flex items-center gap-32 justify-center";
+            
+            const leftCol = createColumn('items-end text-right');
+            const centerCol = createColumn('items-center');
+            const rightCol = createColumn('items-start');
+
+            centerCol.appendChild(createNodeDOM(mindmapData));
+
+            mindmapData.children.forEach((child, index) => {
+                if (mapDirection === "uni") child.side = "right";
+                else if (!child.side || child.side === 'center') child.side = index % 2 === 0 ? "right" : "left";
+                
+                (child.side === "right" ? rightCol : leftCol).appendChild(renderTree(child));
+            });
+
+            if (mapDirection === "bi") containerDiv.appendChild(leftCol);
+            containerDiv.appendChild(centerCol);
+            containerDiv.appendChild(rightCol);
+            content.appendChild(containerDiv);
+            
+            lucide.createIcons();
+            setTimeout(renderLinks, 40);
+        }
+
+        function createColumn(cls) {
+            const d = document.createElement('div');
+            d.className = `flex flex-col gap-10 justify-center ${cls}`;
+            return d;
+        }
+
+        function renderTree(node) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex items-center gap-16 ${node.side === 'left' ? 'flex-row-reverse' : 'flex-row'}`;
+            wrapper.appendChild(createNodeDOM(node));
+
+            if (node.children?.length > 0 && node.expanded) {
+                const childrenContainer = createColumn(node.side === 'left' ? 'items-end' : 'items-start');
+                node.children.forEach(child => {
+                    child.side = node.side;
+                    childrenContainer.appendChild(renderTree(child));
+                });
+                wrapper.appendChild(childrenContainer);
+            }
+            return wrapper;
+        }
+
+        function createNodeDOM(node) {
+            const div = document.createElement('div');
+            div.id = `node-${node.id}`;
+            div.dataset.id = node.id;
+            div.draggable = true;
+            
+            const isSelected = node.id === selectedNodeId;
+            div.className = `mindmap-node bg-white text-slate-800 p-5 rounded-2xl border-t-[6px] shadow-sm min-w-[140px] max-w-[600px] cursor-grab active:cursor-grabbing transition-all relative z-20`;
+            
+            // Appliquer la largeur personnalisée ou celle par défaut
+            const nodeWidth = node.width || 200;
+            div.style.width = `${nodeWidth}px`;
+
+            if (isSelected) {
+                div.style.boxShadow = `0 20px 25px -5px rgba(0,0,0,0.1), 0 0 0 3px ${node.color}`;
+                div.style.borderColor = node.color;
+            } else {
+                div.style.borderColor = node.color;
+            }
+
+            const rawHtml = marked.parse(node.text || '');
+            div.innerHTML = `<div class="node-content text-sm leading-relaxed prose prose-slate prose-sm">${rawHtml}</div>`;
+
+            // --- POIGNÉE DE REDIMENSIONNEMENT (Seulement si sélectionné) ---
+            if (isSelected) {
+                const handle = document.createElement('div');
+                handle.className = "resize-handle";
+                handle.draggable = false;
+                handle.onmousedown = (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const startW = parseInt(div.style.width, 10);
+                    const startXCoord = e.clientX;
+
+                    const doDrag = (moveEvent) => {
+                        // Ajustement proportionnel basé sur l'échelle de zoom actuelle du canvas
+                        const currentWidth = startW + (moveEvent.clientX - startXCoord) / scale;
+                        const finalWidth = Math.min(Math.max(140, currentWidth), 600);
+                        div.style.width = `${finalWidth}px`;
+                        node.width = finalWidth;
+                        renderLinks();
+                    };
+
+                    const stopDrag = () => {
+                        window.removeEventListener('mousemove', doDrag);
+                        window.removeEventListener('mouseup', stopDrag);
+                        saveData();
+                    };
+
+                    window.addEventListener('mousemove', doDrag);
+                    window.addEventListener('mouseup', stopDrag);
+                };
+                div.appendChild(handle);
+            }
+
+            if (node.id === "root" && mapDirection === "bi") {
+                const leftZone = document.createElement('div');
+                leftZone.className = "magnet-zone magnet-left";
+                const rightZone = document.createElement('div');
+                rightZone.className = "magnet-zone magnet-right";
+                
+                [leftZone, rightZone].forEach((zone, i) => {
+                    zone.ondragover = (e) => { e.preventDefault(); e.stopPropagation(); zone.classList.add('drag-over'); div.classList.add('drop-target'); };
+                    zone.ondragleave = () => { zone.classList.remove('drag-over'); div.classList.remove('drop-target'); };
+                    zone.ondrop = (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        zone.classList.remove('drag-over'); div.classList.remove('drop-target');
+                        const draggedId = e.dataTransfer.getData("text/plain");
+                        if (draggedId && draggedId !== "root") {
+                            reparentNode(draggedId, "root", i === 0 ? "left" : "right");
+                        }
+                    };
+                });
+                div.appendChild(leftZone);
+                div.appendChild(rightZone);
+            }
+
+            if (node.children?.length > 0) {
+                const btn = document.createElement('button');
+                btn.className = "absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-indigo-600 shadow-md hover:scale-110 transition z-30 pointer-events-auto";
+                btn.innerHTML = `<i data-lucide="${node.expanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4"></i>`;
+                btn.onclick = (e) => { e.stopPropagation(); toggleExpand(node.id); };
+                div.appendChild(btn);
+            }
+
+            // --- FILTRE LATEX SÉCURISÉ ---
+            setTimeout(() => {
+                const contentNode = div.querySelector('.node-content');
+                if(!contentNode) return;
+                const mathRegex = /(\$\$[\s\S]+?\$\$|\$[\s\S]+?\$)/g;
+                contentNode.innerHTML = contentNode.innerHTML.replace(mathRegex, (match) => {
+                    const isDisplay = match.startsWith('$$');
+                    let formula = isDisplay ? match.slice(2, -2) : match.slice(1, -1);
+                    formula = formula.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?[^>]+(>|$)/g, ""); 
+                    try { return katex.renderToString(formula, { displayMode: isDisplay, throwOnError: false, trust: true }); } catch (e) { return match; }
+                });
+            }, 0);
+
+            div.onclick = (e) => { e.stopPropagation(); selectNode(node.id); };
+            div.ondragstart = (e) => { e.stopPropagation(); e.dataTransfer.setData("text/plain", node.id); div.classList.add('dragging'); };
+            div.ondragend = () => div.classList.remove('dragging');
+            
+            if (node.id !== "root" || mapDirection !== "bi") {
+                div.ondragover = (e) => { e.preventDefault(); e.stopPropagation(); div.classList.add('drop-target'); };
+                div.ondragleave = () => { div.classList.remove('drop-target'); };
+                div.ondrop = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    div.classList.remove('drop-target');
+                    const draggedId = e.dataTransfer.getData("text/plain");
+                    if (draggedId && draggedId !== node.id) { reparentNode(draggedId, node.id, node.side); }
+                };
+            }
+            return div;
+        }
+
+        function reparentNode(childId, newParentId, preferredSide = null) {
+            if (childId === "root" || childId === newParentId) return;
+            let checkNode = findNodeById(mindmapData, childId);
+            if (findNodeById(checkNode, newParentId)) return; 
+
+            let childNode = null;
+            function remove(parent) {
+                if (!parent.children) return;
+                const idx = parent.children.findIndex(c => c.id === childId);
+                if (idx !== -1) { childNode = parent.children.splice(idx, 1)[0]; return; }
+                parent.children.forEach(remove);
+            }
+            remove(mindmapData);
+            if (childNode) {
+                const parent = findNodeById(mindmapData, newParentId);
+                if (preferredSide) childNode.side = preferredSide; 
+                parent.children.push(childNode);
+                parent.expanded = true;
+                saveData();
+                renderMindmap();
+            }
+        }
+
+        function findNodeById(root, id) {
+            if (root.id === id) return root;
+            if (root.children) {
+                for (let child of root.children) {
+                    const found = findNodeById(child, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        // --- DÉPLACEMENT VERTICAL ---
+        function moveNodeOrder(id, direction) {
+            if (id === "root") return;
+            let siblings = null;
+            let currentIndex = -1;
+
+            function findSiblings(parent) {
+                if (!parent.children) return;
+                const idx = parent.children.findIndex(c => c.id === id);
+                if (idx !== -1) { siblings = parent.children; currentIndex = idx; return; }
+                parent.children.forEach(findSiblings);
+            }
+            
+            findSiblings(mindmapData);
+
+            if (siblings && currentIndex !== -1) {
+                let targetIndex = currentIndex + direction;
+                if (targetIndex >= 0 && targetIndex < siblings.length) {
+                    const temp = siblings[currentIndex];
+                    siblings[currentIndex] = siblings[targetIndex];
+                    siblings[targetIndex] = temp;
+                    saveData();
+                    renderMindmap();
+                    document.getElementById(`node-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        function selectNode(id) {
+            selectedNodeId = id;
+            const node = findNodeById(mindmapData, id);
+            if (!node) return;
+            document.getElementById('node-text').value = node.text;
+            renderMindmap();
+        }
+
+        function updateNodeProperty(id, prop, val) {
+            const node = findNodeById(mindmapData, id);
+            if (node) {
+                node[prop] = val;
+                if (prop === 'text') renderLinks(); 
+                clearTimeout(window.saveTimeout);
+                window.saveTimeout = setTimeout(saveData, 500);
+            }
+        }
+
+        function actionAddChild() {
+            const p = findNodeById(mindmapData, selectedNodeId);
+            const newId = "n_" + Date.now();
+            const side = p.id === "root" ? "right" : p.side;
+            p.children.push({ id: newId, text: "Nouveau nœud", color: p.color, expanded: true, side: side, width: 200, children: [] });
+            p.expanded = true;
+            saveData();
+            renderMindmap();
+            selectNode(newId);
+        }
+
+        function actionDeleteNode() {
+            if (selectedNodeId === "root") return;
+            function del(p) {
+                if (!p.children) return;
+                const i = p.children.findIndex(c => c.id === selectedNodeId);
+                if (i !== -1) return p.children.splice(i, 1);
+                p.children.forEach(del);
+            }
+            del(mindmapData);
+            saveData();
+            selectNode("root");
+        }
+
+        function toggleExpand(id) {
+            const n = findNodeById(mindmapData, id);
+            n.expanded = !n.expanded;
+            renderMindmap();
+        }
+
+        function setDirection(dir) {
+            mapDirection = dir;
+            document.getElementById('btn-bi').className = `px-3 py-1.5 rounded-lg transition-all ${dir === 'bi' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`;
+            document.getElementById('btn-uni').className = `px-3 py-1.5 rounded-lg transition-all ${dir === 'uni' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`;
+            renderMindmap();
+        }
+
+        function handleKeyDown(e) {
+            if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) return;
+            
+            if (e.key === 'ArrowUp') { e.preventDefault(); moveNodeOrder(selectedNodeId, -1); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); moveNodeOrder(selectedNodeId, 1); }
+            
+            if (e.key === 'Tab') { e.preventDefault(); actionAddChild(); }
+            if (e.key === 'Delete' || e.key === 'Backspace') actionDeleteNode();
+            if (e.key === ' ') { e.preventDefault(); toggleExpand(selectedNodeId); }
+        }
+
+        function setupCanvasInteraction() {
+            const container = document.getElementById('canvas-container');
+            container.onmousedown = (e) => {
+                if (e.target.closest('.mindmap-node') || e.target.closest('button') || e.target.closest('footer') || e.target.closest('.resize-handle')) return;
+                isPanning = true; startX = e.clientX - panX; startY = e.clientY - panY;
+            };
+            window.onmousemove = (e) => {
+                if (!isPanning) return;
+                panX = e.clientX - startX; panY = e.clientY - startY; updateCanvas();
+            };
+            window.onmouseup = () => isPanning = false;
+            container.onwheel = (e) => {
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 1.05 : 0.95;
+                scale = Math.min(Math.max(0.4, scale * delta), 1.8); updateCanvas();
+            };
+        }
+
+        function updateCanvas() {
+            const c = document.getElementById('mindmap-content');
+            c.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${scale})`;
+            renderLinks();
+        }
+
+        function renderLinks() {
+            const svgGroup = document.getElementById('svg-links');
+            svgGroup.innerHTML = '';
+            const rect = document.getElementById('canvas-container').getBoundingClientRect();
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            function draw(n) {
+                if (!n.expanded || !n.children) return;
+                const pEl = document.getElementById(`node-${n.id}`); if (!pEl) return;
+                const pR = pEl.getBoundingClientRect();
+                
+                n.children.forEach(c => {
+                    const cEl = document.getElementById(`node-${c.id}`); if (!cEl) return;
+                    const cR = cEl.getBoundingClientRect();
+                    const sY = pR.top + pR.height / 2 - rect.top;
+                    const eY = cR.top + cR.height / 2 - rect.top;
+                    let sX, eX;
+                    
+                    if (c.side === 'left') { sX = pR.left - rect.left; eX = cR.right - rect.left; }
+                    else { sX = pR.right - rect.left; eX = cR.left - rect.left; }
+                    
+                    const off = Math.abs(eX - sX) * 0.5;
+                    const cp1 = c.side === 'left' ? sX - off : sX + off;
+                    const cp2 = c.side === 'left' ? eX + off : eX - off;
+                    
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", `M ${sX} ${sY} C ${cp1} ${sY}, ${cp2} ${eY}, ${eX} ${eY}`);
+                    path.setAttribute("stroke", n.color);
+                    path.setAttribute("stroke-width", "3");
+                    path.setAttribute("fill", "none");
+                    path.setAttribute("opacity", isDark ? "0.7" : "0.5");
+                    svgGroup.appendChild(path);
+                    draw(c);
+                });
+            }
+            draw(mindmapData);
+        }
+
+        function initColorPicker() {
+            const p = document.getElementById('color-picker');
+            colors.forEach(c => {
+                const b = document.createElement('button');
+                b.className = "w-7 h-7 rounded-full border-2 border-white shadow-sm hover:scale-125 transition";
+                b.style.backgroundColor = c;
+                b.onclick = () => { updateNodeProperty(selectedNodeId, 'color', c); saveData(); renderMindmap(); };
+                p.appendChild(b);
+            });
+        }
+
+        function toggleModal(id, show) { document.getElementById(id).classList.toggle('hidden', !show); }
+
+        function exportSVG() {
+            const container = document.getElementById('canvas-container').getBoundingClientRect();
+            const svgLinks = document.getElementById('svg-links');
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            const exportSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            exportSvg.setAttribute("width", container.width);
+            exportSvg.setAttribute("height", container.height);
+            exportSvg.setAttribute("viewBox", `0 0 ${container.width} ${container.height}`);
+            exportSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            exportSvg.style.backgroundColor = isDark ? "#0f172a" : "#f8fafc";
+
+            const linksClone = svgLinks.cloneNode(true);
+            exportSvg.appendChild(linksClone);
+
+            const nodes = document.querySelectorAll('.mindmap-node');
+            nodes.forEach(node => {
+                const nodeRect = node.getBoundingClientRect();
+                const x = nodeRect.left - container.left;
+                const y = nodeRect.top - container.top;
+                const color = node.style.borderColor || '#6366f1';
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", y);
+                rect.setAttribute("width", nodeRect.width);
+                rect.setAttribute("height", nodeRect.height);
+                rect.setAttribute("rx", "16");
+                rect.setAttribute("fill", "#ffffff");
+                rect.setAttribute("stroke", "#e2e8f0");
+                rect.setAttribute("stroke-width", "1");
+                g.appendChild(rect);
+
+                const topBar = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                topBar.setAttribute("d", `M ${x+1} ${y+6} Q ${x+1} ${y+1} ${x+6} ${y+1} L ${x + nodeRect.width - 6} ${y+1} Q ${x + nodeRect.width - 1} ${y+1} ${x + nodeRect.width - 1} ${y+6} L ${x + nodeRect.width - 1} ${y+6} L ${x+1} ${y+6} Z`);
+                topBar.setAttribute("fill", color);
+                g.appendChild(topBar);
+
+                const textNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                textNode.setAttribute("fill", "#1e293b");
+                textNode.setAttribute("font-family", "Inter, system-ui, sans-serif");
+                textNode.setAttribute("font-size", "13");
+                
+                const originalNode = findNodeById(mindmapData, node.dataset.id);
+                const lines = originalNode ? originalNode.text.split('\n') : ["Nœud"];
+                
+                lines.forEach((line, index) => {
+                    const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+                    let cleanedLine = line.replace(/[#_*$`]/g, ""); 
+                    tspan.textContent = cleanedLine;
+                    tspan.setAttribute("x", x + 16);
+                    tspan.setAttribute("y", y + 28 + (index * 18));
+                    if (line.startsWith('#')) tspan.setAttribute("font-weight", "bold");
+                    textNode.appendChild(tspan);
+                });
+
+                g.appendChild(textNode);
+                exportSvg.appendChild(g);
+            });
+
+            const finalSvgString = new XMLSerializer().serializeToString(exportSvg);
+            const blob = new Blob([finalSvgString], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "mindvibe-carte.svg";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- EXPORT / IMPORT JSON COMPLET ---
+        function openJSONModal() {
+            document.getElementById('json-code').value = JSON.stringify(mindmapData, null, 2);
+            toggleModal('modal-json', true);
+        }
+
+        function importJSON() {
+            try {
+                const parsed = JSON.parse(document.getElementById('json-code').value);
+                if (!parsed.id || !parsed.text) throw new Error("Format invalide.");
+                mindmapData = parsed;
+                selectedNodeId = parsed.id;
+                saveData();
+                renderMindmap();
+                selectNode(selectedNodeId);
+                toggleModal('modal-json', false);
+            } catch (e) {
+                alert("Erreur de parsing JSON. Veuillez vérifier la structure de votre code avant l'import.");
+            }
+        }
+
+        function copyJSON() {
+            navigator.clipboard.writeText(document.getElementById('json-code').value);
+            alert("Structure JSON copiée dans le presse-papier !");
+        }
+    </script>
+</body>
+</html>

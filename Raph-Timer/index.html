@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Temps d'Écran - Ciel Magique</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* Le fond par défaut est le plein jour */
+            background: linear-gradient(to bottom, #74b9ff, #a29bfe);
+            transition: background 1s linear;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Zone Parents Cachée (Triple-clic en haut à droite) */
+        #config-trigger {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        #config-panel {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 101;
+            text-align: center;
+        }
+
+        #config-panel input {
+            width: 80px;
+            padding: 8px;
+            font-size: 18px;
+            text-align: center;
+            margin: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+
+        #config-panel button {
+            padding: 10px 20px;
+            background: #ff7675;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* LE CIEL ET LES ASTRES */
+        #sun {
+            position: absolute;
+            font-size: 80px;
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            text-align: center;
+            left: 50%;
+            top: 10%;
+            transform: translateX(-50%);
+            transition: all 1s linear;
+            z-index: 1;
+        }
+
+        #moon {
+            position: absolute;
+            font-size: 75px;
+            left: 50%;
+            top: 15%;
+            transform: translateX(-50%) scale(0);
+            transition: transform 2s ease-out;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            color: white;
+            opacity: 0;
+            transition: opacity 2s ease;
+            z-index: 0;
+        }
+
+        /* INTERFACE ENFANT */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 35px;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* Le petit chat */
+        .character-box {
+            font-size: 130px;
+            animation: float 4s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .sleeping {
+            animation: sleep 2.5s ease-in-out infinite !important;
+        }
+
+        @keyframes sleep {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.93); }
+            100% { transform: scale(1); }
+        }
+
+        /* Jauge de Temps épurée */
+        .progress-container {
+            width: 85%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 20px;
+            padding: 5px;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #2ecc71;
+            border-radius: 15px;
+            transition: width 1s linear, background-color 1s ease;
+        }
+
+        /* Bouton Lancement */
+        .start-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: none;
+            background: #2ecc71;
+            color: white;
+            font-size: 35px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+            transition: transform 0.2s, background 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .start-btn:hover { transform: scale(1.05); }
+        .start-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div id="config-trigger" onclick="handleSecretClick()"></div>
+
+    <div id="config-panel">
+        <h3>Options Parents</h3>
+        <label>Minutes de jeu :</label><br>
+        <input type="number" id="duration-input" value="20" min="1"><br>
+        <button onclick="saveConfig()">Appliquer</button>
+    </div>
+
+    <div id="sun">☀️</div>
+    <div id="moon">🌙</div>
+
+    <div class="game-container">
+        <div id="character" class="character-box">🐱</div>
+
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <button id="start-btn" class="start-btn" onclick="startTimer()">▶️</button>
+    </div>
+
+    <script>
+        let totalSeconds = 20 * 60; // 20 minutes par défaut
+        let remainingSeconds = totalSeconds;
+        let timerInterval = null;
+        let clickCount = 0;
+        let clickTimeout;
+
+        // Synthétiseur audio pour la cloche de fin
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'bell') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(554.37, audioCtx.currentTime); // Note Do#
+                osc.frequency.exponentialRampToValueAtTime(277.18, audioCtx.currentTime + 1.5);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 2);
+            } else if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+
+        function handleSecretClick() {
+            clickCount++;
+            clearTimeout(clickTimeout);
+            if (clickCount === 3) {
+                document.getElementById('config-panel').style.display = 'block';
+                clickCount = 0;
+            } else {
+                clickTimeout = setTimeout(() => { clickCount = 0; }, 1000);
+            }
+        }
+
+        function saveConfig() {
+            const minutes = document.getElementById('duration-input').value;
+            totalSeconds = minutes * 60;
+            resetUI();
+            document.getElementById('config-panel').style.display = 'none';
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            playSound('click');
+            remainingSeconds = totalSeconds;
+            document.getElementById('start-btn').style.visibility = 'hidden';
+
+            // Position initiale du soleil (en haut au centre)
+            updateVisuals(100);
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                const percentage = (remainingSeconds / totalSeconds) * 100;
+                
+                updateVisuals(percentage);
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    endSession();
+                }
+            }, 1000);
+        }
+
+        function updateVisuals(percentage) {
+            const progressBar = document.getElementById('progress-bar');
+            const sun = document.getElementById('sun');
+            const character = document.getElementById('character');
+
+            // 1. Mise à jour de la jauge
+            progressBar.style.width = percentage + '%';
+
+            // 2. Trajectoire du Soleil (Arc de cercle décentré vers le bas)
+            // X va de 50% (centre) à 85% (bord droit bas)
+            const progressFraction = (100 - percentage) / 100; 
+            const sunX = 50 + (progressFraction * 40); 
+            // Y descend de 10% à 90% (Disparition sous l'horizon)
+            const sunY = 10 + (progressFraction * progressFraction * 80); 
+            
+            sun.style.left = sunX + '%';
+            sun.style.top = sunY + '%';
+            sun.style.opacity = percentage > 0 ? (percentage / 100) + 0.2 : 0;
+
+            // 3. Changement de couleur du ciel (Dégradé dynamique)
+            if (percentage > 60) {
+                // Plein jour (Bleu azur)
+                document.body.style.background = "linear-gradient(to bottom, #74b9ff, #a29bfe)";
+                progressBar.style.backgroundColor = '#2ecc71'; // Vert
+                character.innerHTML = '🐱';
+            } else if (percentage > 30) {
+                // Coucher de soleil (Orange / Rose)
+                document.body.style.background = "linear-gradient(to bottom, #ff7675, #fdcb6e)";
+                progressBar.style.backgroundColor = '#f1c40f'; // Jaune/Orange
+                character.innerHTML = '🐱';
+            } else if (percentage > 0) {
+                // Crépuscule (Violet / Sombre)
+                document.body.style.background = "linear-gradient(to bottom, #2c3e50, #e74c3c)";
+                progressBar.style.backgroundColor = '#e74c3c'; // Rouge
+                character.innerHTML = '🥱'; // Le chat fatigue
+            }
+        }
+
+        function endSession() {
+            // Nuit noire
+            document.body.style.background = "linear-gradient(to bottom, #0f172a, #1e293b)";
+            
+            // Cacher le soleil et lever la lune
+            document.getElementById('sun').style.transform = 'translateX(-50%) scale(0)';
+            const moon = document.getElementById('moon');
+            moon.style.transform = 'translateX(-50%) scale(1)';
+
+            // Chat qui dort
+            const char = document.getElementById('character');
+            char.innerHTML = '😴';
+            char.classList.add('sleeping');
+            
+            // Activer les étoiles
+            createStars();
+
+            // Cloches douces (3 fois)
+            let j = 0;
+            const bellInterval = setInterval(() => {
+                playSound('bell');
+                j++;
+                if (j >= 3) clearInterval(bellInterval);
+            }, 1800);
+        }
+
+        function resetUI() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            
+            // Reset Ciel
+            document.body.style.background = "linear-gradient(to bottom, #74b9ff, #a29bfe)";
+            document.getElementById('sun').style.transform = 'translateX(-50%) scale(1)';
+            document.getElementById('sun').style.left = '50%';
+            document.getElementById('sun').style.top = '10%';
+            document.getElementById('sun').style.opacity = '1';
+            document.getElementById('moon').style.transform = 'translateX(-50%) scale(0)';
+            removeStars();
+
+            // Reset Chat & Jauge
+            const char = document.getElementById('character');
+            char.innerHTML = '🐱';
+            char.classList.remove('sleeping');
+            document.getElementById('progress-bar').style.width = '100%';
+            document.getElementById('progress-bar').style.backgroundColor = '#2ecc71';
+            document.getElementById('start-btn').style.visibility = 'visible';
+        }
+
+        function createStars() {
+            for(let i=0; i<30; i++) {
+                let star = document.createElement('div');
+                star.className = 'star';
+                star.innerHTML = '⭐';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 60 + 'vh';
+                star.style.fontSize = (Math.random() * 12 + 8) + 'px';
+                document.body.appendChild(star);
+                setTimeout(() => star.style.opacity = Math.random() * 0.8 + 0.2, i * 50);
+            }
+        }
+
+        function removeStars() {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => star.remove());
+        }
+    </script>
+</body>
+</html>

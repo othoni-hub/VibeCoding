@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Siècle des Lumières - Frise Chronologique Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fcfbf7;
+        }
+        .serif-title {
+            font-family: 'Cinzel', serif;
+        }
+        .serif-text {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c2a649;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a38936;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+
+    <!-- Header -->
+    <header class="bg-[#1e293b] text-white py-12 px-6 shadow-xl border-b-4 border-[#c2a649] relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.publicdomainpictures.net/pictures/20000/velka/old-paper-background-11293791011YxS.jpg')] bg-cover"></div>
+        <div class="max-w-6xl mx-auto text-center relative z-10">
+            <span class="text-[#c2a649] font-semibold tracking-widest text-sm uppercase block mb-2">XVIIIe Siècle</span>
+            <h1 class="serif-title text-4xl md:text-6xl font-bold mb-4 tracking-wide">Le Siècle des Lumières</h1>
+            <p class="serif-text text-xl md:text-2xl text-gray-300 italic max-w-3xl mx-auto">
+                "Sapere aude ! Aie le courage de te servir de ton propre entendement !" – Emmanuel Kant
+            </p>
+            
+            <!-- Filtres de Catégories -->
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
+                <button onclick="filterEvents('all')" id="btn-all" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-[#c2a649] text-white transition-all shadow-md">
+                    <i class="fa-solid fa-globe mr-1"></i> Tous
+                </button>
+                <button onclick="filterEvents('philosophie')" id="btn-philosophie" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-800 hover:bg-amber-100 transition-all shadow-md">
+                    <i class="fa-solid fa-book-open text-amber-600 mr-1"></i> Philosophie & Littérature
+                </button>
+                <button onclick="filterEvents('sciences')" id="btn-sciences" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-800 hover:bg-blue-100 transition-all shadow-md">
+                    <i class="fa-solid fa-flask text-blue-600 mr-1"></i> Sciences & Innovations
+                </button>
+                <button onclick="filterEvents('politique')" id="btn-politique" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-800 hover:bg-red-100 transition-all shadow-md">
+                    <i class="fa-solid fa-gavel text-red-600 mr-1"></i> Politique & Société
+                </button>
+                <button onclick="filterEvents('arts')" id="btn-arts" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-800 hover:bg-purple-100 transition-all shadow-md">
+                    <i class="fa-solid fa-palette text-purple-600 mr-1"></i> Arts & Musique
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content / Timeline -->
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        <div class="relative border-l-4 border-gray-300 ml-4 md:ml-32 py-4 space-y-12" id="timeline-container">
+            <!-- Les événements seront injectés ici par JavaScript -->
+        </div>
+    </main>
+
+    <!-- Modal pour les fiches détaillées -->
+    <div id="event-modal" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="relative h-64 w-full bg-gray-200">
+                <img id="modal-img" src="" alt="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-6">
+                    <div>
+                        <span id="modal-badge" class="px-3 py-1 rounded-full text-xs font-semibold text-white uppercase tracking-wider"></span>
+                        <h2 id="modal-title" class="serif-title text-2xl md:text-3xl font-bold text-white mt-2"></h2>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/50 text-white rounded-full p-2 hover:bg-black/80 transition-colors w-10 h-10 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 md:p-8">
+                <div class="flex items-center space-x-4 mb-6 pb-4 border-b border-gray-100">
+                    <div class="bg-amber-100 text-amber-800 px-4 py-2 rounded-lg font-bold text-xl border border-amber-300" id="modal-date"></div>
+                    <div class="text-sm text-gray-500 italic" id="modal-author"></div>
+                </div>
+                <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4" id="modal-desc"></div>
+                <div class="mt-8 bg-amber-50/50 border border-amber-200/60 p-4 rounded-lg italic text-sm text-amber-900" id="modal-impact"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#1e293b] text-gray-400 py-8 text-center border-t border-gray-700 mt-20">
+        <p class="text-sm">Application Pédagogique Lycée — Le Siècle des Lumières</p>
+        <p class="text-xs mt-2 text-gray-500">Images d'époque issues du domaine public (XVIIIe siècle).</p>
+    </footer>
+
+    <!-- JavaScript Data and Logic -->
+    <script>
+        // Base de données des 30 événements majeurs des Lumières
+        const eventsData = [
+            {
+                id: 1,
+                year: "1715",
+                title: "Mort de Louis XIV et début de la Régence",
+                category: "politique",
+                author: "Histoire de France",
+                short: "La mort du Roi-Soleil desserre l'étau de la censure royale et ouvre une ère de relative liberté intellectuelle.",
+                desc: "Le décès de Louis XIV marque la fin d'un règne absolu de 72 ans. La Régence de Philippe d'Orléans s'accompagne d'une réaction contre l'austérité de la fin du règne précédent. Les salons littéraires et philosophiques se multiplient, favorisant la libre circulation des idées nouvelles et l'esprit critique.",
+                impact: "Portée pédagogique : Cet événement politique crée l'espace de liberté nécessaire à l'émergence de la philosophie des Lumières en France.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Louis_XIV_on_his_death_bed.jpg/640px-Louis_XIV_on_his_death_bed.jpg"
+            },
+            {
+                id: 2,
+                year: "1721",
+                title: "Parution des 'Lettres persanes' de Montesquieu",
+                category: "philosophie",
+                author: "Montesquieu",
+                short: "Un roman épistolaire satirique qui critique les travers de la société française sous un regard étranger.",
+                desc: "Publié anonymement à Amsterdam, ce roman met en scène deux voyageurs persans, Usbek et Rica, qui découvrent Paris. À travers leur correspondance, Montesquieu critique avec ironie l'absolutisme, la religion, les mœurs et les privilèges de la France de l'époque.",
+                impact: "Portée pédagogique : Une œuvre clé pour étudier l'ironie, le regard de l'autre et la critique sociale par le détournement littéraire.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Lettres_persanes.jpg/435px-Lettres_persanes.jpg"
+            },
+            {
+                id: 3,
+                year: "1725",
+                title: "Vivaldi compose 'Les Quatre Saisons'",
+                category: "arts",
+                author: "Antonio Vivaldi",
+                short: "Chef-d'œuvre de la musique baroque, illustrant le renouveau de la musique descriptive en Europe.",
+                desc: "Le compositeur italien Antonio Vivaldi publie ses quatre concertos pour violon. Cette œuvre révolutionnaire cherche à imiter les sons de la nature (chants d'oiseaux, tempêtes, aboiements). C'est le sommet du baroque tardif, qui annonce une sensibilité artistique nouvelle tournée vers la nature.",
+                impact: "Portée pédagogique : Illustre le dynamisme culturel européen et le lien croissant entre l'art et l'observation du monde naturel.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Antonio_Vivaldi_portrait.jpg/506px-Antonio_Vivaldi_portrait.jpg"
+            },
+            {
+                id: 4,
+                year: "1726",
+                title: "Publication des 'Voyages de Gulliver' de Swift",
+                category: "philosophie",
+                author: "Jonathan Swift",
+                short: "Une satire cinglante de la nature humaine et des institutions politiques de l'époque.",
+                desc: "L'écrivain irlandais Jonathan Swift publie ce conte philosophique sous l'apparence d'un récit de voyage. En confrontant Lemuel Gulliver à des sociétés imaginaires (les minuscules Lilliputiens, les géants de Brobdingnag), Swift livre une critique féroce de la cour d'Angleterre, de la guerre et de la science dogmatique.",
+                impact: "Portée pédagogique : Permet de comprendre comment le conte fantastique sert de miroir critique aux sociétés réelles au XVIIIe siècle.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Gulliver%27s_Travels_by_Jonathan_Swift_first_edition_1726.jpg/440px-Gulliver%27s_Travels_by_Jonathan_Swift_first_edition_1726.jpg"
+            },
+            {
+                id: 5,
+                year: "1728",
+                title: "Création de la 'Cyclopædia' d'Ephraïm Chambers",
+                category: "sciences",
+                author: "Ephraïm Chambers",
+                short: "L'encyclopédie anglaise qui va directement inspirer le projet de Diderot et d'Alembert.",
+                desc: "Publiée à Londres, cette œuvre en deux volumes tente de cartographier l'ensemble des arts et des sciences. C'est en voulant traduire cette œuvre en français que le libraire Le Breton va engager Diderot, menant à la création de la monumentale Encyclopédie française.",
+                impact: "Portée pédagogique : Met en lumière la circulation transnationale des connaissances et les origines directes de l'Encyclopédie.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Chambers_Cyclop%C3%A6dia_1728_title_page.jpg/470px-Chambers_Cyclop%C3%A6dia_1728_title_page.jpg"
+            },
+            {
+                id: 6,
+                year: "1733",
+                title: "Voltaire publie les 'Lettres philosophiques'",
+                category: "philosophie",
+                author: "Voltaire",
+                short: "Un éloge du modèle politique et de la tolérance religieuse de l'Angleterre face à la France.",
+                desc: "Après un exil en Angleterre, Voltaire publie ces lettres (aussi appelées 'Lettres anglaises') où il fait l'éloge du parlementarisme britannique, de la liberté religieuse et de la science de Newton. Le livre est brûlé par le bourreau en France pour hérésie et critique du pouvoir royal.",
+                impact: "Portée pédagogique : Un texte fondamental pour comprendre le combat des Lumières pour la liberté d'expression et la tolérance.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Voltaire_philosophe.jpg/452px-Voltaire_philosophe.jpg"
+            },
+            {
+                id: 7,
+                year: "1735",
+                title: "Carl von Linné publie 'Systema Naturae'",
+                category: "sciences",
+                author: "Carl von Linné",
+                short: "Fondation de la méthode moderne de classification des êtres vivants (nomenclature binomiale).",
+                desc: "Le savant suédois Carl von Linné propose une méthode universelle pour nommer et classer les plantes et les animaux par genre et espèce (ex: *Homo sapiens*). C'est le triomphe de la rationalité scientifique appliquée au monde vivant, cherchant à organiser le chaos de la nature.",
+                impact: "Portée pédagogique : Illustre le besoin d'ordre, d'observation directe et de méthode caractéristique des sciences de l'esprit des Lumières.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Linn%C3%A9_Systema_Naturae_page_de_titre.jpg/464px-Linn%C3%A9_Systema_Naturae_page_de_titre.jpg"
+            },
+            {
+                id: 8,
+                year: "1738",
+                title: "Publication des 'Éléments de la philosophie de Newton'",
+                category: "sciences",
+                author: "Voltaire & Émilie du Châtelet",
+                short: "L'ouvrage qui vulgarise la physique newtonienne et la gravitation en France et en Europe.",
+                desc: "Voltaire, fortement aidé par la brillante mathématicienne Émilie du Châtelet, publie cet ouvrage qui remplace la physique cartésienne par la science de Newton en France. Émilie du Châtelet traduira ensuite l'intégralité des *Principia* de Newton, une prouesse scientifique majeure.",
+                impact: "Portée pédagogique : Met en valeur le rôle crucial des femmes de sciences au XVIIIe siècle, trop souvent invisibilisées.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Newton_Voltaire_Chatelet.jpg/443px-Newton_Voltaire_Chatelet.jpg"
+            },
+            {
+                id: 9,
+                year: "1748",
+                title: "Montesquieu publie 'De l'esprit des lois'",
+                category: "politique",
+                author: "Montesquieu",
+                short: "Théorisation de la séparation des pouvoirs (exécutif, législatif, judiciaire) pour éviter la tyrannie.",
+                desc: "Dans ce traité d'économie politique et de sociologie, Montesquieu étudie les différents types de régimes politiques. Il y formule le principe fondamental selon lequel 'le pouvoir doit arrêter le pouvoir', jetant les bases des constitutions démocratiques modernes.",
+                impact: "Portée pédagogique : Texte pilier des programmes d'Éducation Civique et d'Histoire sur l'origine de nos institutions actuelles.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Esprit_des_loix_1748.jpg/445px-Esprit_des_loix_1748.jpg"
+            },
+            {
+                id: 10,
+                year: "1749",
+                title: "Buffon commence la monumentale 'Histoire naturelle'",
+                category: "sciences",
+                author: "Georges-Louis Leclerc, comte de Buffon",
+                short: "Une immense encyclopédie scientifique en 36 volumes décrivant les secrets de la Terre et de la vie.",
+                desc: "Buffon, intendant du Jardin du Roi, entame une œuvre monumentale qui l'occupera toute sa vie. En refusant d'expliquer la nature par la théologie, il pose les bases de la géologie moderne et de la biologie, évoquant même l'idée d'une évolution des espèces bien avant Darwin.",
+                impact: "Portée pédagogique : Montre l'effort d'émancipation de la science vis-à-vis des dogmes religieux au XVIIIe siècle.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Buffon_Histoire_Naturelle.jpg/480px-Buffon_Histoire_Naturelle.jpg"
+            },
+            {
+                id: 11,
+                year: "1751",
+                title: "Parution du Tome I de 'L'Encyclopédie'",
+                category: "philosophie",
+                author: "Diderot et d'Alembert",
+                short: "Le lancement du plus grand projet éditorial et philosophique du siècle pour diffuser les savoirs.",
+                desc: "Le premier volume de l' *Encyclopédie ou Dictionnaire raisonné des sciences, des arts et des métiers* est publié malgré les oppositions religieuses. Son but affiché par Diderot est de 'changer la façon commune de penser' en vulgarisant les techniques, les arts mécaniques et les idées critiques des Lumières.",
+                impact: "Portée pédagogique : L'œuvre emblématique des Lumières, idéale pour étudier le travail collaboratif et le combat contre l'obscurantisme.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Encyclopedie_Frontispice_Full.jpg/460px-Encyclopedie_Frontispice_Full.jpg"
+            },
+            {
+                id: 12,
+                year: "1751",
+                title: "Voltaire publie 'Le Siècle de Louis XIV'",
+                category: "arts",
+                author: "Voltaire",
+                short: "Une œuvre majeure qui invente l'histoire culturelle en célébrant les progrès de l'esprit humain.",
+                desc: "Publié à Berlin, ce livre ne se contente pas de relater les guerres du roi, mais glorifie les progrès des arts, des lettres et des sciences sous son règne. Voltaire y définit quatre grands siècles de l'histoire humaine, dont le sien, caractérisés par l'épanouissement de la raison.",
+                impact: "Portée pédagogique : Permet d'analyser comment l'écriture de l'histoire se détache du récit purement militaire au profit de la culture.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Siecle_de_Louis_XIV_1751.jpg/477px-Siecle_de_Louis_XIV_1751.jpg"
+            },
+            {
+                id: 13,
+                year: "1752",
+                title: "Benjamin Franklin invente le paratonnerre",
+                category: "sciences",
+                author: "Benjamin Franklin",
+                short: "La domestication d'une force de la nature considérée jusqu'alors comme un châtiment divin.",
+                desc: "Grâce à sa célèbre et dangereuse expérience du cerf-volant pendant un orage, l'Américain Benjamin Franklin prouve la nature électrique de la foudre. Il conçoit le paratonnerre, démontrant que la science peut protéger l'humanité des fléaux naturels sans recourir aux superstitions.",
+                impact: "Portée pédagogique : Un exemple concret de l'application pratique des sciences pour le bien commun et le recul des superstitions.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Franklin_foudre.jpg/458px-Franklin_foudre.jpg"
+            },
+            {
+                id: 14,
+                year: "1755",
+                title: "Le séisme de Lisbonne ébranle l'Europe",
+                category: "politique",
+                author: "Événement Historique",
+                short: "Une catastrophe naturelle majeure qui suscite un immense débat philosophique sur le mal.",
+                desc: "Le jour de la Toussaint, un tremblement de terre suivi d'un tsunami détruit Lisbonne et fait des dizaines de milliers de morts. Ce drame ébranle la foi des philosophes en un Dieu bienveillant. Voltaire s'en inspire pour attaquer l'optimisme béat dans son 'Poème sur le désastre de Lisbonne' puis dans 'Candide'.",
+                impact: "Portée pédagogique : Analyse du basculement d'une vision providentielle du monde vers une vision plus réaliste et tragique de la condition humaine.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Terramoto_de_Lisboa_1755.jpg/640px-Terramoto_de_Lisboa_1755.jpg"
+            },
+            {
+                id: 15,
+                year: "1756",
+                title: "Début de la Guerre de Sept Ans",
+                category: "politique",
+                author: "Histoire géopolitique",
+                short: "Considérée par les historiens comme la véritable première guerre mondiale.",
+                desc: "Ce conflit majeur oppose principalement la France à la Grande-Bretagne, et l'Autriche à la Prusse. Se déroulant en Europe, en Amérique du Nord et en Inde, il s'achève en 1763 par la défaite de la France qui perd son premier empire colonial. La dette accumulée lors de cette guerre préparera le terrain aux révolutions.",
+                impact: "Portée pédagogique : Permet de contextualiser le cadre géopolitique mondialisé dans lequel évoluent les penseurs des Lumières.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Battle_of_Quiberon_Bay_1759.jpg/640px-Battle_of_Quiberon_Bay_1759.jpg"
+            },
+            {
+                id: 16,
+                year: "1759",
+                title: "Publication de 'Candide' de Voltaire",
+                category: "philosophie",
+                author: "Voltaire",
+                short: "Un conte philosophique mordant dénonçant l'optimisme niais, l'intolérance et la guerre.",
+                desc: "À travers les mésaventures absurdes et sanglantes du jeune Candide et de son maître Pangloss, Voltaire tourne en dérision la philosophie optimiste de Leibniz. L'œuvre invite le lecteur à refuser la fatalité et à agir concrètement à son échelle : 'il faut cultiver notre jardin'.",
+                impact: "Portée pédagogique : L'œuvre littéraire du XVIIIe siècle la plus étudiée au lycée, pilier de l'argumentation ironique.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Candide_1759_title_page.jpg/435px-Candide_1759_title_page.jpg"
+            },
+            {
+                id: 17,
+                year: "1762",
+                title: "Rousseau publie 'Du contrat social' et 'L'Émile'",
+                category: "philosophie",
+                author: "Jean-Jacques Rousseau",
+                short: "Fondation théorique de la souveraineté du peuple et d'une éducation moderne.",
+                desc: "Dans le *Contrat Social*, Rousseau affirme que le pouvoir légitime appartient au peuple (souveraineté populaire). Dans l'*Émile*, il révolutionne la pédagogie en plaçant l'enfant au centre de l'apprentissage, loin du dressage traditionnel. Les deux livres sont immédiatement condamnés et brûlés à Paris et Genève.",
+                impact: "Portée pédagogique : Comprendre la rupture républicaine de Rousseau qui inspirera directement la Révolution française.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Jean-Jacques_Rousseau_%28La_Tour%29.jpg/490px-Jean-Jacques_Rousseau_%28La_Tour%29.jpg"
+            },
+            {
+                id: 18,
+                year: "1763",
+                title: "Voltaire publie le 'Traité sur la tolérance'",
+                category: "philosophie",
+                author: "Voltaire",
+                short: "Un vibrant plaidoyer pour la liberté religieuse rédigé à l'occasion de l'affaire Calas.",
+                desc: "Révolté par l'exécution à Toulouse de Jean Calas, un protestant injustement accusé d'avoir assassiné son fils, Voltaire utilise sa notoriété pour obtenir la réhabilitation de la victime. Il signe un traité universel condamnant le fanatisme religieux et la torture.",
+                impact: "Portée pédagogique : Un cas pratique d'intellectuel engagé au service des droits humains et contre l'erreur judiciaire.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Jean_Calas_family.jpg/568px-Jean_Calas_family.jpg"
+            },
+            {
+                id: 19,
+                year: "1764",
+                title: "Publication du 'Traité des délits et des peines' de Beccaria",
+                category: "politique",
+                author: "Cesare Beccaria",
+                short: "Le premier grand texte juridique plaidant pour l'abolition de la torture et de la peine de mort.",
+                desc: "Ce juriste italien pose les bases du droit pénal moderne. Il soutient que les peines doivent être proportionnées aux délits et servir à réinsérer, non à se venger. Il dénonce l'inefficacité et la cruauté de la torture et réclame la fin de la peine de mort.",
+                impact: "Portée pédagogique : Fondamental pour retracer l'histoire de la justice humaine et l'origine du droit humaniste.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Beccaria_Dei_delitti_1764.jpg/477px-Beccaria_Dei_delitti_1764.jpg"
+            },
+            {
+                id: 20,
+                year: "1769",
+                title: "James Watt brevète la machine à vapeur moderne",
+                category: "sciences",
+                author: "James Watt",
+                short: "L'innovation technique qui va déclencher la Révolution industrielle.",
+                desc: "En améliorant drastiquement l'efficacité de la machine de Newcomen grâce à un condenseur séparé, l'ingénieur écossais James Watt transforme une pompe thermique en un moteur universel. C'est le début de l'automatisation des usines et de la transformation économique de l'Occident.",
+                impact: "Portée pédagogique : Fait le pont entre l'esprit scientifique théorique des Lumières et l'ère industrielle du XIXe siècle.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/James_Watt_by_Henry_Howard.jpg/484px-James_Watt_by_Henry_Howard.jpg"
+            },
+            {
+                id: 21,
+                year: "1769",
+                title: "Bougainville publie son 'Voyage autour du monde'",
+                category: "sciences",
+                author: "Louis-Antoine de Bougainville",
+                short: "Le récit des explorations dans le Pacifique qui alimente le mythe du 'bon sauvage'.",
+                desc: "Le navigateur français raconte son escale idyllique à Tahiti. Sa description d'une société libertaire vivant en harmonie avec la nature fascine l'Europe et pousse Denis Diderot à écrire son célèbre 'Supplément au Voyage de Bougainville', une critique de la colonisation et de la morale occidentale.",
+                impact: "Portée pédagogique : Idéal pour travailler la notion d'altérité et la critique philosophique de l'ethnocentrisme européen.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bougainville_Tahiti.jpg/640px-Bougainville_Tahiti.jpg"
+            },
+            {
+                id: 22,
+                year: "1774",
+                title: "Avènement de Louis XVI",
+                category: "politique",
+                author: "Histoire de France",
+                short: "Le jeune roi monte sur le trône de France dans un climat de crise financière croissante.",
+                desc: "À la mort de Louis XV, son petit-fils Louis XVI devient roi à l'âge de 19 ans. Malgré ses tentatives de réformes économiques menées par des ministres éclairés comme Turgot, il se heurte au refus de la noblesse de renoncer à ses privilèges fiscaux, bloquant la modernisation du royaume.",
+                impact: "Portée pédagogique : Permet de comprendre l'impasse politique de la monarchie absolue française à la veille de la Révolution.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Louis_XVI_Duplessis.jpg/484px-Louis_XVI_Duplessis.jpg"
+            },
+            {
+                id: 23,
+                year: "1776",
+                title: "Déclaration d'indépendance des États-Unis",
+                category: "politique",
+                author: "Pères fondateurs américains",
+                short: "La première mise en passage concrète des idées politiques des Lumières.",
+                desc: "Rédigée principalement par Thomas Jefferson, cette déclaration proclame la rupture des treize colonies avec la Grande-Bretagne. Elle affirme comme des droits inaliénables la vie, la liberté et la recherche du bonheur, des concepts directement inspirés du philosophe John Locke.",
+                impact: "Portée pédagogique : Un événement mondial qui prouve aux opposants européens que les théories des Lumières sont applicables en politique.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Declaration_of_Independence_July_4_1776.jpg/640px-Declaration_of_Independence_July_4_1776.jpg"
+            },
+            {
+                id: 24,
+                year: "1781",
+                title: "Kant publie la 'Critique de la raison pure'",
+                category: "philosophie",
+                author: "Emmanuel Kant",
+                short: "Un monument philosophique qui redéfinit les limites et les pouvoirs de la connaissance humaine.",
+                desc: "Le philosophe allemand Emmanuel Kant opère une 'révolution copernicienne' en philosophie. Il explique que notre esprit ne se contente pas de recevoir passivement le monde, mais qu'il le structure. Il fixe les limites de ce que la raison humaine peut savoir avec certitude, séparant la science de la foi.",
+                impact: "Portée pédagogique : Marque l'apogée philosophique des Lumières (Aufklärung) et ouvre la voie à la philosophie contemporaine.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Kant_gemmaelde.jpg/477px-Kant_gemmaelde.jpg"
+            },
+            {
+                id: 25,
+                year: "1783",
+                title: "Premier vol humain en montgolfière",
+                category: "sciences",
+                author: "Frères Montgolfier",
+                short: "L'humanité s'affranchit pour la première fois de la gravité terrestre à Paris.",
+                desc: "À la Muette (Paris), Jean-François Pilâtre de Rozier et le Marquis d'Arlandes prennent place à bord d'un ballon à air chaud conçu par les frères Montgolfier. Le vol dure 25 minutes. C'est un triomphe scientifique spectaculaire qui enthousiasme l'Europe entière.",
+                impact: "Portée pédagogique : Symbole parfait de la foi indéfectible des Lumières dans le progrès technique et la conquête de nouveaux horizons.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/A%C3%A9rostat_r%C3%A9veillon_1783.jpg/460px-A%C3%A9rostat_r%C3%A9veillon_1783.jpg"
+            },
+            {
+                id: 26,
+                year: "1784",
+                title: "Première de la pièce 'Le Mariage de Figaro'",
+                category: "arts",
+                author: "Beaumarchais",
+                short: "Une comédie théâtrale subversive qui annonce les grondements de la Révolution.",
+                desc: "Après plusieurs années de censure royale, la pièce est enfin jouée et connaît un triomphe public immense. À travers le personnage du valet Figaro, insolent et plus brillant que son maître le Comte Almaviva, Beaumarchais attaque frontalement les privilèges de naissance : 'Qu'avez-vous fait pour tant de biens ? Vous vous êtes donné la peine de naître, et rien de plus !'",
+                impact: "Portée pédagogique : Un exemple magistral de la manière dont le théâtre devient une arme de contestation politique directe.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Mariage_de_Figaro_acte_V.jpg/477px-Mariage_de_Figaro_acte_V.jpg"
+            },
+            {
+                id: 27,
+                year: "1784",
+                title: "Jacques-Louis David peint 'Le Serment des Horaces'",
+                category: "arts",
+                author: "Jacques-Louis David",
+                short: "Le manifeste du néoclassicisme, exaltant les vertus civiques et le sacrifice patriotique.",
+                desc: "Ce tableau monumental marque une rupture radicale avec les frivolités du style rococo précédent. En choisissant un sujet de la Rome antique, David prône un retour à la rigueur morale, géométrique et politique, préfigurant l'engagement républicain de la fin du siècle.",
+                impact: "Portée pédagogique : Permet d'étudier l'histoire des arts et la rupture esthétique vers un art engagé et moralisé.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/David-Serment_des_Horaces.jpg/640px-David-Serment_des_Horaces.jpg"
+            },
+            {
+                id: 28,
+                year: "1787",
+                title: "Mozart crée l'opéra 'Don Giovanni' à Prague",
+                category: "arts",
+                author: "Wolfgang Amadeus Mozart",
+                short: "Apogée de la musique classique, mêlant tragédie et comédie autour de la liberté individuelle.",
+                desc: "Sur un livret de Lorenzo da Ponte, Mozart compose ce chef-d'œuvre absolu de l'opéra (dramma giocoso). Le personnage de Don Juan y incarne un rebelle ultime qui refuse toutes les règles morales, religieuses et sociales, jusqu'à son châtiment final face au Commandeur.",
+                impact: "Portée pédagogique : Analyse de la figure du libertin et de l'apogée du classicisme musical européen.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Wolfgang-amadeus-mozart_1.jpg/475px-Wolfgang-amadeus-mozart_1.jpg"
+            },
+            {
+                id: 29,
+                year: "1789",
+                title: "Lavoisier publie le 'Traité élémentaire de chimie'",
+                category: "sciences",
+                author: "Antoine Lavoisier",
+                short: "Acte de naissance de la chimie moderne, basée sur la méthode expérimentale quantitative.",
+                desc: "Lavoisier balaie définitivement les théories alchimiques médiévales. Il formule la loi de conservation de la masse ('Rien ne se perd, rien ne se crée, tout se transforme') et établit la première liste moderne des éléments chimiques, aidé par ses expériences rigoureuses sur l'oxygène.",
+                impact: "Portée pédagogique : Permet de comprendre le passage de l'alchimie mystique à la science chimique exacte.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lavoisier_chemical_apparatus_plates.jpg/500px-Lavoisier_chemical_apparatus_plates.jpg"
+            },
+            {
+                id: 30,
+                year: "1789",
+                title: "Prise de la Bastille et Déclaration des Droits de l'Homme",
+                category: "politique",
+                author: "Le Peuple de Paris / L'Assemblée Nationale",
+                short: "L'effondrement de l'Ancien Régime et la proclamation universelle de l'égalité des citoyens.",
+                desc: "Le 14 juillet, le peuple parisien s'empare de la forteresse royale de la Bastille, symbole de l'arbitraire. En août, l'Assemblée adopte la Déclaration des droits de l'homme et du citoyen, traduisant en lois positives et universelles les rêves d'égalité, de liberté et de justice formulés pendant un siècle par les Lumières.",
+                impact: "Portée pédagogique : L'aboutissement politique concret et la conclusion logique des combats intellectuels du Siècle des Lumières.",
+                img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Prise_de_la_Bastille.jpg/640px-Prise_de_la_Bastille.jpg"
+            }
+        ];
+
+        // Dictionnaire d'icônes et couleurs pour les catégories
+        const categories = {
+            philosophie: { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-400', icon: 'fa-book-open', label: 'Philosophie & Lettres' },
+            sciences: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-400', icon: 'fa-flask', label: 'Sciences & Innovations' },
+            politique: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-400', icon: 'fa-gavel', label: 'Politique & Société' },
+            arts: { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-400', icon: 'fa-palette', label: 'Arts & Musique' }
+        };
+
+        // Génération de la Frise Chronologique
+        function renderTimeline(events) {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+
+            if (events.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 py-8">Aucun événement ne correspond à ce filtre.</p>`;
+                return;
+            }
+
+            events.forEach((event, index) => {
+                const cat = categories[event.category];
+                
+                const eventBlock = document.createElement('div');
+                eventBlock.className = "relative pl-6 md:pl-8 group animate-fade-in";
+                
+                eventBlock.innerHTML = `
+                    <!-- Indicateur de date sur la gauche -->
+                    <div class="absolute -left-[18px] top-1.5 bg-white border-4 ${cat.border} rounded-full w-8 h-8 flex items-center justify-center z-10 group-hover:scale-110 transition-transform shadow-sm">
+                        <i class="fa-solid ${cat.icon} text-xs ${cat.text}"></i>
+                    </div>
+                    
+                    <!-- Date pour affichage desktop décalé -->
+                    <div class="hidden md:block absolute -left-32 top-1 w-24 text-right font-bold text-xl text-[#1e293b] tracking-tight">
+                        ${event.year}
+                    </div>
+
+                    <!-- Carte de l'événement -->
+                    <div onclick="openModal(${event.id})" class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-0.5 flex flex-col md:flex-row gap-5 items-start">
+                        
+                        <!-- Image miniature de l'époque -->
+                        <div class="w-full md:w-32 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 shadow-inner">
+                            <img src="${event.img}" alt="${event.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+
+                        <!-- Contenu textuel -->
+                        <div class="flex-1">
+                            <div class="flex flex-wrap gap-2 items-center mb-1">
+                                <span class="md:hidden font-bold text-lg text-[#1e293b] mr-2">${event.year}</span>
+                                <span class="${cat.bg} ${cat.text} text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
+                                    ${cat.label}
+                                </span>
+                            </div>
+                            <h3 class="serif-title text-lg md:text-xl font-bold text-gray-900 group-hover:text-[#c2a649] transition-colors">
+                                ${event.title}
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Par : ${event.author}</p>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">${event.short}</p>
+                            
+                            <span class="inline-flex items-center text-xs font-semibold text-[#c2a649] mt-3 group-hover:underline">
+                                Voir la fiche détaillée <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(eventBlock);
+            });
+        }
+
+        // Système de Filtrage
+        function filterEvents(category) {
+            // Mise à jour de l'état graphique des boutons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-800 hover:bg-gray-100 transition-all shadow-md";
+            });
+            
+            const activeBtn = document.getElementById(`btn-${category}`);
+            if(category === 'all') {
+                activeBtn.className = "filter-btn px-4 py-2 rounded-full text-sm font-medium bg-[#c2a649] text-white transition-all shadow-md";
+                renderTimeline(eventsData);
+            } else {
+                const colors = { philosophie: 'bg-amber-600', sciences: 'bg-blue-600', politique: 'bg-red-600', arts: 'bg-purple-600' };
+                activeBtn.className = `filter-btn px-4 py-2 rounded-full text-sm font-medium ${colors[category]} text-white transition-all shadow-md`;
+                
+                const filtered = eventsData.filter(e => e.category === category);
+                renderTimeline(filtered);
+            }
+        }
+
+        // Gestion de la Modal (Fiches Détaillées)
+        function openModal(id) {
+            const event = eventsData.find(e => e.id === id);
+            if (!event) return;
+
+            const cat = categories[event.category];
+
+            document.getElementById('modal-img').src = event.img;
+            document.getElementById('modal-img').alt = event.title;
+            document.getElementById('modal-title').innerText = event.title;
+            document.getElementById('modal-date').innerText = event.year;
+            document.getElementById('modal-author').innerText = `Auteur / Acteur majeur : ${event.author}`;
+            
+            // Formatage de la description
+            document.getElementById('modal-desc').innerHTML = `<p class="serif-text text-lg italic text-gray-600 border-l-4 border-gray-300 pl-3 my-2">${event.short}</p><p>${event.desc}</p>`;
+            document.getElementById('modal-impact').innerHTML = `<i class="fa-solid fa-graduation-cap text-[#c2a649] mr-2 text-base"></i><strong>Pédagogie :</strong> ${event.impact.replace('Portée pédagogique : ', '')}`;
+            
+            // Badge de catégorie
+            const badge = document.getElementById('modal-badge');
+            badge.className = `px-3 py-1 rounded-full text-xs font-semibold text-white uppercase tracking-wider ${cat.bg.replace('100', '600')}`;
+            badge.innerText = cat.label;
+
+            // Affichage
+            const modal = document.getElementById('event-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('event-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('event-modal').addEventListener('click', function(e) {
+            if(e.target === this) closeModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if(e.key === "Escape") closeModal();
+        });
+
+        window.onload = () => {
+            renderTimeline(eventsData);
+        };
+    </script>
+</body>
+</html>

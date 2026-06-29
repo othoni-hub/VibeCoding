@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.P.E.C.T.R.E. — Éléments Propres ECG</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-indigo-950 text-white shadow-lg p-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-wider text-rose-500">
+                    S.P.E.C.T.R.E.
+                </h1>
+                <p class="text-xs text-indigo-300 font-medium mt-1 tracking-wide uppercase">
+                    <span class="text-white font-bold">S</span>ystème de <span class="text-white font-bold">P</span>rojection et d'<span class="text-white font-bold">E</span>xtraction des <span class="text-white font-bold">C</span>oefficients pour la <span class="text-white font-bold">T</span>ransformation et la <span class="text-white font-bold">R</span>éduction d'<span class="text-white font-bold">E</span>ndomorphismes
+                </p>
+            </div>
+            <span class="bg-indigo-800 border border-indigo-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest text-indigo-200">
+                Moteur Formel & $\LaTeX$ Exact
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow w-full">
+        
+        <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">1. Dimension de l'espace ($n$)</h2>
+            <div class="grid grid-cols-4 gap-2 mb-6">
+                <button onclick="changeDim(2)" id="b-2" class="dim-btn py-2 rounded-xl border text-sm font-bold transition bg-indigo-900 text-white border-indigo-900">n = 2</button>
+                <button onclick="changeDim(3)" id="b-3" class="dim-btn py-2 rounded-xl border text-sm font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">n = 3</button>
+                <button onclick="changeDim(4)" id="b-4" class="dim-btn py-2 rounded-xl border text-sm font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">n = 4</button>
+                <button onclick="changeDim(5)" id="b-5" class="dim-btn py-2 rounded-xl border text-sm font-bold transition bg-white text-slate-700 border-slate-200 hover:bg-slate-50">n = 5</button>
+            </div>
+
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">2. Coefficients de la matrice $A$</h2>
+            <div class="text-xs text-slate-400 mb-2 italic">Formats acceptés : 5, -3/2, sqrt(2), 2*sqrt(3)</div>
+            <div id="matrix-inputs" class="mb-6"></div>
+
+            <div class="flex flex-col gap-2">
+                <button onclick="calculerSpectre()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition shadow-sm cursor-pointer text-center">
+                    ⚡ Calculer les éléments propres
+                </button>
+                <button onclick="chargerExemple()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-xl transition text-sm">
+                    🎲 Charger une matrice symétrique ($\sqrt{2}$)
+                </button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-h-[450px]">
+            <h2 class="text-xl font-bold mb-6 text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                <span>Analyse Spectrale et Réduction</span>
+            </h2>
+            
+            <div id="output" class="space-y-6">
+                <p class="text-slate-400 text-center py-16">Saisissez les coefficients, puis lancez l'extraction.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 text-center py-4 text-xs border-t border-slate-800">
+        Créé par <span class="text-slate-200 font-medium">Olivier Thöni</span>, vibe-codé avec l'aide de <span class="text-indigo-400 font-medium">Gemini 3.5 Flash</span>
+    </footer>
+
+    <script>
+        let N = 2;
+        const EPSILON = 1e-9; // Seuil de tolérance mathématique pour l'identification des zéros
+
+        // Exemples académiques incluant des fractions et des radicaux
+        const exemples = {
+            2: [["0", "sqrt(2)"], ["sqrt(2)", "1"]], // Valeurs propres exactes : 2 et -1
+            3: [["3", "1", "1"], ["1", "3", "1"], ["1", "1", "3"]],
+            4: [["1/2", "0", "0", "0"], ["0", "1/2", "0", "0"], ["0", "0", "2", "0"], ["0", "0", "0", "2"]],
+            5: [["2", "-1", "0", "0", "0"], ["-1", "2", "-1", "0", "0"], ["0", "-1", "2", "-1", "0"], ["0", "0", "-1", "2", "-1"], ["0", "0", "0", "-1", "2"]]
+        };
+
+        // Parseur d'expressions algébriques sécurisé (Fractions & Math.sqrt)
+        function evaluerExpression(chaine) {
+            let str = chaine.trim().toLowerCase();
+            if (!str) return 0;
+            // Remplacement des expressions de type sqrt(x) par l'équivalent JS évalué
+            str = str.replace(/sqrt\s*\(\s*([^)]+)\s*\)/g, "Math.sqrt($1)");
+            try {
+                // Utilisation de Function pour évaluer proprement l'expression numérique (fraction ou racine)
+                return Function(`"use strict"; return (${str})`)();
+            } catch (e) {
+                console.error("Erreur de parsing sur le coefficient: ", chaine);
+                return 0;
+            }
+        }
+
+        // Traducteur de sortie numérique vers une chaîne LaTeX élégante et simplifiée
+        function formatNombreTex(val) {
+            if (Math.abs(val) < EPSILON) return "0";
+            
+            // Tentative de reconnaissance des fractions simples (jusqu'au dénominateur 12)
+            for (let d = 1; d <= 12; d++) {
+                let n = Math.round(val * d);
+                if (Math.abs(val - n / d) < EPSILON) {
+                    if (d === 1) return `${n}`;
+                    return `\\frac{${n}}{${d}}`;
+                }
+            }
+            
+            // Tentative de reconnaissance de radicaux de type n*sqrt(d) ou sqrt(d)/n
+            let valCarre = val * val;
+            for (let d = 2; d <= 10; d++) {
+                if (Math.abs(valCarre - d) < EPSILON) return val > 0 ? `\\sqrt{${d}}` : `-\\sqrt{${d}}`;
+                for (let coeff = 2; coeff <= 5; coeff++) {
+                    if (Math.abs(valCarre - (d / (coeff*coeff))) < EPSILON) {
+                        return val > 0 ? `\\frac{\\sqrt{${d}}}{${coeff}}` : `-\\frac{\\sqrt{${d}}}{${coeff}}`;
+                    }
+                }
+            }
+
+            // Fallback décimal propre si non identifiable formellement
+            return val.toFixed(3).replace(/\.?0+$/, "");
+        }
+
+        function changeDim(n) {
+            N = n;
+            document.querySelectorAll('.dim-btn').forEach(b => {
+                b.classList.remove('bg-indigo-900', 'text-white', 'border-indigo-900');
+                b.classList.add('bg-white', 'text-slate-700', 'border-slate-200', 'hover:bg-slate-50');
+            });
+            const active = document.getElementById(`b-${n}`);
+            active.classList.remove('bg-white', 'text-slate-700', 'border-slate-200', 'hover:bg-slate-50');
+            active.classList.add('bg-indigo-900', 'text-white', 'border-indigo-900');
+            
+            const container = document.getElementById('matrix-inputs');
+            container.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'grid gap-2';
+            grid.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+            
+            for(let i=0; i<n; i++) {
+                for(let j=0; j<n; j++) {
+                    let input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `m-${i}-${j}`;
+                    input.value = '0';
+                    input.className = 'w-full text-center p-2 border border-slate-200 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-600 font-mono font-bold text-sm';
+                    grid.appendChild(input);
+                }
+            }
+            container.appendChild(grid);
+        }
+
+        function chargerExemple() {
+            let ex = exemples[N];
+            for(let i=0; i<N; i++) {
+                for(let j=0; j<N; j++) {
+                    document.getElementById(`m-${i}-${j}`).value = ex[i][j];
+                }
+            }
+        }
+
+        function matrixToTex(matrixOfNumbers) {
+            let tex = '\\begin{pmatrix} ';
+            let rows = matrixOfNumbers.map(row => row.map(v => formatNombreTex(v)).join(' & '));
+            tex += rows.join(' \\\\ ');
+            tex += ' \\end{pmatrix}';
+            return tex;
+        }
+
+        // Résolution du noyau de (A - lambda*I) par Pivot de Gauss sur des réels
+        function chercherNoyau(matriceA, valeurPropre) {
+            let M = [];
+            for(let i=0; i<N; i++) {
+                M[i] = [];
+                for(let j=0; j<N; j++) {
+                    let val = matriceA[i][j];
+                    if(i === j) val -= valeurPropre;
+                    M[i].push(val);
+                }
+            }
+
+            let rang = 0;
+            let pivotsColonnes = Array(N).fill(-1);
+
+            for (let c = 0; c < N; c++) {
+                let pivotLigne = -1;
+                for (let l = rang; l < N; l++) {
+                    if (Math.abs(M[l][c]) > EPSILON) { pivotLigne = l; break; }
+                }
+                if (pivotLigne === -1) continue;
+
+                let temp = M[rang]; M[rang] = M[pivotLigne]; M[pivotLigne] = temp;
+                let pVal = M[rang][c];
+                for (let j = c; j < N; j++) M[rang][j] /= pVal;
+
+                for (let i = 0; i < N; i++) {
+                    if (i !== rang && Math.abs(M[i][c]) > EPSILON) {
+                        let factor = M[i][c];
+                        for (let j = c; j < N; j++) M[i][j] -= factor * M[rang][j];
+                    }
+                }
+                pivotsColonnes[c] = rang;
+                rang++;
+            }
+
+            let baseVecteurs = [];
+            for (let c = 0; c < N; c++) {
+                if (pivotsColonnes[c] === -1) {
+                    let vecteur = Array(N).fill(0);
+                    vecteur[c] = 1;
+                    for (let i = 0; i < N; i++) {
+                        if (pivotsColonnes[i] !== -1) {
+                            let lignePivot = pivotsColonnes[i];
+                            vecteur[i] = -M[lignePivot][c];
+                        }
+                    }
+                    baseVecteurs.push(vecteur);
+                }
+            }
+            return baseVecteurs;
+        }
+
+        function inverserMatrice(P) {
+            let size = P.length;
+            let M = [];
+            for(let i=0; i<size; i++) {
+                M[i] = [];
+                for(let j=0; j<size; j++) M[i][j] = P[i][j];
+                for(let j=0; j<size; j++) M[i][j+size] = (i === j ? 1 : 0);
+            }
+
+            for(let i=0; i<size; i++) {
+                let pivot = M[i][i];
+                if(Math.abs(pivot) < EPSILON) return null;
+                for(let j=0; j<2*size; j++) M[i][j] /= pivot;
+                for(let k=0; k<size; k++) {
+                    if(k !== i) {
+                        let factor = M[k][i];
+                        for(let j=0; j<2*size; j++) M[k][j] -= factor * M[i][j];
+                    }
+                }
+            }
+            let Inv = [];
+            for(let i=0; i<size; i++) {
+                Inv[i] = [];
+                for(let j=0; j<size; j++) Inv[i].push(M[i][j+size]);
+            }
+            return Inv;
+        }
+
+        function calculerSpectre() {
+            let matA = [];
+            for(let i=0; i<N; i++) {
+                matA[i] = [];
+                for(let j=0; j<N; j++) {
+                    let str = document.getElementById(`m-${i}-${j}`).value.trim();
+                    matA[i].push(evaluerExpression(str));
+                }
+            }
+
+            // Génération dynamique des candidats de valeurs propres CPGE (incluant les racines typiques d'ordre 2/3)
+            let vpCandidates = [];
+            // Balayage large : entiers et fractions usuelles
+            for(let i = -6; i <= 6; i++) {
+                vpCandidates.push(i);
+                if (i !== 0) {
+                    vpCandidates.push(i / 2);
+                    vpCandidates.push(i / 3);
+                }
+            }
+            // Balayage des racines typiques issues d'équations caractéristiques
+            for(let r of [2, 3, 5, 6, 7]) {
+                let sq = Math.sqrt(r);
+                vpCandidates.push(sq, -sq, 1+sq, 1-sq, (1+sq)/2, (1-sq)/2);
+            }
+
+            // Élimination des doublons numériques fins
+            vpCandidates = vpCandidates.filter((v, idx, self) => self.findIndex(t => Math.abs(t - v) < EPSILON) === idx);
+
+            let sousEspaces = [];
+            let totalVecteursLibres = 0;
+
+            vpCandidates.forEach(c => {
+                let base = chercherNoyau(matA, c);
+                if (base.length > 0) {
+                    sousEspaces.push({ valeur: c, base: base });
+                    totalVecteursLibres += base.length;
+                }
+            });
+
+            let out = document.getElementById('output');
+            out.innerHTML = "";
+
+            // 1. Rendu LaTeX du Polynôme Caractéristique théorique
+            let factors = sousEspaces.map(se => {
+                let sign = se.valeur < 0 ? " + " : " - ";
+                let valStr = formatNombreTex(Math.abs(se.valeur));
+                if (Math.abs(se.valeur) < EPSILON) return `X^{${se.base.length}}`;
+                return `(X ${sign} ${valStr})^{${se.base.length}}`;
+            });
+            let polyTex = factors.length > 0 ? factors.join('') : `X^{${N}}`;
+            
+            let blockPoly = document.createElement('div');
+            blockPoly.className = "p-4 bg-slate-50 rounded-xl border border-slate-100 text-lg overflow-x-auto";
+            blockPoly.innerHTML = `$$\\chi_A(X) = P_A(X) = ${polyTex}$$`;
+            out.appendChild(blockPoly);
+
+            // 2. Sous-espaces propres
+            let titleSE = document.createElement('h3');
+            titleSE.className = "text-sm font-bold uppercase tracking-wider text-indigo-900 mt-4";
+            titleSE.innerText = "Sous-espaces propres associés :";
+            out.appendChild(titleSE);
+
+            sousEspaces.forEach(se => {
+                let vecteursTex = se.base.map(v => matrixToTex(v.map(val => [val]))).join(', ');
+                let itemSE = document.createElement('div');
+                itemSE.className = "p-4 border-l-4 border-indigo-600 bg-slate-50/50 rounded-r-xl overflow-x-auto text-md";
+                itemSE.innerHTML = `$$\\lambda = ${formatNombreTex(se.valeur)} \\implies E_A(\\lambda) = \\text{Vect}\\left\\{ ${vecteursTex} \\right\\} \\quad \\text{avec } \\dim E_A(\\lambda) = ${se.base.length}$$`;
+                out.appendChild(itemSE);
+            });
+
+            // 3. Diagonalisabilité
+            let blockStatus = document.createElement('div');
+            if (totalVecteursLibres === N) {
+                blockStatus.className = "p-4 rounded-xl font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 text-sm";
+                blockStatus.innerHTML = `✅ $\\sum \\dim E_A(\\lambda) = ${N} = n$ : L'endomorphisme est diagonalisable dans $\\mathbb{R}$.`;
+                out.appendChild(blockStatus);
+
+                let P = Array(N).fill(null).map(() => Array(N).fill(null));
+                let D = Array(N).fill(null).map(() => Array(N).fill(null).map(() => 0));
+                
+                let colIdx = 0;
+                sousEspaces.forEach(se => {
+                    se.base.forEach(v => {
+                        D[colIdx][colIdx] = se.valeur;
+                        for(let i=0; i<N; i++) P[i][colIdx] = v[i];
+                        colIdx++;
+                    });
+                });
+
+                let Pinv = inverserMatrice(P);
+
+                let gridMatrices = document.createElement('div');
+                gridMatrices.className = "grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-4";
+                
+                let matricesData = [
+                    { title: "Matrice de passage $P$", tex: matrixToTex(P) },
+                    { title: "Matrice diagonale $D$", tex: matrixToTex(D) },
+                    { title: "Inverse $P^{-1}$", tex: Pinv ? matrixToTex(Pinv) : '\\text{Erreur d\'inversion}' }
+                ];
+
+                matricesData.forEach(m => {
+                    let wrapper = document.createElement('div');
+                    wrapper.className = "text-center bg-slate-50 p-4 rounded-xl border border-slate-100 overflow-x-auto";
+                    wrapper.innerHTML = `<p class="text-xs font-bold text-slate-400 mb-2 uppercase">${m.title}</p>$$${m.tex}$$`;
+                    gridMatrices.appendChild(wrapper);
+                });
+                out.appendChild(gridMatrices);
+
+            } else {
+                blockStatus.className = "p-4 rounded-xl font-medium bg-rose-50 text-rose-800 border border-rose-200 text-sm";
+                blockStatus.innerHTML = `❌ $\\sum \\dim E_A(\\lambda) = ${totalVecteursLibres} < n$ : L'endomorphisme n'est pas diagonalisable dans $\\mathbb{R}$ ou possède des valeurs propres complexes (non scannées).`;
+                out.appendChild(blockStatus);
+            }
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([out]).catch(err => console.log(err));
+            }
+        }
+
+        window.onload = () => { changeDim(2); chargerExemple(); };
+    </script>
+</body>
+</html>

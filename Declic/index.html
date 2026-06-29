@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démonstration Dynamique du Barycentre</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .draggable {
+            cursor: grab;
+        }
+        .draggable:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <header class="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r flow-root from-indigo-400 to-emerald-400 bg-clip-text text-transparent">
+                    Le Théorème du Barycentre Dynamique
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">Illustration interactive : MA·GA + MB·GB + MC·GC = 0</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <button id="btn-stealth" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-slate-500" id="led-stealth"></span>
+                    <span>Mode Furtif</span>
+                </button>
+
+                <button id="btn-play" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer">
+                    <svg id="icon-play" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="icon-pause" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    <span id="text-play">Pause</span>
+                </button>
+
+                <div class="flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800">
+                    <label for="slider-speed" class="text-xs text-slate-400 font-medium">Vitesse</label>
+                    <input type="range" id="slider-speed" min="1" max="10" value="3" class="w-20 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 items-center">
+        
+        <div class="space-y-6 lg:col-span-1">
+            <div class="glass p-5 rounded-2xl shadow-xl">
+                <h2 class="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    Distances au point M
+                </h2>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">MA</div>
+                        <div id="val-ma" class="text-xl font-bold text-slate-200">0.0</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">MB</div>
+                        <div id="val-mb" class="text-xl font-bold text-slate-200">0.0</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">MC</div>
+                        <div id="val-mc" class="text-xl font-bold text-slate-200">0.0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass p-5 rounded-2xl shadow-xl">
+                <h2 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                    Distances au Barycentre G
+                </h2>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">GA</div>
+                        <div id="val-ga" class="text-xl font-bold text-slate-200">0.0</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">GB</div>
+                        <div id="val-gb" class="text-xl font-bold text-slate-200">0.0</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">GC</div>
+                        <div id="val-gc" class="text-xl font-bold text-slate-200">0.0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass p-5 rounded-2xl text-xs text-slate-400 leading-relaxed space-y-2">
+                <p class="font-semibold text-slate-300">💡 Géométrie Dynamique Intégrale :</p>
+                <p>Glissez les sommets <span class="text-indigo-400 font-semibold">A, B, C</span> directement sur le cercle pour modifier la forme du triangle.</p>
+                <p>Le lieu géométrique en pointillés se déforme en temps réel, mais conserve sa nature de triangle enveloppe.</p>
+                <p>Cliquez n'importe où sur le cercle pour y positionner instantanément le point de contrôle <span class="text-amber-400 font-semibold">M</span>.</p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 flex justify-center items-center">
+            <div class="glass p-4 rounded-3xl shadow-2xl w-full max-w-[600px] aspect-square relative bg-slate-900/30">
+                <svg id="viewport" viewBox="0 0 600 600" class="w-full h-full select-none">
+                    <defs>
+                        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" rx="20"/>
+
+                    <polygon id="locus-polyline" points="" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="6 4" opacity="0.6"/>
+
+                    <g id="trail-group"></g>
+
+                    <circle id="circumcircle" cx="300" cy="300" r="220" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 4" class="cursor-pointer" />
+
+                    <line id="line-ma" class="stroke-amber-500/30" stroke-width="1.2" />
+                    <line id="line-mb" class="stroke-amber-500/30" stroke-width="1.2" />
+                    <line id="line-mc" class="stroke-amber-500/30" stroke-width="1.2" />
+
+                    <line id="line-ga" class="stroke-rose-500/30" stroke-width="1.2" />
+                    <line id="line-gb" class="stroke-rose-500/30" stroke-width="1.2" />
+                    <line id="line-gc" class="stroke-rose-500/30" stroke-width="1.2" />
+
+                    <polygon id="triangle-abc" points="" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linejoin="round"/>
+
+                    <rect id="bg-lbl-ma" width="36" height="18" rx="4" fill="#1e293b" class="stroke-amber-500/30" stroke-width="1"/>
+                    <text id="lbl-ma" class="fill-amber-400 text-[11px] font-bold text-center" text-anchor="middle"></text>
+                    
+                    <rect id="bg-lbl-mb" width="36" height="18" rx="4" fill="#1e293b" class="stroke-amber-500/30" stroke-width="1"/>
+                    <text id="lbl-mb" class="fill-amber-400 text-[11px] font-bold" text-anchor="middle"></text>
+                    
+                    <rect id="bg-lbl-mc" width="36" height="18" rx="4" fill="#1e293b" class="stroke-amber-500/30" stroke-width="1"/>
+                    <text id="lbl-mc" class="fill-amber-400 text-[11px] font-bold" text-anchor="middle"></text>
+
+                    <rect id="bg-lbl-ga" width="36" height="18" rx="4" fill="#1e293b" class="stroke-rose-500/30" stroke-width="1"/>
+                    <text id="lbl-ga" class="fill-rose-400 text-[11px] font-bold" text-anchor="middle"></text>
+                    
+                    <rect id="bg-lbl-gb" width="36" height="18" rx="4" fill="#1e293b" class="stroke-rose-500/30" stroke-width="1"/>
+                    <text id="lbl-gb" class="fill-rose-400 text-[11px] font-bold" text-anchor="middle"></text>
+                    
+                    <rect id="bg-lbl-gc" width="36" height="18" rx="4" fill="#1e293b" class="stroke-rose-500/30" stroke-width="1"/>
+                    <text id="lbl-gc" class="fill-rose-400 text-[11px] font-bold" text-anchor="middle"></text>
+
+                    <g id="grp-a" class="draggable">
+                        <circle id="node-a" r="9" fill="#6366f1" stroke="#fff" stroke-width="2" class="hover:fill-indigo-400 transition-colors"/>
+                        <text id="txt-a" class="fill-slate-300 text-xs font-bold" dx="14" dy="-6">A</text>
+                    </g>
+                    
+                    <g id="grp-b" class="draggable">
+                        <circle id="node-b" r="9" fill="#6366f1" stroke="#fff" stroke-width="2" class="hover:fill-indigo-400 transition-colors"/>
+                        <text id="txt-b" class="fill-slate-300 text-xs font-bold" dx="14" dy="14">B</text>
+                    </g>
+                    
+                    <g id="grp-c" class="draggable">
+                        <circle id="node-c" r="9" fill="#6366f1" stroke="#fff" stroke-width="2" class="hover:fill-indigo-400 transition-colors"/>
+                        <text id="txt-c" class="fill-slate-300 text-xs font-bold" dx="-22" dy="14">C</text>
+                    </g>
+
+                    <circle id="node-m" r="7" fill="#f59e0b" stroke="#fff" stroke-width="2" class="drop-shadow-[0_0_8px_rgba(245,158,11,0.7)] pointer-events-none"/>
+                    <text id="txt-m" class="fill-amber-400 text-xs font-bold pointer-events-none" dx="14" dy="4">M</text>
+
+                    <circle id="node-g" r="7" fill="#10b981" stroke="#fff" stroke-width="2" class="drop-shadow-[0_0_8px_rgba(16,185,129,0.7)] pointer-events-none"/>
+                    <text id="txt-g" class="fill-emerald-400 text-xs font-bold pointer-events-none" dx="12" dy="-6">G</text>
+                </svg>
+                <div class="absolute bottom-6 right-6 text-[10px] text-slate-500 bg-slate-950/80 px-2 py-1 rounded-md border border-slate-800 pointer-events-none">
+                    Déplacez A, B, C ou cliquez sur le cercle pour M
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900 bg-slate-950">
+        SPA de Géométrie Dynamique conçue pour l'illustration des théorèmes barycentriques.
+    </footer>
+
+    <script>
+        // --- Configuration Géométrique ---
+        const center = { x: 300, y: 300 };
+        const radius = 220;
+
+        // Angles initiaux des sommets
+        let angles = {
+            A: -1.4,
+            B: 0.7,
+            C: 2.4
+        };
+
+        // Coordonnées réelles calculées dynamiquement
+        let A = {}, B = {}, C = {};
+
+        function updateVertexCoordinates() {
+            A = { x: center.x + radius * Math.cos(angles.A), y: center.y + radius * Math.sin(angles.A) };
+            B = { x: center.x + radius * Math.cos(angles.B), y: center.y + radius * Math.sin(angles.B) };
+            C = { x: center.x + radius * Math.cos(angles.C), y: center.y + radius * Math.sin(angles.C) };
+        }
+        updateVertexCoordinates();
+
+        // --- État de l'application ---
+        let isPlaying = true;
+        let isStealth = false;
+        let currentTheta = 0.0;
+        let speedFactor = 0.015;
+        
+        let gHistory = [];
+        const maxHistory = 45;
+
+        // --- Drag & Drop State ---
+        let draggedVertex = null;
+
+        // --- Sélections DOM ---
+        const viewport = document.getElementById('viewport');
+        const btnPlay = document.getElementById('btn-play');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const textPlay = document.getElementById('text-play');
+        const sliderSpeed = document.getElementById('slider-speed');
+        const btnStealth = document.getElementById('btn-stealth');
+        const ledStealth = document.getElementById('led-stealth');
+        const trailGroup = document.getElementById('trail-group');
+
+        // --- Génération des segments pour le sillage furtif ---
+        const trailSegments = [];
+        for (let i = 0; i < maxHistory - 1; i++) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("stroke", "#10b981");
+            const ratio = (i + 1) / maxHistory;
+            line.setAttribute("stroke-width", (1.0 + ratio * 2.5).toFixed(2));
+            line.setAttribute("opacity", (ratio * 0.8).toFixed(2));
+            line.setAttribute("stroke-linecap", "round");
+            line.style.display = 'none';
+            trailGroup.appendChild(line);
+            trailSegments.push(line);
+        }
+
+        // --- Fonctions Utilitaires ---
+        const getDistance = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+        function computeBarycenter(M_pos) {
+            const mA = getDistance(M_pos, A);
+            const mB = getDistance(M_pos, B);
+            const mC = getDistance(M_pos, C);
+            const total = mA + mB + mC;
+            if(total === 0) return { x: center.x, y: center.y, distances: { mA: 0, mB: 0, mC: 0 } };
+            return {
+                x: (mA * A.x + mB * B.x + mC * C.x) / total,
+                y: (mA * A.y + mB * B.y + mC * C.y) / total,
+                distances: { mA, mB, mC }
+            };
+        }
+
+        // Calcule le lieu complet théorique selon la position actuelle de A, B et C
+        function generateLocus() {
+            let pointsArray = [];
+            for (let i = 0; i <= 180; i++) { // 180 points suffisent pour un rendu lisse et performant
+                const theta = (i * 2 * Math.PI) / 180;
+                const M_test = { x: center.x + radius * Math.cos(theta), y: center.y + radius * Math.sin(theta) };
+                const G_test = computeBarycenter(M_test);
+                pointsArray.push(`${G_test.x},${G_test.y}`);
+            }
+            document.getElementById('locus-polyline').setAttribute('points', pointsArray.join(' '));
+        }
+
+        function positionLabel(textId, rectId, p1, p2, val) {
+            const mx = (p1.x + p2.x) / 2;
+            const my = (p1.y + p2.y) / 2;
+            const txt = document.getElementById(textId);
+            const rect = document.getElementById(rectId);
+            txt.textContent = (val / 10).toFixed(1);
+            txt.setAttribute('x', mx);
+            txt.setAttribute('y', my + 4);
+            rect.setAttribute('x', mx - 18);
+            rect.setAttribute('y', my - 9);
+        }
+
+        function floodHistory(point) {
+            gHistory = [];
+            for(let i = 0; i < maxHistory; i++) {
+                gHistory.push({ x: point.x, y: point.y });
+            }
+        }
+
+        // --- Boucle d'animation et de rendu principale ---
+        function updateLayout() {
+            // Recalculer les positions géométriques des nœuds
+            updateVertexCoordinates();
+
+            // Injection dans le DOM pour le triangle ABC et ses nœuds textuels
+            document.getElementById('triangle-abc').setAttribute('points', `${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`);
+            
+            document.getElementById('node-a').setAttribute('cx', A.x); document.getElementById('node-a').setAttribute('cy', A.y);
+            document.getElementById('txt-a').setAttribute('x', A.x); document.getElementById('txt-a').setAttribute('y', A.y);
+            
+            document.getElementById('node-b').setAttribute('cx', B.x); document.getElementById('node-b').setAttribute('cy', B.y);
+            document.getElementById('txt-b').setAttribute('x', B.x); document.getElementById('txt-b').setAttribute('y', B.y);
+            
+            document.getElementById('node-c').setAttribute('cx', C.x); document.getElementById('node-c').setAttribute('cy', C.y);
+            document.getElementById('txt-c').setAttribute('x', C.x); document.getElementById('txt-c').setAttribute('y', C.y);
+
+            // Régénération dynamique du lieu théorique sous-jacent
+            generateLocus();
+
+            // Position actuelle de M
+            const M = {
+                x: center.x + radius * Math.cos(currentTheta),
+                y: center.y + radius * Math.sin(currentTheta)
+            };
+
+            // Nœud M graphique
+            document.getElementById('node-m').setAttribute('cx', M.x);
+            document.getElementById('node-m').setAttribute('cy', M.y);
+            document.getElementById('txt-m').setAttribute('x', M.x);
+            document.getElementById('txt-m').setAttribute('y', M.y);
+
+            // Segments M
+            document.getElementById('line-ma').setAttribute('x1', M.x); document.getElementById('line-ma').setAttribute('y1', M.y);
+            document.getElementById('line-ma').setAttribute('x2', A.x); document.getElementById('line-ma').setAttribute('y2', A.y);
+            document.getElementById('line-mb').setAttribute('x1', M.x); document.getElementById('line-mb').setAttribute('y1', M.y);
+            document.getElementById('line-mb').setAttribute('x2', B.x); document.getElementById('line-mb').setAttribute('y2', B.y);
+            document.getElementById('line-mc').setAttribute('x1', M.x); document.getElementById('line-mc').setAttribute('y1', M.y);
+            document.getElementById('line-mc').setAttribute('x2', C.x); document.getElementById('line-mc').setAttribute('y2', C.y);
+
+            // Calculs barycentriques de G
+            const G_data = computeBarycenter(M);
+            const G = { x: G_data.x, y: G_data.y };
+            const distsM = G_data.distances;
+
+            // Gestion du sillage temporel
+            if (isPlaying) {
+                gHistory.push({ x: G.x, y: G.y });
+                if (gHistory.length > maxHistory) gHistory.shift();
+            } else if (gHistory.length === 0 || draggedVertex !== null) {
+                // Si on manipule un sommet en pause, on sature l'historique pour éviter des distorsions du sillage
+                floodHistory(G);
+            }
+
+            // Nœud G graphique
+            document.getElementById('node-g').setAttribute('cx', G.x);
+            document.getElementById('node-g').setAttribute('cy', G.y);
+            document.getElementById('txt-g').setAttribute('x', G.x);
+            document.getElementById('txt-g').setAttribute('y', G.y);
+
+            // Segments G
+            document.getElementById('line-ga').setAttribute('x1', G.x); document.getElementById('line-ga').setAttribute('y1', G.y);
+            document.getElementById('line-ga').setAttribute('x2', A.x); document.getElementById('line-ga').setAttribute('y2', A.y);
+            document.getElementById('line-gb').setAttribute('x1', G.x); document.getElementById('line-gb').setAttribute('y1', G.y);
+            document.getElementById('line-gb').setAttribute('x2', B.x); document.getElementById('line-gb').setAttribute('y2', B.y);
+            document.getElementById('line-gc').setAttribute('x1', G.x); document.getElementById('line-gc').setAttribute('y1', G.y);
+            document.getElementById('line-gc').setAttribute('x2', C.x); document.getElementById('line-gc').setAttribute('y2', C.y);
+
+            // Données numériques panneaux latéraux
+            const ga = getDistance(G, A); const gb = getDistance(G, B); const gc = getDistance(G, C);
+            document.getElementById('val-ma').textContent = (distsM.mA / 10).toFixed(1);
+            document.getElementById('val-mb').textContent = (distsM.mB / 10).toFixed(1);
+            document.getElementById('val-mc').textContent = (distsM.mC / 10).toFixed(1);
+            document.getElementById('val-ga').textContent = (ga / 10).toFixed(1);
+            document.getElementById('val-gb').textContent = (gb / 10).toFixed(1);
+            document.getElementById('val-gc').textContent = (gc / 10).toFixed(1);
+
+            // Étiquettes numériques volantes
+            positionLabel('lbl-ma', 'bg-lbl-ma', M, A, distsM.mA);
+            positionLabel('lbl-mb', 'bg-lbl-mb', M, B, distsM.mB);
+            positionLabel('lbl-mc', 'bg-lbl-mc', M, C, distsM.mC);
+            positionLabel('lbl-ga', 'bg-lbl-ga', G, A, ga);
+            positionLabel('lbl-gb', 'bg-lbl-gb', G, B, gb);
+            positionLabel('lbl-gc', 'bg-lbl-gc', G, C, gc);
+
+            // Rendu Furtif vs Standard
+            if (isStealth) {
+                document.getElementById('locus-polyline').style.display = 'none';
+                trailGroup.style.display = 'inline';
+                for (let i = 0; i < gHistory.length - 1; i++) {
+                    if (trailSegments[i]) {
+                        trailSegments[i].setAttribute('x1', gHistory[i].x);
+                        trailSegments[i].setAttribute('y1', gHistory[i].y);
+                        trailSegments[i].setAttribute('x2', gHistory[i + 1].x);
+                        trailSegments[i].setAttribute('y2', gHistory[i + 1].y);
+                        trailSegments[i].style.display = 'inline';
+                    }
+                }
+            } else {
+                document.getElementById('locus-polyline').style.display = 'inline';
+                trailGroup.style.display = 'none';
+                for (let i = 0; i < trailSegments.length; i++) trailSegments[i].style.display = 'none';
+            }
+
+            // Progression temporelle de M
+            if (isPlaying && draggedVertex === null) {
+                currentTheta += speedFactor;
+                if (currentTheta > Math.PI * 2) currentTheta -= Math.PI * 2;
+            }
+
+            requestAnimationFrame(updateLayout);
+        }
+
+        // --- Logique du Drag & Drop (Glisser-Déposer) ---
+        function getSVGCoordinates(e) {
+            const rect = viewport.getBoundingClientRect();
+            // Prise en charge combinée Souris et Écrans Tactiles
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            return {
+                x: ((clientX - rect.left) / rect.width) * 600,
+                y: ((clientY - rect.top) / rect.height) * 600
+            };
+        }
+
+        function setupDragListeners(elementId, vertexKey) {
+            const element = document.getElementById(elementId);
+            
+            const startDrag = (e) => {
+                e.stopPropagation();
+                draggedVertex = vertexKey;
+            };
+
+            element.addEventListener('mousedown', startDrag);
+            element.addEventListener('touchstart', startDrag, { passive: true });
+        }
+
+        setupDragListeners('grp-a', 'A');
+        setupDragListeners('grp-b', 'B');
+        setupDragListeners('grp-c', 'C');
+
+        // Événements globaux sur le Viewport pour le déplacement et le relâchement
+        const moveDrag = (e) => {
+            if (draggedVertex === null) return;
+            const coords = getSVGCoordinates(e);
+            // On calcule le nouvel angle du sommet par rapport au centre pour le contraindre sur le cercle
+            angles[draggedVertex] = Math.atan2(coords.y - center.y, coords.x - center.x);
+        };
+
+        const stopDrag = () => {
+            draggedVertex = null;
+        };
+
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('touchmove', moveDrag, { passive: true });
+        window.addEventListener('mouseup', stopDrag);
+        window.addEventListener('touchend', stopDrag);
+
+        // Téléportation exclusive de M au clic (uniquement si on ne glisse pas un sommet)
+        viewport.addEventListener('click', (e) => {
+            // On vérifie que la cible n'est pas un sommet pour éviter les conflits de clic
+            if (e.target.closest('.draggable')) return;
+            
+            const coords = getSVGCoordinates(e);
+            currentTheta = Math.atan2(coords.y - center.y, coords.x - center.x);
+            
+            const M_click = { x: center.x + radius * Math.cos(currentTheta), y: center.y + radius * Math.sin(currentTheta) };
+            floodHistory(computeBarycenter(M_click));
+        });
+
+        // --- Boutons et UI Controls ---
+        btnPlay.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                iconPlay.classList.add('hidden');
+                iconPause.classList.remove('hidden');
+                textPlay.textContent = "Pause";
+            } else {
+                iconPause.classList.add('hidden');
+                iconPlay.classList.remove('hidden');
+                textPlay.textContent = "Reprendre";
+            }
+        });
+
+        btnStealth.addEventListener('click', () => {
+            isStealth = !isStealth;
+            if(isStealth) {
+                btnStealth.classList.add('bg-emerald-950', 'text-emerald-400', 'border-emerald-500/40');
+                ledStealth.classList.remove('bg-slate-500');
+                ledStealth.classList.add('bg-emerald-400', 'animate-pulse');
+            } else {
+                btnStealth.classList.remove('bg-emerald-950', 'text-emerald-400', 'border-emerald-500/40');
+                ledStealth.classList.remove('bg-emerald-400', 'animate-pulse');
+                ledStealth.classList.add('bg-slate-500');
+            }
+        });
+
+        sliderSpeed.addEventListener('input', (e) => {
+            speedFactor = (e.target.value) * 0.005;
+        });
+
+        // Premier lancement global
+        requestAnimationFrame(updateLayout);
+    </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cent Mille Milliards de Poèmes — Oulipo Machine</title>
+    <!-- Tailwind CSS pour le style Néo-brutaliste -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Alpine.js pour la réactivité agile -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f4f0ea;
+            background-image: radial-gradient(#e5e0d8 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .mono {
+            font-family: 'Space Mono', monospace;
+        }
+        /* Style Néo-brutaliste : ombres dures et nettes */
+        .brutal-shadow {
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
+        .brutal-shadow-sm {
+            box-shadow: 3px 3px 0px 0px #000000;
+        }
+        .brutal-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px 0px #000000;
+        }
+    </style>
+</head>
+<body class="text-black min-h-screen py-12 px-4 selection:bg-yellow-300">
+
+    <div x-data="oulipoMachine()" class="max-w-6xl mx-auto">
+        
+        <!-- HEADER OULIPO -->
+        <header class="border-4 border-black bg-white p-6 mb-8 brutal-shadow relative overflow-hidden">
+            <div class="absolute -right-8 -top-8 w-32 h-32 bg-yellow-300 border-4 border-black rotate-12 flex items-center justify-center font-bold text-2xl mono select-none hidden md:flex">
+                10<sup>14</sup>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-bold tracking-tight uppercase mb-2">
+                Cent mille milliards de poésies
+            </h1>
+            <p class="text-base md:text-lg mono text-neutral-700 max-w-2xl">
+                Machine combinatoire d'après <span class="underline decoration-3 decoration-red-500 font-bold">Raymond Queneau</span>. 
+                Réglez chaque vers à l'aide des molettes numériques ou lancez les dés.
+            </p>
+        </header>
+
+        <!-- TABLEAU DE BORD / ACTIONS AVEC ACRONYME RÉCURSIF -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10 bg-black text-white p-6 border-4 border-black brutal-shadow">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-block w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
+                    <h2 class="text-xl font-bold uppercase tracking-wider font-mono">Moteur O.U.L.I.P.O.</h2>
+                </div>
+                <p class="text-sm text-neutral-300 font-mono leading-relaxed">
+                    <span class="text-red-400 font-bold">O</span>uvroir d’<span class="text-red-400 font-bold">U</span>nivers <span class="text-red-400 font-bold">L</span>ittéraires <span class="text-red-400 font-bold">I</span>nteractifs vers des <span class="text-red-400 font-bold">P</span>oèmes d’<span class="text-red-400 font-bold">O</span>ulipo.
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-4 shrink-0">
+                <!-- LE NOUVEAU BOUTON ALÉATOIRE POP-ART -->
+                <button @click="randomizeAll()" 
+                        class="group relative inline-flex items-center gap-3 bg-[#ff5555] hover:bg-[#ff3333] text-black font-extrabold uppercase tracking-widest px-6 py-4 border-4 border-black cursor-pointer text-sm md:text-base transition-all transform duration-150 active:translate-x-[4px] active:translate-y-[4px] active:shadow-none shadow-[6px_6px_0px_0px_#fff]">
+                    
+                    <svg class="w-6 h-6 transition-transform duration-500 group-hover:rotate-180" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3M4.5 12c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l-3 3m3-3l3 3" />
+                    </svg>
+                    <span>Panique Combinatoire</span>
+                </button>
+
+                <!-- Boutons secondaires -->
+                <div class="flex sm:flex-col gap-2 w-full sm:w-auto">
+                    <button @click="resetAll()" class="w-full text-center bg-zinc-800 hover:bg-zinc-700 text-neutral-300 hover:text-white font-bold uppercase text-xs tracking-wider py-2 px-4 border border-zinc-700 font-mono transition-all cursor-pointer">
+                        Init (1.1.1...)
+                    </button>
+                    <button @click="copyPoem()" class="w-full text-center bg-yellow-400 hover:bg-yellow-300 text-black font-bold uppercase text-xs tracking-wider py-2 px-4 border border-black font-mono transition-all cursor-pointer relative">
+                        <span x-text="copied ? '✓ Copié !' : 'Copier Poème'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ZONE DE JEU PRINCIPALE -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- LE POÈME EN COURS DE CONSTRUCTION -->
+            <main class="lg:col-span-6 bg-white border-4 border-black p-6 brutal-shadow lg:sticky lg:top-6">
+                <div class="border-b-2 border-dashed border-black pb-3 mb-6 flex justify-between items-center text-xs md:text-sm mono text-neutral-500">
+                    <span>STRUCTURE : SONNET</span>
+                    <span class="bg-black text-white px-2 py-0.5 font-bold tracking-tight text-[11px] md:text-xs" x-text="'MATRICE : ' + currentSignature()"></span>
+                </div>
+                
+                <div class="space-y-6 italic text-base md:text-[19px] leading-relaxed tracking-wide text-neutral-900 font-serif">
+                    <!-- Quatrain 1 -->
+                    <div class="space-y-1 border-l-4 border-yellow-400 pl-4">
+                        <template x-for="i in [0,1,2,3]">
+                            <p class="transition-all duration-200 py-0.5 rounded px-1 cursor-pointer hover:bg-neutral-50" :class="{'bg-yellow-100 font-bold not-italic': activeLine === i}" x-text="matrix[i][selections[i]]" @click="activeLine = i"></p>
+                        </template>
+                    </div>
+
+                    <!-- Quatrain 2 -->
+                    <div class="space-y-1 border-l-4 border-blue-400 pl-4">
+                        <template x-for="i in [4,5,6,7]">
+                            <p class="transition-all duration-200 py-0.5 rounded px-1 cursor-pointer hover:bg-neutral-50" :class="{'bg-blue-100 font-bold not-italic': activeLine === i}" x-text="matrix[i][selections[i]]" @click="activeLine = i"></p>
+                        </template>
+                    </div>
+
+                    <!-- Tercet 1 -->
+                    <div class="space-y-1 border-l-4 border-green-400 pl-4">
+                        <template x-for="i in [8,9,10]">
+                            <p class="transition-all duration-200 py-0.5 rounded px-1 cursor-pointer hover:bg-neutral-50" :class="{'bg-green-100 font-bold not-italic': activeLine === i}" x-text="matrix[i][selections[i]]" @click="activeLine = i"></p>
+                        </template>
+                    </div>
+
+                    <!-- Tercet 2 -->
+                    <div class="space-y-1 border-l-4 border-purple-400 pl-4">
+                        <template x-for="i in [11,12,13]">
+                            <p class="transition-all duration-200 py-0.5 rounded px-1 cursor-pointer hover:bg-neutral-50" :class="{'bg-purple-100 font-bold not-italic': activeLine === i}" x-text="matrix[i][selections[i]]" @click="activeLine = i"></p>
+                        </template>
+                    </div>
+                </div>
+            </main>
+
+            <!-- LES MOLETTES MANUELLES NUMÉRIQUES -->
+            <section class="lg:col-span-6 space-y-2.5">
+                <h3 class="font-bold text-lg uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>Réglage des Languettes</span>
+                    <span class="text-xs font-mono bg-neutral-200 border border-black px-2 py-0.5">Vers 1 à 14</span>
+                </h3>
+                
+                <template x-for="(lineVariants, lineIndex) in matrix">
+                    <div class="bg-white border-2 border-black p-2 flex flex-col sm:flex-row sm:items-center justify-between brutal-shadow-sm gap-2 transition-all"
+                         :class="{'border-red-500 ring-2 ring-red-500 bg-red-50/20': activeLine === lineIndex}">
+                        
+                        <!-- Bloc Indicateur et Mini-Preview -->
+                        <div class="flex items-center min-w-0 flex-1 cursor-pointer" @click="activeLine = lineIndex">
+                            <span class="mono font-bold text-xs bg-black text-white w-6 h-6 flex items-center justify-center shrink-0 mr-2.5" x-text="String(lineIndex + 1).padStart(2, '0')"></span>
+                            <p class="text-xs truncate font-mono text-neutral-600 italic" x-text="lineVariants[selections[lineIndex]]"></p>
+                        </div>
+
+                        <!-- LA MOLETTE INTERACTIVE (SÉLECTEUR HORIZONTAL) -->
+                        <div class="flex items-center gap-0.5 self-end sm:self-auto bg-neutral-100 border border-black p-0.5 rounded">
+                            <template x-for="num in [1,2,3,4,5,6,7,8,9,10]">
+                                <button @click="setVariant(lineIndex, num - 1)" 
+                                        type="button"
+                                        class="w-7 h-7 font-bold text-xs mono flex items-center justify-center cursor-pointer transition-all border"
+                                        :class="{
+                                            'bg-black text-white border-black font-bold scale-110 shadow-sm z-10': selections[lineIndex] === (num - 1),
+                                            'bg-white text-neutral-700 border-neutral-200 hover:bg-amber-100 hover:text-black': selections[lineIndex] !== (num - 1)
+                                        }"
+                                        x-text="num">
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </section>
+
+        </div>
+
+        <!-- FOOTER PERSONNALISÉ -->
+        <footer class="mt-16 text-center text-xs font-mono text-neutral-500 border-t border-dashed border-neutral-300 pt-6 max-w-2xl mx-auto leading-relaxed">
+            Raymond Queneau, mis en lumière par Olivier Thöni, dans une application vibe-codée avec Gemini 3.5 Flash.
+        </footer>
+    </div>
+
+    <script>
+        function oulipoMachine() {
+            return {
+                activeLine: null,
+                copied: false,
+                selections: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                
+                matrix: [
+                    ["Le roi de la pampa retourne sa chemise", "Lorsque tout est fini lorsque l'on agonise", "Le cheval Parthénon s'énerve sur sa frise", "Le vieux marin breton de tabac prit sa prise", "C'était à onyx o'clock que sortait la marquise", "Du jeune avantageux la nymphe était éprise", "Il se penche il voudrait attraper sa valise", "Quand l'un avec l'autre aussitôt sympathise", "Lorsqu'un jour exalté l'aède prosaïse", "Le marbre pour l'acide est une friandise"],
+                    ["Pour la mettre à sécher aux cornes des taureaux", "Lorsque le marbrier astique nos tombeaux", "Depuis que lord Elgin négligea ses naseaux", "Pour du fin fond du nez exciter les arceaux", "Pour consommer un thé puis des petits gâteaux", "Snob un peu sur les bords des bords fondamentaux", "Que convoitait c'est sûr une horde d'escrocs", "Se faire il pourrait bien que ce soit des jumeaux", "Pour déplaire au profane aussi bien qu'aux idiots", "D'aucuns par dessus tout prisent les escargots"],
+                    ["Le pampa gouailleur Marc avait l'âme soumise", "Des lueurs d'espoir lorgnent par la fente assise", "Le coursier d'un seul bond franchit la Tamise", "Sur l'océan des âges le navire balise", "Le lointain voyageur subit la bise", "Une toge de lin en vain le déguise", "Il n'y trouve qu'un lacet et des chemises", "La découverte alors de loin les favorise", "Il chante les vertus de la dinde farcie", "Le dandy singulier feint d'aimer la Venise"],
+                    ["Aux caprices de l'ordre et du jeu des échecs", "Où l'on prépare au mort des linceuls tout nouveaux", "Il l'emmena brouter le long des caniveaux", "Le capitaine prend son cap sur des îlots", "En pensant aux amours de ses petits oiseaux", "Où les poissons disposent de nombreux réseaux", "De pauvres hères pleins de poux et de tics", "À moins que l'un d'entre eux ne soit un vrai héros", "Il chante les vertus du fromage de Meaux", "Pour pouvoir s'en offrir des pleins pleins pleins plateaux"],
+                    ["Le pampa nonchalant de ses doigts d'or tisonne", "L'un d'eux pourtant survit qui d'un pas ferme arpente", "Il s'en va de ce pas visiter la ontree", "Le marin breton n'est pas une ignorante", "Le dandy voyageur de sa canne tisonne", "La nymphe indifférente à ses cris se lamente", "Il vide ses poches avec insouciance", "Ils s'en vont tous les deux faire la connaissance", "Le poète s'en va vers la foule béante", "Le gourmet raffiné de sa langue tisonne"],
+                    ["Le feu de bivouac qui s'éteint dans la tente", "Le cimetière obscur où les ombres s'inventent", "La Grèce de Platon qui reste son attente", "La Bretagne natale où les vents se lamentent", "L'Angleterre lointaine où les ladies attendent", "Le jeune avantageux dont la voix est tremblante", "La malle disparue où ses nippes s'éventent", "De la dame du lieu qui se montre engageante", "Du public ignorant dont l'oreille est pendante", "La sauce aux cornichons qui reste frémissante"],
+                    ["Le pampa tout joyeux de sa voix de fausset", "Et le vent du désert qui doucement balance", "Et le vent de l'histoire à la grande importance", "Et la mer infinie où son esprit s'élance", "Et le brouillard épais qui cache la distance", "Et l'amour filial qui n'a pas d'importance", "Et la colère obscure où son cœur se balance", "Et la fortune alors qui vient avec constance", "Et la muse moderne avec sa digne prestance", "Et le ragoût d'agneau qui cuit en abondance"],
+                    ["Chante la pampa fraîche et le grand ciel ouvert", "Les cyprès centenaires et la nuit vieillissante", "Les ruines de jadis sous l'herbe verdoyante", "Les vagues de la mer à la crête écumante", "Les salons feutrés et la tasse fumante", "Les larmes du départ et la main hésitante", "La perte de ses biens et sa fureur naissante", "Le bonheur partagé et l'heure séduisante", "Les lauriers de la gloire et la palme géante", "Le plaisir de la table et la chair succulente"],
+                    ["On croit que le pampa n'est qu'un grossier soudard", "Mais on s'aperçoit bien qu'il est déjà trop tard", "On regrette parfois le temps des fiers soudards", "Le marin solitaire évoque le homard", "La marquise s'ennuie au fond de son placard", "Le jeune avantageux n'est qu'un sinistre tocard", "Le voyageur déçu rate son autobus de trois quarts", "Les deux amis s'en vont boire un coup au comptoir", "Le poète maudit n'est qu'un vil bavard", "Le gourmet fatigué digère son homard"],
+                    ["Lorsqu'il rentre chez lui après s'être enivré", "Quand le fossoyeur vient pour vous ensevelir", "Quand on voit le passé si vite s'effacer", "Qui danse sur les flots sans jamais s'arrêter", "En songeant au passé qui ne peut revenir", "Qui ne sait que mentir et que se pavaner", "Et se retrouve ainsi sur le pavé mouillé", "Pour fêter dignement leur destin partagé", "Qui ne sait que rimer sans jamais inventer", "Et s'endort sur son lit lourdement saturé"],
+                    ["Il aime le bétail et le bon vin tiré", "Et l'on ne peut alors s'empêcher de frémir", "Et l'on voudrait alors pouvoir s'en souvenir", "Et l'on regarde au loin le soleil s'obscurcir", "Et l'on écoute au loin le silence venir", "Et l'on voudrait parfois le voir s'évanouir", "Et l'on maudit alors le destin et le pire", "Et l'on voit l'avenir s'ouvrir et resplendir", "Et l'on voudrait pouvoir enfin s'en aller dormir", "Et l'on ne pense plus qu'au plaisir de dormir"],
+                    ["Et de chasser le buffle avec son vieux poignard", "Devant le monument que l'on va ériger", "En regardant au loin le profil du lézard", "En vidant une bouteille au fond du vieux hangar", "En écoutant le chant du coucou du pendard", "En lui jetant au nez un regard de mépris", "En maudissant les gares et les chefs de gare", "Sans craindre le venin du serpent ou du cafard", "En vendant ses sonnets pour un simple liard", "En évitant soigneusement le regard du douanier grognard"],
+                    ["Le pampa s'en revient vers sa terre promise", "La mort vient à son heure et tout est consommé", "Le temps efface tout et l'homme est oublié", "La mer efface tout sur le sable mouillé", "Le thé est consommé et le jour est décliné", "La nymphe s'est enfuie et le charme est brisé", "La valise est perdue et le voyage est manqué", "L'amitié s'est ancrée pour la postérité", "La gloire est éphémère et le poète est damné", "Le repas est fini et le ventre est comblé"],
+                    ["Et l'on n'en parle plus car tout est terminé.", "Et l'on s'en va coucher sous le marbre glacé.", "Et le Parthénon reste à jamais figé.", "Et le navire au loin s'en est allé sombrer.", "Et la marquise alors s'en va se reposer.", "Et le jeune fat s'en va pleurer son passé.", "Et le pauvre voyageur reste là hébété.", "Et les deux bons compères s'en vont bras dessus bras dessous.", "Et le livre se ferme et tout est oublié.", "Et le gourmet s'endort sans plus rien désirer."]
+                ],
+
+                setVariant(lineIndex, variantIndex) {
+                    this.activeLine = lineIndex;
+                    this.selections[lineIndex] = variantIndex;
+                },
+
+                randomizeAll() {
+                    this.activeLine = null;
+                    for (let i = 0; i < 14; i++) {
+                        this.selections[i] = Math.floor(Math.random() * 10);
+                    }
+                },
+
+                resetAll() {
+                    this.activeLine = null;
+                    this.selections = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                },
+
+                currentSignature() {
+                    return this.selections.map(val => val + 1).join('.');
+                },
+
+                copyPoem() {
+                    let poemText = "";
+                    const groups = [[0,1,2,3], [4,5,6,7], [8,9,10], [11,12,13]];
+                    groups.forEach((group, gIdx) => {
+                        group.forEach(i => {
+                            poemText += this.matrix[i][this.selections[i]] + "\n";
+                        });
+                        if(gIdx < 3) poemText += "\n";
+                    });
+                    
+                    poemText += `\n— Raymond Queneau (Matrice: ${this.currentSignature()})`;
+
+                    navigator.clipboard.writeText(poemText).then(() => {
+                        this.copied = true;
+                        setTimeout(() => this.copied = false, 2000);
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

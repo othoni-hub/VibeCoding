@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Simulation de Pendule Triple</title>
+    <style>
+        :root {
+            --bg-color: #0a0a12;
+            --panel-bg: rgba(20, 20, 35, 0.85);
+            --accent-1: #ff3366;
+            --accent-2: #33ccff;
+            --accent-3: #33ffaa;
+            --text: #e0e0ff;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            touch-action: none;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 280px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #toggle-menu {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 11;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .instruction {
+            font-size: 0.8rem;
+            color: #8a8ab0;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .control-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #a0a0c0;
+            margin-bottom: 4px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-2);
+            background: #2c2c54;
+            border-radius: 4px;
+            height: 6px;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2c2c54, #474787);
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #474787, #706fd3);
+        }
+
+        button#reset {
+            background: linear-gradient(135deg, #b33939, #ff5252);
+        }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 768px) {
+            #toggle-menu {
+                display: block;
+            }
+
+            #ui-panel {
+                width: 240px;
+                top: 80px;
+                right: 20px;
+                left: auto;
+            }
+
+            #ui-panel.hidden {
+                transform: translateY(-20px);
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="toggle-menu" aria-label="Menu">⚙️</button>
+
+    <div id="ui-panel">
+        <h1>Pendule Triple</h1>
+        <div class="instruction">
+            Glissez sur l'écran pour orienter le pendule. Ajustez les bras ci-dessous.
+        </div>
+        
+        <div class="control-group">
+            <button id="start-stop">Démarrer</button>
+        </div>
+        <div class="control-group">
+            <button id="reset">Effacer la trace</button>
+        </div>
+
+        <div class="control-group">
+            <label>Bras 1 : <span id="val-l1">100</span>px</label>
+            <input type="range" id="input-l1" min="30" max="250" value="100">
+        </div>
+        <div class="control-group">
+            <label>Bras 2 : <span id="val-l2">100</span>px</label>
+            <input type="range" id="input-l2" min="30" max="250" value="100">
+        </div>
+        <div class="control-group">
+            <label>Bras 3 : <span id="val-l3">100</span>px</label>
+            <input type="range" id="input-l3" min="30" max="250" value="100">
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const btnStartStop = document.getElementById('start-stop');
+        const btnReset = document.getElementById('reset');
+        const btnToggleMenu = document.getElementById('toggle-menu');
+        const uiPanel = document.getElementById('ui-panel');
+
+        // Éléments des sliders
+        const inputL1 = document.getElementById('input-l1');
+        const inputL2 = document.getElementById('input-l2');
+        const inputL3 = document.getElementById('input-l3');
+        const txtL1 = document.getElementById('val-l1');
+        const txtL2 = document.getElementById('val-l2');
+        const txtL3 = document.getElementById('val-l3');
+
+        let width, height, cx, cy;
+        let isRunning = false;
+        let isDragging = false;
+
+        const g = 0.98; 
+        let l1 = 100, l2 = 100, l3 = 100; // Longueurs initiales
+        const m1 = 10, m2 = 10, m3 = 10;    
+
+        let state = [Math.PI / 2, Math.PI / 2, Math.PI / 2, 0, 0, 0];
+        
+        // Tableau pour stocker la trace avec gestion du temps : {x, y, time}
+        let tracePoints = [];
+        const TRACE_LIFETIME = 10000; // 10 secondes en millisecondes
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            cx = width / 2;
+            cy = height / 3; 
+
+            // Adapter dynamiquement les valeurs max des curseurs pour que le pendule ne dépasse JAMAIS de l'écran
+            // La distance max du point d'ancrage aux bords critiques (bas, gauche, droite)
+            const maxAllowedLength = Math.min(height - cy - 30, cx - 30);
+            const maxPerBar = Math.floor(maxAllowedLength / 3);
+
+            // On met à jour les limites des sliders pour garantir que l'extension totale (l1+l2+l3) rentre dans l'écran
+            [inputL1, inputL2, inputL3].forEach(input => {
+                input.max = maxPerBar;
+                if (parseInt(input.value) > maxPerBar) {
+                    input.value = maxPerBar;
+                }
+            });
+
+            updateLengthsFromSliders();
+        }
+
+        function updateLengthsFromSliders() {
+            l1 = parseInt(inputL1.value);
+            l2 = parseInt(inputL2.value);
+            l3 = parseInt(inputL3.value);
+            
+            txtL1.textContent = l1;
+            txtL2.textContent = l2;
+            txtL3.textContent = l3;
+        }
+
+        // Écouteurs sur les sliders
+        [inputL1, inputL2, inputL3].forEach(input => {
+            input.addEventListener('input', updateLengthsFromSliders);
+        });
+
+        window.addEventListener('resize', resize);
+
+        // --- PHYSIQUE (RK4) ---
+        function getDerivatives(s) {
+            const [t1, t2, t3, w1, w2, w3] = s;
+
+            const M = [
+                [ (m1+m2+m3)*l1,          (m2+m3)*l2*Math.cos(t1-t2), m3*l3*Math.cos(t1-t3) ],
+                [ (m2+m3)*l1*Math.cos(t1-t2), (m2+m3)*l2,             m3*l3*Math.cos(t2-t3) ],
+                [ m3*l1*Math.cos(t1-t3),      m3*l2*Math.cos(t2-t3),      m3*l3 ]
+            ];
+
+            const F1 = -(m2+m3)*l2*w2*w2*Math.sin(t1-t2) - m3*l3*w3*w3*Math.sin(t1-t3) - (m1+m2+m3)*g*Math.sin(t1);
+            const F2 =  (m2+m3)*l1*w1*w1*Math.sin(t1-t2) - m3*l3*w3*w3*Math.sin(t2-t3) - (m2+m3)*g*Math.sin(t2);
+            const F3 =  m3*l1*w1*w1*Math.sin(t1-t3) + m3*l2*w2*w2*Math.sin(t2-t3) - m3*g*Math.sin(t3);
+
+            const detM = M[0][0]*(M[1][1]*M[2][2] - M[1][2]*M[2][1]) - 
+                         M[0][1]*(M[1][0]*M[2][2] - M[1][2]*M[2][0]) + 
+                         M[0][2]*(M[1][0]*M[2][1] - M[1][1]*M[2][0]);
+
+            const detA1 = F1*(M[1][1]*M[2][2] - M[1][2]*M[2][1]) - 
+                          M[0][1]*(F2*M[2][2] - M[1][2]*F3) + 
+                          M[0][2]*(F2*M[2][1] - M[1][1]*F3);
+
+            const detA2 = M[0][0]*(F2*M[2][2] - M[1][2]*F3) - 
+                          F1*(M[1][0]*M[2][2] - M[1][2]*M[2][0]) + 
+                          M[0][2]*(M[1][0]*F3 - F2*M[2][0]);
+
+            const detA3 = M[0][0]*(M[1][1]*F3 - F2*M[2][1]) - 
+                          M[0][1]*(M[1][0]*F3 - F2*M[2][0]) + 
+                          F1*(M[1][0]*M[2][1] - M[1][1]*M[2][0]);
+
+            return [w1, w2, w3, detA1 / detM, detA2 / detM, detA3 / detM];
+        }
+
+        function rk4Step(s, dt) {
+            const k1 = getDerivatives(s);
+            const s2 = s.map((val, i) => val + k1[i] * dt / 2);
+            const k2 = getDerivatives(s2);
+            const s3 = s.map((val, i) => val + k2[i] * dt / 2);
+            const k3 = getDerivatives(s3);
+            const s4 = s.map((val, i) => val + k3[i] * dt);
+            const k4 = getDerivatives(s4);
+
+            return s.map((val, i) => val + (dt / 6) * (k1[i] + 2*k2[i] + 2*k3[i] + k4[i]));
+        }
+
+        function getPositions(s) {
+            const [t1, t2, t3] = s;
+            const x1 = cx + l1 * Math.sin(t1);
+            const y1 = cy + l1 * Math.cos(t1);
+            const x2 = x1 + l2 * Math.sin(t2);
+            const y2 = y1 + l2 * Math.cos(t2);
+            const x3 = x2 + l3 * Math.sin(t3);
+            const y3 = y2 + l3 * Math.cos(t3);
+            return [{x: cx, y: cy}, {x: x1, y: y1}, {x: x2, y: y2}, {x: x3, y: y3}];
+        }
+
+        // --- GESTION INTERACTIVE ---
+        function handlePointer(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = clientX - rect.left;
+            const my = clientY - rect.top;
+
+            const dx = mx - cx;
+            const dy = my - cy;
+            const angle = Math.atan2(dx, dy);
+            
+            state = [angle, angle, angle, 0, 0, 0];
+        }
+
+        window.addEventListener('mousedown', (e) => {
+            if(e.target.closest('#ui-panel') || e.target.closest('#toggle-menu')) return;
+            isDragging = true;
+            isRunning = false;
+            btnStartStop.textContent = "Démarrer";
+            btnStartStop.style.background = "linear-gradient(135deg, #2c2c54, #474787)";
+            handlePointer(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) handlePointer(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mouseup', () => isDragging = false);
+        
+        window.addEventListener('touchstart', (e) => {
+            if(e.target.closest('#ui-panel') || e.target.closest('#toggle-menu')) return;
+            isDragging = true;
+            isRunning = false;
+            btnStartStop.textContent = "Démarrer";
+            btnStartStop.style.background = "linear-gradient(135deg, #2c2c54, #474787)";
+            if(window.innerWidth <= 768) uiPanel.classList.add('hidden');
+            handlePointer(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) handlePointer(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => isDragging = false);
+
+        // --- UI ACTIONS ---
+        btnStartStop.addEventListener('click', () => {
+            isRunning = !isRunning;
+            btnStartStop.textContent = isRunning ? "Pause" : "Démarrer";
+            btnStartStop.style.background = isRunning ? "linear-gradient(135deg, #1e824c, #2ecc71)" : "linear-gradient(135deg, #2c2c54, #474787)";
+            if (isRunning && window.innerWidth <= 768) uiPanel.classList.add('hidden');
+        });
+
+        btnReset.addEventListener('click', () => {
+            tracePoints = [];
+        });
+
+        btnToggleMenu.addEventListener('click', () => {
+            uiPanel.classList.toggle('hidden');
+        });
+
+        // --- BOUCLE DE RENDU ---
+        function loop() {
+            const now = performance.now();
+
+            if (isRunning) {
+                const substeps = 4;
+                const dt = 0.25 / substeps; 
+                for (let i = 0; i < substeps; i++) {
+                    state = rk4Step(state, dt);
+                }
+            }
+
+            const pts = getPositions(state);
+
+            // Ajouter le point actuel de l'extrémité à l'historique de la trace
+            if (isRunning) {
+                tracePoints.push({ x: pts[3].x, y: pts[3].y, time: now });
+            }
+
+            // Nettoyage des points plus vieux que 10 secondes
+            tracePoints = tracePoints.filter(p => now - p.time < TRACE_LIFETIME);
+
+            // Nettoyage complet de l'écran à chaque frame (nécessaire pour la trace dynamique)
+            ctx.fillStyle = '#0a0a12'; 
+            ctx.fillRect(0, 0, width, height);
+
+            // --- DESSIN DE LA TRACE DYNAMIQUE (Furtivité 10s) ---
+            if (tracePoints.length > 1) {
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 0; // Pas de flou lourd sur toute la trace pour préserver les perfs
+                
+                for (let i = 1; i < tracePoints.length; i++) {
+                    const p1 = tracePoints[i - 1];
+                    const p2 = tracePoints[i];
+                    
+                    // Calcul de l'opacité selon l'âge du point (1.0 au début, 0.0 à 10 secondes)
+                    const age = now - p2.time;
+                    const opacity = Math.max(0, 1 - age / TRACE_LIFETIME);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(51, 255, 170, ${opacity * 0.5})`;
+                    ctx.stroke();
+                }
+            }
+
+            // --- DESSIN DES BRAS (Glow Néon) ---
+            ctx.lineWidth = 4;
+            const colors = ['#ff3366', '#33ccff', '#33ffaa'];
+            
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(pts[i].x, pts[i].y);
+                ctx.lineTo(pts[i+1].x, pts[i+1].y);
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = colors[i];
+                ctx.strokeStyle = colors[i];
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0; 
+
+            // --- DESSIN DES MASSES ---
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.arc(pts[i].x, pts[i].y, i === 0 ? 5 : 7, 0, 2 * Math.PI);
+                ctx.fillStyle = i === 0 ? '#ffffff' : colors[i-1];
+                ctx.fill();
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // Initialisation
+        resize();
+        loop();
+    </script>
+</body>
+</html>
