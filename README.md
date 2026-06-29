@@ -128,6 +128,8 @@ PGCD-PPCM visualisé par le spirographe
 
 <img width="350" height="250" alt="image" src="https://github.com/user-attachments/assets/eaf17522-1575-466e-b57e-d4545cee1387" />
 
+Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géométrie dynamique : Déclic
+*"Quel est le lieu des barycentres des sommets A, B, C d'un triangle, pondérés des distances MA, MB, MC, quand M parcourt le cerle circonscrit au triangle ABC ?"*
 
 ***destination :*** Mathématiques Terminale Spé Maths
 
