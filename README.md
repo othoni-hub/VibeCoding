@@ -30,6 +30,10 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
 - [L'appli *POKER-Dés*](#POKER)
 
+
+### Utilitaires
+- [L'appli *CHROMA*](#CHROMA)
+  
 --- 
 ---
 
@@ -254,3 +258,20 @@ Simulateur de Poker-dés, banqueroute assurée
 ***destination :*** adultes (jeu de hasard)
 
 [Retour en haut](#VibeCoding)
+
+---
+---
+
+## Utilitaires
+CHROMA
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/CHROMA/" target="_blank" rel="noopener noreferrer">CHROMA </a></li>
+
+
+
+Section du cube chromatique et codes RVB 
+
+***destination :*** tous
+
+[Retour en haut](#VibeCoding)
+
