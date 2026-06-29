@@ -41,7 +41,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 ### Constructor
 [*Vibe-Codé* avec Gemini 3.5]
 
-<li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/" target="_blank" rel="noopener noreferrer">Constructor </a></li> 
+<li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/index.html" target="_blank" rel="noopener noreferrer">Constructor </a></li> 
 
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/701d0511-2c2b-4f0c-ae28-d48cebc8b799" />
 
