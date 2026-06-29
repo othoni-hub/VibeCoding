@@ -37,6 +37,8 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 --- 
 ---
 
+***Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger***
+
 ## **Mathématiques**
 ### Constructor
 [*Vibe-Codé* avec Gemini 3.5]
