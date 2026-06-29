@@ -137,6 +137,7 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 
 
 Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-Voltera
+
 ***destination :*** Mathématiques CPGE-ECG
 
 [Retour en haut](#VibeCoding)
