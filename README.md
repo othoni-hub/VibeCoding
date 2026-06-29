@@ -18,6 +18,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
 - [L'appli *GAUSS*](#TCL)
+- [L'appli *ASIMOV-Simul-invers*](#ASIMOV-Simul-invers)
   
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
@@ -145,6 +146,22 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 
 Simulations de diverses lois de probabilité pour illustrer la convergence en loi (Théorème Central Limite)
+
+***destination :*** Mathématiques CPGE-ECG
+
+[Retour en haut](#VibeCoding)
+
+---
+### ASIMOV-Simul-invers
+
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/ASIMOV-Simul-invers/" target="_blank" rel="noopener noreferrer">ASIMOV-Simul-invers </a></li>
+
+<img width="500" height="370" alt="image" src="https://github.com/user-attachments/assets/792ef681-b2e2-41de-b4e7-5279791128e3" />
+
+
+
+Simulations de lois de probabilités par inversion de la foncton de répartition
 
 ***destination :*** Mathématiques CPGE-ECG
 
