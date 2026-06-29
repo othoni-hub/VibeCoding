@@ -106,7 +106,7 @@ Mur de calcul additif.
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/8396fd48-924c-46dc-9a60-67b3abc13323" />
+<img width="400" height="280" alt="image" src="https://github.com/user-attachments/assets/8396fd48-924c-46dc-9a60-67b3abc13323" />
 
 
 
