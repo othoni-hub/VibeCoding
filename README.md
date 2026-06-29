@@ -7,6 +7,8 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 <img width="135" height="200" alt="image" src="https://github.com/user-attachments/assets/39a17948-2725-4cd6-8a7f-0a32188c6b21" />
 
+***Clic gauche sur les liens pour ouvrir dans le navigateur, clic droit pour télécharger***
+
 
 ## Table des matières
 ### Mathématiques
@@ -37,13 +39,14 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 --- 
 ---
 
-***Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger***
 
 ## **Mathématiques**
 ### Constructor
 [*Vibe-Codé* avec Gemini 3.5]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/index.html" target="_blank" rel="noopener noreferrer">Constructor </a></li> 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/701d0511-2c2b-4f0c-ae28-d48cebc8b799" />
 
@@ -61,6 +64,8 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li>
 
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="470" height="225" alt="image" src="https://github.com/user-attachments/assets/9fba1a70-5368-4aec-aee4-1cb47b8c7d4b" />
 
 Visualiseur intéractif de coniques
@@ -75,6 +80,9 @@ Visualiseur intéractif de coniques
 ### BRIQUE
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/BRIQUE/brique.html" target="_blank" rel="noopener noreferrer">BRIQUE </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="300" height="220" alt="image" src="https://github.com/user-attachments/assets/96de829f-d209-48ce-b2ae-dbf1de6d817d" />
 
 
