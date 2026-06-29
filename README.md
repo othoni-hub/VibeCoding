@@ -264,14 +264,17 @@ Simulateur de Poker-dés, banqueroute assurée
 
 ## Utilitaires
 ### CHROMA
+
 [*Vibe-Codé* avec Gemini 3.5]
+
 <li><a href="https://othoni-hub.github.io/VibeCoding/CHROMA/" target="_blank" rel="noopener noreferrer">CHROMA </a></li>
 
+<img width="450" height="220" alt="image" src="https://github.com/user-attachments/assets/6bcd5f2f-6b59-44a4-9101-8e63e215009a" />
 
 
-Section du cube chromatique et codes RVB 
+Section plane du cube chromatique et codes RVB 
 
-***destination :*** tous
+***destination :*** tous / mathématiques
 
 [Retour en haut](#VibeCoding)
 
