@@ -7,7 +7,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 <img width="135" height="200" alt="image" src="https://github.com/user-attachments/assets/39a17948-2725-4cd6-8a7f-0a32188c6b21" />
 
-***Clic gauche sur les liens pour ouvrir dans le navigateur, clic droit pour télécharger***
+
 
 
 ## Table des matières
@@ -37,6 +37,9 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *CHROMA*](#CHROMA)
   
 --- 
+
+***Clic gauche sur les liens pour ouvrir dans le navigateur, clic droit pour télécharger***
+
 ---
 
 
@@ -98,6 +101,11 @@ Mur de calcul additif.
 ### Spirographe
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Spirograph/Spirographe.html" target="_blank" rel="noopener noreferrer">Spirographe </a></li>
+
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/8396fd48-924c-46dc-9a60-67b3abc13323" />
 
 
@@ -114,6 +122,9 @@ PGCD-PPCM visualisé par le spirographe
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Polya/" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="650" height="250" alt="image" src="https://github.com/user-attachments/assets/08b2ea02-de77-41b1-8229-ce1b74bd544e" />
 
 
@@ -129,6 +140,9 @@ Simulation Urne de Polya
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/EPIDEMIC/" target="_blank" rel="noopener noreferrer">Propagation épidémique </a></li>
 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/c7767a2a-cc54-4f90-837a-e545d5138efc" />
 
 Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selon le modèle SIR (Sains - Infectés - Rétablis)
@@ -142,6 +156,9 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 ### PredateursProies
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PredateursProies/" target="_blank" rel="noopener noreferrer">Prédateurs - Proies : Lotka-Voltera </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/c9028662-00ee-46f2-81f7-fc4464ffd0e1" />
 
@@ -157,6 +174,9 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/TCL/" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/bc7da267-2154-41d2-ac30-37e1c35c9a12" />
 
 
@@ -171,6 +191,9 @@ Simulations de diverses lois de probabilité pour illustrer la convergence en lo
 
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ASIMOV-Simul-invers/" target="_blank" rel="noopener noreferrer">ASIMOV-Simul-invers </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/792ef681-b2e2-41de-b4e7-5279791128e3" />
 
@@ -190,6 +213,9 @@ Simulations de lois de probabilités par inversion de leur foncton de répartiti
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/" target="_blank" rel="noopener noreferrer">Solarium 3D </a></li>
 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/66394ea5-1f07-464c-b875-370fe3ede90d" />
 
 Vue animée du Système Solaire
@@ -202,6 +228,9 @@ Vue animée du Système Solaire
 ### PAGNOL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/9be6f83e-901a-45eb-9ff2-8bdb861b1229" />
 
 Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup>
@@ -213,6 +242,9 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 ### ACTIVE-Renforcement
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ACTIVE-Renforcement/" target="_blank" rel="noopener noreferrer">ACTIVE-Renforcement </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/314701c2-5685-483f-a445-07b52d87fdf0" />
 
@@ -231,6 +263,9 @@ Application proposant un programme de renforcement musculaire aux jeunes lycéen
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ArbreFractal/" target="_blank" rel="noopener noreferrer">Arbre Fractal </a></li>
 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
 <img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/f18cdd00-020d-4254-8924-208ecba1e9c5" />
 
 Arbre fractal avec paramètres
@@ -245,6 +280,9 @@ téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/ArbreFract
 ### VOLUME
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/VOLUME/" target="_blank" rel="noopener noreferrer">VOLUME (sketchUp like) </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="300" height="150" alt="image" src="https://github.com/user-attachments/assets/e8743e06-e1f6-43ec-93ae-1e39ee3552f2" />
 
@@ -261,6 +299,9 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/POKER/" target="_blank" rel="noopener noreferrer">POKER </a></li>
 
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="200" height="270" alt="image" src="https://github.com/user-attachments/assets/ea9dd482-b9a1-4e8f-8dfb-77e2040231bb" />
 
@@ -280,6 +321,9 @@ Simulateur de Poker-dés, banqueroute assurée
 [*Vibe-Codé* avec Gemini 3.5]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/CHROMA/" target="_blank" rel="noopener noreferrer">CHROMA </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="450" height="220" alt="image" src="https://github.com/user-attachments/assets/6bcd5f2f-6b59-44a4-9101-8e63e215009a" />
 
