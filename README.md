@@ -263,7 +263,7 @@ Simulateur de Poker-dés, banqueroute assurée
 ---
 
 ## Utilitaires
-CHROMA
+### CHROMA
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/CHROMA/" target="_blank" rel="noopener noreferrer">CHROMA </a></li>
 
