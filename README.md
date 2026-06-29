@@ -5,6 +5,9 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 (Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
+<img width="270" height="400" alt="image" src="https://github.com/user-attachments/assets/39a17948-2725-4cd6-8a7f-0a32188c6b21" />
+
+
 ## Table des matières
 ### Mathématiques
 - [L'appli *Constructor*](#Constructor)
