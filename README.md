@@ -182,6 +182,7 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 <img width="300" height="225" alt="image" src="https://github.com/user-attachments/assets/314701c2-5685-483f-a445-07b52d87fdf0" />
 
 Application proposant un programme de renforcement musculaire aux jeunes lycéens et lycéennes
+
 ***destination :*** EPS lycée
 
 [Retour en haut](#VibeCoding)
