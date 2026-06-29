@@ -19,6 +19,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
 - [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
+- [L'appli A.C.T.I.V.E](#ACTIVE-Renforcement)
 
 ### Jeux
 - [L'appli *Arbre Fractal*](#ArbreFractal)
@@ -170,6 +171,18 @@ Vue animée du Système Solaire
 
 Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup>
 ***destination :*** Français 3<sup>ème</sup>
+
+[Retour en haut](#VibeCoding)
+
+---
+### ACTIVE-Renforcement
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/ACTIVE-Renforcement/" target="_blank" rel="noopener noreferrer">ACTIVE-Renforcement </a></li>
+
+<img width="1009" height="725" alt="image" src="https://github.com/user-attachments/assets/314701c2-5685-483f-a445-07b52d87fdf0" />
+
+Application proposant un programme de renforcement musculaire aux jeunes lycéens et lycéennes
+***destination :*** EPS lycée
 
 [Retour en haut](#VibeCoding)
 
