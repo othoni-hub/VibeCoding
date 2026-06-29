@@ -65,7 +65,7 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 
 ### i-CONIC
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/" target="_blank" rel="noopener noreferrer">i-CONIC </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/i-CONIC/index.html" target="_blank" rel="noopener noreferrer">i-CONIC </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
@@ -120,7 +120,7 @@ PGCD-PPCM visualisé par le spirographe
 
 ### MAJOR
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/Polya/" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/Polya/index.html" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -138,7 +138,7 @@ Simulation Urne de Polya
 
 ### EPIDEMIC
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/EPIDEMIC/" target="_blank" rel="noopener noreferrer">Propagation épidémique </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/EPIDEMIC/index.html" target="_blank" rel="noopener noreferrer">Propagation épidémique </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -155,7 +155,7 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 
 ### PredateursProies
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/PredateursProies/" target="_blank" rel="noopener noreferrer">Prédateurs - Proies : Lotka-Voltera </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/PredateursProies/index.html" target="_blank" rel="noopener noreferrer">Prédateurs - Proies : Lotka-Voltera </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -172,7 +172,7 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 ### TCL
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/TCL/" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/TCL/index.html" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -190,7 +190,7 @@ Simulations de diverses lois de probabilité pour illustrer la convergence en lo
 ### ASIMOV-Simul-invers
 
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/ASIMOV-Simul-invers/" target="_blank" rel="noopener noreferrer">ASIMOV-Simul-invers </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/ASIMOV-Simul-invers/index.html" target="_blank" rel="noopener noreferrer">ASIMOV-Simul-invers </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -211,7 +211,7 @@ Simulations de lois de probabilités par inversion de leur foncton de répartiti
 ## **Autres disciplines**
 ### Solarium
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/" target="_blank" rel="noopener noreferrer">Solarium 3D </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/index.html" target="_blank" rel="noopener noreferrer">Solarium 3D </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -227,7 +227,7 @@ Vue animée du Système Solaire
 ---
 ### PAGNOL
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/" target="_blank" rel="noopener noreferrer">PAGNOL </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/PAGNOL/index.html" target="_blank" rel="noopener noreferrer">PAGNOL </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
@@ -241,7 +241,7 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 ---
 ### ACTIVE-Renforcement
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/ACTIVE-Renforcement/" target="_blank" rel="noopener noreferrer">ACTIVE-Renforcement </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/ACTIVE-Renforcement/index.html" target="_blank" rel="noopener noreferrer">ACTIVE-Renforcement </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
@@ -261,7 +261,7 @@ Application proposant un programme de renforcement musculaire aux jeunes lycéen
 
 ### ArbreFractal
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/ArbreFractal/" target="_blank" rel="noopener noreferrer">Arbre Fractal </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/ArbreFractal/index.html" target="_blank" rel="noopener noreferrer">Arbre Fractal </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -279,7 +279,7 @@ téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/ArbreFract
 
 ### VOLUME
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/VOLUME/" target="_blank" rel="noopener noreferrer">VOLUME (sketchUp like) </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/VOLUME/index.html" target="_blank" rel="noopener noreferrer">VOLUME (sketchUp like) </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
@@ -297,7 +297,7 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 
 ### POKER
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/POKER/" target="_blank" rel="noopener noreferrer">POKER </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/POKER/index.html" target="_blank" rel="noopener noreferrer">POKER </a></li>
 
 
 
@@ -320,7 +320,7 @@ Simulateur de Poker-dés, banqueroute assurée
 
 [*Vibe-Codé* avec Gemini 3.5]
 
-<li><a href="https://othoni-hub.github.io/VibeCoding/CHROMA/" target="_blank" rel="noopener noreferrer">CHROMA </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/CHROMA/index.html" target="_blank" rel="noopener noreferrer">CHROMA </a></li>
 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
