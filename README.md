@@ -16,6 +16,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *BRIQUE*](#BRIQUE)
 - [L'appli *Spirographe*](#Spirographe)
+- [L'appli *Declic*](#SDeclic)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
@@ -117,6 +118,18 @@ PGCD-PPCM visualisé par le spirographe
 [Retour en haut](#VibeCoding)
 
 ---
+
+### Declic
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Declic/index.html" target="_blank" rel="noopener noreferrer">Declic </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="350" height="250" alt="image" src="https://github.com/user-attachments/assets/eaf17522-1575-466e-b57e-d4545cee1387" />
+
+
+***destination :*** Mathématiques Terminale Spé Maths
 
 ### MAJOR
 [*Vibe-Codé* avec Gemini 3.5]
