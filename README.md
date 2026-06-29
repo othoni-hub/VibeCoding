@@ -179,7 +179,7 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ACTIVE-Renforcement/" target="_blank" rel="noopener noreferrer">ACTIVE-Renforcement </a></li>
 
-<img width="1009" height="725" alt="image" src="https://github.com/user-attachments/assets/314701c2-5685-483f-a445-07b52d87fdf0" />
+<img width="400" height="325" alt="image" src="https://github.com/user-attachments/assets/314701c2-5685-483f-a445-07b52d87fdf0" />
 
 Application proposant un programme de renforcement musculaire aux jeunes lycéens et lycéennes
 ***destination :*** EPS lycée
