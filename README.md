@@ -16,7 +16,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *BRIQUE*](#BRIQUE)
 - [L'appli *Spirographe*](#Spirographe)
-- [L'appli *Declic*](#SDeclic)
+- [L'appli *Declic*](#Declic)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
