@@ -157,11 +157,11 @@ Simulations de diverses lois de probabilité pour illustrer la convergence en lo
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/ASIMOV-Simul-invers/" target="_blank" rel="noopener noreferrer">ASIMOV-Simul-invers </a></li>
 
-<img width="500" height="370" alt="image" src="https://github.com/user-attachments/assets/792ef681-b2e2-41de-b4e7-5279791128e3" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/792ef681-b2e2-41de-b4e7-5279791128e3" />
 
 
 
-Simulations de lois de probabilités par inversion de la foncton de répartition
+Simulations de lois de probabilités par inversion de leur foncton de répartition
 
 ***destination :*** Mathématiques CPGE-ECG
 
