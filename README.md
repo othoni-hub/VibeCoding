@@ -1,7 +1,7 @@
 # VibeCoding
 Applications "single page" pédagogiques ou autres, *vibe-codées* par **Olivier Thöni**
 
-avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
+avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteur)
 
 (Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
