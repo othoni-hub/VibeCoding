@@ -31,6 +31,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
 - [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
+- [L'appli *OULIPO](#OULIPO)
 - [L'appli A.C.T.I.V.E](#ACTIVE-Renforcement)
 
 ### Jeux
@@ -353,6 +354,25 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 ***destination :*** Français 3<sup>ème</sup>, Marcel Pagnol
 
 [Retour en haut](#VibeCoding)
+
+---
+
+### OULIPO
+
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/OULIPO/index.html" target="_blank" rel="noopener noreferrer">OULIPO </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="300" height="230" alt="image" src="https://github.com/user-attachments/assets/68e61a3c-c63c-48dd-b4c3-4d054924d2ed" />
+
+
+Un peu de lecture : "100 mille milliards de poésie", de Rayond Queneau, générateur de poème 
+                                                                                            
+***destination :*** Français 3<sup>ème</sup>, Raymond Queneau, mathématiques : puissances de 10
+
+[Retour en haut](#VibeCoding)
+
 
 ---
 ### ACTIVE-Renforcement
