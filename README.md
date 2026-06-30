@@ -31,8 +31,8 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 ### Autres disciplines
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
 - [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
-- [L'appli *OULIPO](#OULIPO)
-- [L'appli A.C.T.I.V.E](#ACTIVE-Renforcement)
+- [L'appli *O.U.L.I.P.O.*](#OULIPO)
+- [L'appli *A.C.T.I.V.E*](#ACTIVE-Renforcement)
 
 ### Jeux
 - [L'appli *Arbre Fractal*](#ArbreFractal)
