@@ -20,6 +20,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *Declic*](#Declic)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
+- [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)Endomorphisme-2D
 - [L'appli *EndomorphiK*](#EndomorphiK)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *GAUSS*](#TCL)
@@ -194,6 +195,23 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 [Retour en haut](#VibeCoding)
 
 ---
+### Endomorphisme-2D
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Endomorphisme-2D/index.html" target="_blank" rel="noopener noreferrer">Endomorphisme-2D </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/6d208535-18d5-424f-b000-cd86edcdfa8f" />
+
+Visualisation des effets d'un endomorphisme de $\mathbb{R}^3$ défini par sa matrice, avec calcul et visualistation de ses valeurs propres et vecteurs propres.
+
+***destination :*** Mathématiques CPGE-ECG, algèbre linéaire
+
+
+[Retour en haut](#VibeCoding)
+
+---
 
 ### EndomorphiK
 [*Vibe-Codé* avec Gemini 3.5]
@@ -204,7 +222,6 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 <img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/ae64e8bb-d3b6-492d-a865-458e0dc7ce34" />
 
-<img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/6d208535-18d5-424f-b000-cd86edcdfa8f" />
 
 
 
