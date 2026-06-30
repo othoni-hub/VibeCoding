@@ -427,7 +427,7 @@ Section plane du cube chromatique et codes RVB
 
 <img width="286" height="176" alt="image" src="https://github.com/user-attachments/assets/a46ef69c-37c3-42b1-b49b-e24e4f50286c" />
 
-GIF-It DID2GI est une applicationpour smartphone uniquement pour la création de Gif animés à partir de photos de votre photothèque.
+GIF-It DID2GI est une application pour smartphone uniquement pour la création de Gif animés à partir de photos de votre photothèque.
 
 ***destination :*** tous (surtout celles et ceux qui en ont marre des versions d'essais limitées à 3 jours que l'on trouve sur les Stores)
 
