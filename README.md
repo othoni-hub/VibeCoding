@@ -61,7 +61,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 *Timeline* des femmes mathématiciennes et scientifiques : fiche individuelle ou bien FlashCards, au choix...
 Pour donner le goût et la confiance aux futures femmes de sciences !
 
-***destination :*** Mathématiques, dès la 6<sup>ème</sup>
+***destination :*** Mathématiques, dès la 6<sup>ème</sup>, histoire des sciences
 
 [Retour en haut](#VibeCoding)
 
@@ -79,7 +79,7 @@ Pour donner le goût et la confiance aux futures femmes de sciences !
 
 Le Boa Constructor est une application sous forme de jeu de plateau, au croisement de la forge de MineCraft et du bouton "Créer un nouvel outil" de Geogebra, destiné à faire acquérir des compétences en pensée computationnelle, tout en consolidant les définitions des outils de la géométrie.
 
-***destination :*** Mathématiques, dès la 6<sup>ème</sup>
+***destination :*** Mathématiques, dès la 6<sup>ème</sup>, géométrie programmée
 
 [Retour en haut](#VibeCoding)
 
@@ -96,7 +96,7 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 
 Visualiseur intéractif de coniques
 
-***destination :*** L3 Mathématiques
+***destination :*** L3 Mathématiques, coniques
 
 [Retour en haut](#VibeCoding)
 
@@ -114,7 +114,7 @@ Visualiseur intéractif de coniques
 
 Mur de calcul additif.
 
-***destination :*** CE2
+***destination :*** CE2, addition, soustraction
 
 [Retour en haut](#VibeCoding)
 
@@ -135,7 +135,7 @@ Mur de calcul additif.
 
 PGCD-PPCM visualisé par le spirographe
 
-***destination :*** Mathématiques 3<sup>ème</sup>
+***destination :*** Mathématiques 3<sup>ème</sup>, arithmétique
 
 [Retour en haut](#VibeCoding)
 
@@ -154,7 +154,7 @@ Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géomé
 
 *"Quel est le lieu des barycentres des sommets A, B, C d'un triangle, pondérés des distances MA, MB, MC, quand M parcourt le cercle circonscrit au triangle ABC ?"*
 
-***destination :*** Mathématiques Terminale Spé Maths
+***destination :*** Mathématiques Terminale Spé Maths, barycentre
 
 ---
 
@@ -170,7 +170,7 @@ Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géomé
 
 Simulation Urne de Polya
 
-***destination :*** Mathématiques CPGE-ECG
+***destination :*** Mathématiques CPGE-ECG, probabilités discrètes
 
 [Retour en haut](#VibeCoding)
 
@@ -187,7 +187,7 @@ Simulation Urne de Polya
 
 Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selon le modèle SIR (Sains - Infectés - Rétablis)
 
-***destination :*** Mathématiques CPGE-ECG
+***destination :*** Mathématiques CPGE-ECG, systèmes différentiels (temps continu) ou suites imbriquées (temps discret)
 
 [Retour en haut](#VibeCoding)
 
@@ -205,7 +205,7 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 
 Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-Voltera
 
-***destination :*** Mathématiques CPGE-ECG
+***destination :*** Mathématiques CPGE-ECG, systèmes différentiels (temps continu) ou suites imbriquées (temps discret)
 
 [Retour en haut](#VibeCoding)
 
@@ -218,13 +218,15 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
+<img width="1262" height="656" alt="image" src="https://github.com/user-attachments/assets/ae64e8bb-d3b6-492d-a865-458e0dc7ce34" />
+
 <img width="450" height="280" alt="image" src="https://github.com/user-attachments/assets/6d208535-18d5-424f-b000-cd86edcdfa8f" />
 
 
 
 Visualisation des effets d'un endomorphisme de $mathbb{R}^3$ défini par sa matrice, avec calcul et visualistation de ses valeurs propres et vecteurs propres.
 
-***destination :*** Mathématiques CPGE-ECG
+***destination :*** Mathématiques CPGE-ECG, algèbre linéaire
 
 [Retour en haut](#VibeCoding)
 
@@ -241,7 +243,7 @@ Visualisation des effets d'un endomorphisme de $mathbb{R}^3$ défini par sa matr
 
 Simulations de diverses lois de probabilité pour illustrer la convergence en loi (Théorème Central Limite)
 
-***destination :*** Mathématiques CPGE-ECG
+***destination :*** Mathématiques CPGE-ECG, probabilités : convergences en lois
 
 [Retour en haut](#VibeCoding)
 
@@ -260,7 +262,7 @@ Simulations de diverses lois de probabilité pour illustrer la convergence en lo
 
 Simulations de lois de probabilités par inversion de leur foncton de répartition
 
-***destination :*** Mathématiques CPGE-ECG
+***destination :*** Mathématiques CPGE-ECG, simulation de probabilités
 
 [Retour en haut](#VibeCoding)
 
@@ -279,7 +281,7 @@ Simulations de lois de probabilités par inversion de leur foncton de répartiti
 
 Vue animée du Système Solaire
 
-***destination :*** SVT collège
+***destination :*** SVT collège, système solaire
 
 [Retour en haut](#VibeCoding)
 
@@ -294,7 +296,7 @@ Vue animée du Système Solaire
 
 Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves de 3<sup>ème</sup
                                                                                             
-***destination :*** Français 3<sup>ème</sup>
+***destination :*** Français 3<sup>ème</sup>, Marcel Pagnol
 
 [Retour en haut](#VibeCoding)
 
@@ -310,7 +312,7 @@ Timeline sur les oeuvres principales de Marcel Pagnol, à destination d'élèves
 
 Application proposant un programme de renforcement musculaire aux jeunes lycéens et lycéennes
 
-***destination :*** EPS lycée
+***destination :*** EPS lycée, condition physique
 
 [Retour en haut](#VibeCoding)
 
@@ -331,7 +333,7 @@ Application proposant un programme de renforcement musculaire aux jeunes lycéen
 Arbre fractal avec paramètres
 téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/ArbreFractal/index.html
 
-***destination :*** tous
+***destination :*** tous, fractales
 
 [Retour en haut](#VibeCoding)
 
@@ -349,7 +351,7 @@ téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/ArbreFract
 
 Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 
-***destination :*** tous
+***destination :*** tous, solides de l'espace
 
 [Retour en haut](#VibeCoding)
 
@@ -368,7 +370,7 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 
 Simulateur de Poker-dés, banqueroute assurée
 
-***destination :*** adultes (jeu de hasard)
+***destination :*** adultes (jeu de hasard), poker dés
 
 [Retour en haut](#VibeCoding)
 
@@ -390,7 +392,7 @@ Simulateur de Poker-dés, banqueroute assurée
 
 Section plane du cube chromatique et codes RVB 
 
-***destination :*** tous / mathématiques
+***destination :*** tous / mathématiques, section de solide, coordonnées spatiales
 
 [Retour en haut](#VibeCoding)
 
