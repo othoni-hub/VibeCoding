@@ -58,7 +58,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 
 *Timeline* des femmes mathématiciennes et scientifiques : fiche individuelle ou bien FlashCards, au choix...
-Pour donner le goût des sciences et la confiance aux futures femmes de science !
+Pour donner le goût et la confiance aux futures femmes de sciences !
 
 ***destination :*** Mathématiques, dès la 6<sup>ème</sup>
 
