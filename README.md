@@ -464,7 +464,7 @@ GIF-It DID2GI est une application pour smartphone uniquement pour la création d
 <img width="350" height="150" alt="image" src="https://github.com/user-attachments/assets/810aef37-f4d1-4557-888c-8e2a144a3325" />
 
 
-Construction de cartes mentales intégrnat images, ien LaTeX, etc.
+Construction de cartes mentales intégrant images, liens, formules LaTeX, etc. Exports multiples
 
 ***destination :*** tous 
 
