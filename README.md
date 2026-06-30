@@ -218,7 +218,7 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="1262" height="656" alt="image" src="https://github.com/user-attachments/assets/ae64e8bb-d3b6-492d-a865-458e0dc7ce34" />
+<img width="400" height="220" alt="image" src="https://github.com/user-attachments/assets/ae64e8bb-d3b6-492d-a865-458e0dc7ce34" />
 
 <img width="450" height="280" alt="image" src="https://github.com/user-attachments/assets/6d208535-18d5-424f-b000-cd86edcdfa8f" />
 
