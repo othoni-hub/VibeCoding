@@ -15,6 +15,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *ELLES-TimeLine*](#ELLES-TimeLine)
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *i-CONIC*](#i-CONIC)
+- [L'appli *Lissajous*](#Lissajous)
 - [L'appli *BRIQUE*](#BRIQUE)
 - [L'appli *Spirographe*](#Spirographe)
 - [L'appli *Declic*](#Declic)
@@ -102,6 +103,22 @@ Visualiseur intéractif de coniques
 
 [Retour en haut](#VibeCoding)
 
+
+---
+
+### Lissajous
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Lissajous/index.html" target="_blank" rel="noopener noreferrer">Lissajous </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="500" height="220" alt="image" src="https://github.com/user-attachments/assets/de9be275-419d-418d-9857-939a3ccaae70" />
+
+Application O.S.C.A.R. : Courbes de Lissajous
+
+***destination :*** L3 Mathématiques, courbes paramétrées
+
+[Retour en haut](#VibeCoding)
 
 ---
 
