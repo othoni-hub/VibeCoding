@@ -19,6 +19,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 - [L'appli *BRIQUE*](#BRIQUE)
 - [L'appli *Spirographe*](#Spirographe)
 - [L'appli *Declic*](#Declic)
+- [L'appli *OPTIM-ConeShpere*](#OPTIM-ConeShpere)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
 - [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)
@@ -177,7 +178,23 @@ Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géomé
 ***destination :*** Mathématiques Terminale Spé Maths, barycentre
 
 ---
+### OPTIM-ConeShpere
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/OPTIM-ConeShpere/index.html" target="_blank" rel="noopener noreferrer">OPTIM-ConeShpere </a></li>
 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="300" height="250" alt="image" src="https://github.com/user-attachments/assets/cc952faa-c391-47f4-b7a2-78dbfd4bf47e" />
+
+Optimisation du volume du cône inscrit dans un sphère : vue en coupe, vue 3D, fonction ratio des volumes
+
+
+
+***destination :*** Mathématiques Terminale Spé Maths, modélisation, analyse, géométrie dans l'esâce
+
+
+---
 
 
 ### EPIDEMIC
