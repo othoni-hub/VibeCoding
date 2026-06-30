@@ -41,6 +41,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 ### Utilitaires
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
+- [L'appli *MindVibe*](#MindVibe)
   
 --- 
 
@@ -447,6 +448,25 @@ Section plane du cube chromatique et codes RVB
 GIF-It DID2GI est une application pour smartphone uniquement pour la création de Gif animés à partir de photos de votre photothèque.
 
 ***destination :*** tous (surtout celles et ceux qui en ont marre des versions d'essais limitées à 3 jours que l'on trouve sur les Stores)
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### MindVibe
+[*Vibe-Codé* avec Gemini 3.5]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/MindVibe/index.html" target="_blank" rel="noopener noreferrer">MindVibe </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="350" height="150" alt="image" src="https://github.com/user-attachments/assets/810aef37-f4d1-4557-888c-8e2a144a3325" />
+
+
+Construction de cartes mentales intégrnat images, ien LaTeX, etc.
+
+***destination :*** tous 
 
 [Retour en haut](#VibeCoding)
 
