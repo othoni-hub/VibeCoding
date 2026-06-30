@@ -39,6 +39,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ### Utilitaires
 - [L'appli *CHROMA*](#CHROMA)
+- [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
   
 --- 
 
@@ -413,4 +414,25 @@ Section plane du cube chromatique et codes RVB
 ***destination :*** tous / mathématiques, section de solide, coordonnées spatiales
 
 [Retour en haut](#VibeCoding)
+
+---
+
+### GIF-IT-SmartPhone
+[*Vibe-Codé* avec Gemini 3.5, pour Smartphone uniquement]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/GIF-IT-SmartPhone/index.html" target="_blank" rel="noopener noreferrer">GIF-IT-SmartPhone </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="286" height="176" alt="image" src="https://github.com/user-attachments/assets/a46ef69c-37c3-42b1-b49b-e24e4f50286c" />
+
+GIF-It DID2GI est une applicationpour smartphone uniquement pour la création de Gif animés à partir de photos de votre photothèque.
+
+***destination :*** tous (surtout celles et ceux qui en ont marre des versions d'essais limitées à 3 jours que l'on trouve sur les Stores)
+
+[Retour en haut](#VibeCoding)
+
+---
+
 
