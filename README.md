@@ -261,7 +261,7 @@ Simulations de diverses lois de probabilité pour illustrer la convergence en lo
 
 
 
-Simulations de lois de probabilités par inversion de leur foncton de répartition
+Simulations de lois de probabilités par inversion de leur fonction de répartition
 
 ***destination :*** Mathématiques CPGE-ECG, simulation de probabilités
 
