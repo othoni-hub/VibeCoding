@@ -54,10 +54,11 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="300" height="220" alt="image" src="https://github.com/user-attachments/assets/8544bd0f-4598-4de0-8b8a-71211b43a508" />
+<img width="280" height="220" alt="image" src="https://github.com/user-attachments/assets/8544bd0f-4598-4de0-8b8a-71211b43a508" />
 
 
 *Timeline* des femmes mathématiciennes et scientifiques : fiche individuelle ou bien FlashCards, au choix...
+Pour donner le goût des sciences et la confiance aux futures femmes de science !
 
 ***destination :*** Mathématiques, dès la 6<sup>ème</sup>
 
