@@ -12,6 +12,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 ## Table des matières
 ### Mathématiques
+- [L'appli *ELLES-TimeLine*](#ELLES-TimeLine)
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *BRIQUE*](#BRIQUE)
@@ -45,6 +46,23 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 
 
 ## **Mathématiques**
+
+### ELLES-TimeLine
+[*Vibe-Codé* avec Gemini 3.5]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/ELLES-TimeLine/index.html" target="_blank" rel="noopener noreferrer">ELLES-TimeLine </a></li> 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="300" height="220" alt="image" src="https://github.com/user-attachments/assets/8544bd0f-4598-4de0-8b8a-71211b43a508" />
+
+
+*Timeline* des femmes mathématiciennes et scientifiques : fiche individuelle ou bien FlashCards, au choix...
+
+***destination :*** Mathématiques, dès la 6<sup>ème</sup>
+
+[Retour en haut](#VibeCoding)
+
 ### Constructor
 [*Vibe-Codé* avec Gemini 3.5]
 
