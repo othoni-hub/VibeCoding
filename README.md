@@ -64,6 +64,8 @@ Pour donner le goût et la confiance aux futures femmes de sciences !
 
 [Retour en haut](#VibeCoding)
 
+---
+
 ### Constructor
 [*Vibe-Codé* avec Gemini 3.5]
 
@@ -153,6 +155,8 @@ Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géomé
 
 ***destination :*** Mathématiques Terminale Spé Maths
 
+---
+
 ### MAJOR
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Polya/index.html" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
@@ -203,6 +207,7 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 ***destination :*** Mathématiques CPGE-ECG
 
 [Retour en haut](#VibeCoding)
+
 ---
 
 ### TCL
