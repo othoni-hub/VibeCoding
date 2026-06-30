@@ -21,6 +21,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
+- [L'appli *EndomorphiK*](#EndomorphiK)
 - [L'appli *GAUSS*](#TCL)
 - [L'appli *ASIMOV-Simul-invers*](#ASIMOV-Simul-invers)
   
@@ -210,6 +211,24 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 ---
 
+### EndomorphiK
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/EndomorphiK/index.html" target="_blank" rel="noopener noreferrer">EndomorphiK </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="450" height="280" alt="image" src="https://github.com/user-attachments/assets/6d208535-18d5-424f-b000-cd86edcdfa8f" />
+
+
+
+Visualisation d'un endomorphisme défini par sa matrice, avec calcul de ses valeurs propres et vecteurs propres.
+
+***destination :*** Mathématiques CPGE-ECG
+
+[Retour en haut](#VibeCoding)
+
+---
 ### TCL
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/TCL/index.html" target="_blank" rel="noopener noreferrer">Convergences en lois </a></li>
