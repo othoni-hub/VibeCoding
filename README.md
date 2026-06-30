@@ -185,7 +185,7 @@ Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géomé
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="300" height="250" alt="image" src="https://github.com/user-attachments/assets/cc952faa-c391-47f4-b7a2-78dbfd4bf47e" />
+<img width="300" height="230" alt="image" src="https://github.com/user-attachments/assets/cc952faa-c391-47f4-b7a2-78dbfd4bf47e" />
 
 Optimisation du volume du cône inscrit dans un sphère : vue en coupe, vue 3D, fonction ratio des volumes
 
