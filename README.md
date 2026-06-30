@@ -20,7 +20,7 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *Declic*](#Declic)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
-- [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)Endomorphisme-2D
+- [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)
 - [L'appli *EndomorphiK*](#EndomorphiK)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *GAUSS*](#TCL)
