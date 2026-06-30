@@ -222,7 +222,7 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 
 
-Visualisation d'un endomorphisme défini par sa matrice, avec calcul de ses valeurs propres et vecteurs propres.
+Visualisation des effets d'un endomorphisme de $mathbb{R}^3$ défini par sa matrice, avec calcul et visualistation de ses valeurs propres et vecteurs propres.
 
 ***destination :*** Mathématiques CPGE-ECG
 
