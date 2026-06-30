@@ -18,10 +18,10 @@ avec l'aide de **Gemini 3.5** ou de **Claude Sonnet 4.6**
 - [L'appli *BRIQUE*](#BRIQUE)
 - [L'appli *Spirographe*](#Spirographe)
 - [L'appli *Declic*](#Declic)
-- [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
 - [L'appli *EndomorphiK*](#EndomorphiK)
+- [L'appli *MAJOR - Urne de Polya*](#MAJOR)
 - [L'appli *GAUSS*](#TCL)
 - [L'appli *ASIMOV-Simul-invers*](#ASIMOV-Simul-invers)
   
@@ -158,23 +158,7 @@ Problème dû à Emmanuel Ostenne, auteur d'un des premiers logiciels de géomé
 
 ---
 
-### MAJOR
-[*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/Polya/index.html" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
 
-
-*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
-
-<img width="650" height="250" alt="image" src="https://github.com/user-attachments/assets/08b2ea02-de77-41b1-8229-ce1b74bd544e" />
-
-
-Simulation Urne de Polya
-
-***destination :*** Mathématiques CPGE-ECG, probabilités discrètes
-
-[Retour en haut](#VibeCoding)
-
----
 
 ### EPIDEMIC
 [*Vibe-Codé* avec Gemini 3.5]
@@ -227,6 +211,23 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 Visualisation des effets d'un endomorphisme de $\mathbb{R}^3$ défini par sa matrice, avec calcul et visualistation de ses valeurs propres et vecteurs propres.
 
 ***destination :*** Mathématiques CPGE-ECG, algèbre linéaire
+
+[Retour en haut](#VibeCoding)
+
+---
+### MAJOR
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Polya/index.html" target="_blank" rel="noopener noreferrer">Urne de Polya </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="650" height="250" alt="image" src="https://github.com/user-attachments/assets/08b2ea02-de77-41b1-8229-ce1b74bd544e" />
+
+
+Simulation Urne de Polya
+
+***destination :*** Mathématiques CPGE-ECG, probabilités discrètes
 
 [Retour en haut](#VibeCoding)
 
