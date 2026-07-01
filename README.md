@@ -29,11 +29,12 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
 - [L'appli *Voyageur-de-commerce*](#Voyageur-de-commerce)
+- [L'appli *GAUSS*](#GAUSS)
 - [L'appli *SPECTRE-Diagonalisation*](#SPECTRE-Diagonalisation)
 - [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)
 - [L'appli *EndomorphiK*](#EndomorphiK)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
-- [L'appli *GAUSS*](#TCL)
+- 
 - [L'appli *ASIMOV-Simul-invers*](#ASIMOV-Simul-invers)
   
 ### Autres disciplines
@@ -330,6 +331,8 @@ Problème d'optimisation du "Voyageur de Commerce", simulant le tour de France d
 [Retour en haut](#VibeCoding)
 
 ---
+
+
 
 ### SPECTRE-Diagonalisation
 [*Vibe-Codé* avec Gemini 3.5]
