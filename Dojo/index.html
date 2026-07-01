@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Dojo — Grille de positionnement enseignant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f0e0c;--bg2:#1a1814;--bg3:#231f1a;--bg4:#2e2921;
+  --surface:#332d25;--surface2:#3d3629;
+  --gold:#d4a017;--gold-light:#f0c040;--gold-dim:#a07a10;
+  --text:#f0ead8;--text2:#c4b898;--text3:#8a7d6a;
+  --radius:12px;--radius-sm:8px;
+  --font-title:'Noto Serif JP',serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.6;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(212,160,23,.07) 0%,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.01) 60px,rgba(255,255,255,.01) 61px);pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* HEADER */
+.dojo-header{text-align:center;padding:2.5rem 2rem 1.8rem;border-bottom:1px solid rgba(212,160,23,.15);}
+.dojo-mon{width:72px;height:72px;margin:0 auto 1.2rem;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:1.8rem;color:var(--bg);box-shadow:0 0 0 4px rgba(212,160,23,.2),0 0 0 8px rgba(212,160,23,.08);}
+.dojo-header h1{font-family:var(--font-title);font-size:2.2rem;font-weight:700;color:var(--gold-light);letter-spacing:.02em;}
+.dojo-header p{color:var(--text2);font-size:.95rem;margin-top:.4rem;}
+.dojo-header-slim{padding:1rem 2rem;border-bottom:1px solid rgba(212,160,23,.1);}
+.dojo-header-slim h1{font-size:1.3rem;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:.85rem 1.8rem;border-radius:var(--radius);font-family:var(--font-body);font-size:1rem;font-weight:500;cursor:pointer;transition:all .2s;border:none;text-decoration:none;}
+.btn-primary{background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:var(--bg);font-weight:600;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-secondary{background:var(--surface);color:var(--text2);border:1px solid rgba(212,160,23,.2);}
+.btn-secondary:hover{background:var(--surface2);color:var(--text);}
+.btn-ghost{background:transparent;color:var(--gold);border:1.5px solid rgba(212,160,23,.4);}
+.btn-ghost:hover{background:rgba(212,160,23,.08);}
+
+/* WELCOME */
+#screen-welcome{align-items:center;justify-content:center;}
+.welcome-container{max-width:700px;width:100%;padding:2.5rem 2rem;text-align:center;}
+.welcome-kanji{font-family:var(--font-title);font-size:5rem;color:rgba(212,160,23,.12);line-height:1;margin-bottom:1rem;display:block;}
+.welcome-title{font-family:var(--font-title);font-size:2.8rem;font-weight:700;color:var(--gold-light);line-height:1.2;margin-bottom:.5rem;}
+.welcome-sub{font-size:1.1rem;color:var(--text2);margin-bottom:2.5rem;max-width:520px;margin-left:auto;margin-right:auto;}
+.belts-row{display:flex;justify-content:center;gap:8px;margin-bottom:2.5rem;flex-wrap:wrap;}
+.belt-chip{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
+.belt-band{width:42px;height:13px;border-radius:4px;position:relative;overflow:hidden;}
+.belt-band::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.2),transparent);}
+.flow-steps{display:flex;align-items:flex-start;justify-content:center;gap:0;margin-bottom:2.5rem;flex-wrap:wrap;}
+.flow-step{display:flex;flex-direction:column;align-items:center;gap:8px;width:110px;padding:0 6px;text-align:center;}
+.flow-step-num{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:600;color:var(--gold);}
+.flow-step-label{font-size:.76rem;color:var(--text3);line-height:1.3;}
+.flow-arrow{font-size:1.1rem;color:var(--text3);margin-top:9px;padding:0 2px;}
+
+/* NAME */
+#screen-name{align-items:center;justify-content:center;}
+.name-container{max-width:480px;width:100%;padding:2.5rem 2rem;text-align:center;}
+.name-container h2{font-family:var(--font-title);font-size:1.7rem;color:var(--gold-light);margin-bottom:.4rem;}
+.name-container p{color:var(--text2);margin-bottom:1.8rem;}
+.field-group{margin-bottom:1.2rem;text-align:left;}
+.field-group label{display:block;font-size:.82rem;font-weight:500;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.08em;}
+.field-group input{width:100%;padding:.7rem 1rem;background:var(--bg3);border:1px solid rgba(212,160,23,.2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:1rem;outline:none;transition:border-color .2s;}
+.field-group input:focus{border-color:var(--gold);}
+
+/* QUIZ */
+#screen-quiz{flex-direction:column;}
+.quiz-layout{display:flex;flex:1;min-height:calc(100vh - 180px);}
+.quiz-sidebar{width:270px;min-width:270px;background:var(--bg2);border-right:1px solid rgba(212,160,23,.1);padding:1.4rem;overflow-y:auto;position:sticky;top:0;max-height:100vh;}
+.sidebar-section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.8rem;}
+.domain-nav-item{display:flex;align-items:center;gap:10px;padding:.55rem .75rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;margin-bottom:3px;}
+.domain-nav-item:hover{background:var(--bg3);}
+.domain-nav-item.active{background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.2);}
+.domain-nav-dot{width:9px;height:9px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--text3);flex-shrink:0;transition:all .2s;}
+.domain-nav-dot.done{background:var(--gold);border-color:var(--gold);}
+.domain-nav-label{font-size:.83rem;color:var(--text2);line-height:1.3;}
+.domain-nav-item.active .domain-nav-label{color:var(--gold-light);}
+.sidebar-progress-wrap{margin-top:1.8rem;padding-top:1.4rem;border-top:1px solid rgba(212,160,23,.1);}
+.sidebar-progress-label{font-size:.76rem;color:var(--text3);margin-bottom:7px;display:flex;justify-content:space-between;}
+.progress-bar{height:4px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(to right,var(--gold-dim),var(--gold-light));border-radius:2px;transition:width .4s ease;}
+
+/* QUIZ MAIN */
+.quiz-main{flex:1;padding:2rem 3rem;overflow-y:auto;max-width:860px;}
+.domain-block{display:none;}
+.domain-block.active{display:block;}
+.domain-header{margin-bottom:1.8rem;padding-bottom:1.4rem;border-bottom:1px solid rgba(212,160,23,.12);}
+.domain-icon-big{font-size:2.2rem;margin-bottom:.6rem;}
+.domain-title{font-family:var(--font-title);font-size:1.5rem;color:var(--gold-light);margin-bottom:.3rem;}
+.domain-desc{color:var(--text2);font-size:.9rem;}
+
+/* LEVEL CARD — the main UI element */
+.level-card{background:var(--bg2);border:1px solid rgba(212,160,23,.1);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;transition:border-color .2s;}
+.level-card:hover{border-color:rgba(212,160,23,.22);}
+.level-card.selected{border-color:rgba(212,160,23,.5);}
+.level-card-header{display:flex;align-items:center;gap:12px;padding:1rem 1.2rem .8rem;}
+.belt-dot-lg{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.15);}
+.level-name{font-weight:600;font-size:1rem;color:var(--text);}
+.level-badge{font-size:.72rem;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:auto;}
+.badge-formation{background:rgba(212,160,23,.15);color:var(--gold);border:1px solid rgba(212,160,23,.3);}
+.badge-expert{background:rgba(100,100,100,.15);color:var(--text3);border:1px solid rgba(100,100,100,.2);}
+.level-indicator{padding:.3rem 1.2rem 1rem 3.2rem;font-size:.88rem;color:var(--text2);line-height:1.5;border-left:2px solid transparent;}
+.level-card.selected .level-indicator{color:var(--text);}
+
+/* Level select button */
+.level-select-btn{display:block;width:calc(100% - 2.4rem);margin:0 1.2rem 1rem;padding:.6rem 1rem;border-radius:var(--radius-sm);border:1.5px solid rgba(212,160,23,.2);background:transparent;color:var(--text3);font-family:var(--font-body);font-size:.85rem;cursor:pointer;transition:all .15s;text-align:left;}
+.level-select-btn:hover{border-color:rgba(212,160,23,.45);color:var(--text2);background:rgba(212,160,23,.05);}
+.level-select-btn.active{background:rgba(212,160,23,.14);border-color:var(--gold);color:var(--gold-light);font-weight:500;}
+
+/* Compact level selector */
+.domain-question{background:var(--bg2);border:1px solid rgba(212,160,23,.1);border-radius:var(--radius);padding:1.4rem 1.4rem 1rem;margin-bottom:1rem;}
+.domain-question-title{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:.3rem;}
+.domain-question-hint{font-size:.82rem;color:var(--text3);margin-bottom:1.2rem;font-style:italic;}
+.levels-grid{display:flex;flex-direction:column;gap:6px;}
+.lvl-btn{display:flex;align-items:flex-start;gap:12px;padding:.75rem 1rem;border-radius:var(--radius-sm);border:1.5px solid rgba(212,160,23,.12);background:var(--bg3);cursor:pointer;transition:all .15s;font-family:var(--font-body);text-align:left;width:100%;}
+.lvl-btn:hover{border-color:rgba(212,160,23,.35);background:rgba(212,160,23,.04);}
+.lvl-btn.selected{border-color:var(--gold);background:rgba(212,160,23,.1);}
+.lvl-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px;border:2px solid rgba(255,255,255,.2);}
+.lvl-text{flex:1;}
+.lvl-name{font-size:.88rem;font-weight:600;color:var(--text2);display:block;margin-bottom:2px;}
+.lvl-btn.selected .lvl-name{color:var(--gold-light);}
+.lvl-desc{font-size:.8rem;color:var(--text3);line-height:1.4;}
+.lvl-btn.selected .lvl-desc{color:var(--text2);}
+.lvl-formation-tag{font-size:.68rem;padding:1px 7px;border-radius:10px;background:rgba(212,160,23,.12);color:var(--gold-dim);border:1px solid rgba(212,160,23,.2);margin-left:6px;white-space:nowrap;}
+
+/* QUIZ NAV */
+.quiz-nav{display:flex;align-items:center;justify-content:space-between;margin-top:2rem;padding-top:1.4rem;border-top:1px solid rgba(212,160,23,.1);}
+
+/* RESULT */
+#screen-result{align-items:center;}
+.result-container{max-width:760px;width:100%;padding:2.5rem 2rem;}
+.result-header{text-align:center;margin-bottom:2.5rem;}
+.result-belt-circle{width:110px;height:110px;border-radius:50%;margin:0 auto 1.4rem;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 0 5px rgba(255,255,255,.05),0 0 40px rgba(212,160,23,.15);}
+.result-belt-circle::before{content:'';position:absolute;inset:7px;border-radius:50%;border:2px solid rgba(255,255,255,.25);}
+.result-belt-kanji{font-family:var(--font-title);font-size:2.6rem;color:white;text-shadow:0 2px 8px rgba(0,0,0,.5);position:relative;z-index:1;}
+.result-belt-name{font-family:var(--font-title);font-size:1.7rem;color:var(--gold-light);margin-bottom:.3rem;}
+.result-belt-desc{color:var(--text2);font-size:.92rem;max-width:420px;margin:0 auto;}
+.result-section{background:var(--bg2);border:1px solid rgba(212,160,23,.1);border-radius:var(--radius);padding:1.4rem;margin-bottom:1.5rem;}
+.result-section-title{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:1.1rem;}
+.domain-score-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.domain-score-label{font-size:.83rem;color:var(--text2);width:200px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.domain-score-bar-wrap{flex:1;height:7px;background:var(--surface);border-radius:4px;overflow:hidden;}
+.domain-score-bar{height:100%;border-radius:4px;background:linear-gradient(to right,var(--gold-dim),var(--gold-light));transition:width 1.2s ease;}
+.domain-score-val{font-size:.8rem;color:var(--gold);font-family:var(--font-mono);width:80px;text-align:right;flex-shrink:0;}
+.result-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:1.8rem;}
+
+/* RESUME */
+#screen-resume{align-items:center;justify-content:center;}
+.resume-container{max-width:520px;width:100%;padding:2.5rem 2rem;text-align:center;}
+.upload-zone{border:2px dashed rgba(212,160,23,.3);border-radius:var(--radius);padding:2.5rem 2rem;cursor:pointer;transition:all .2s;margin-bottom:1.4rem;}
+.upload-zone:hover{border-color:rgba(212,160,23,.6);background:rgba(212,160,23,.04);}
+.upload-zone.dragging{border-color:var(--gold);background:rgba(212,160,23,.08);}
+.upload-icon{font-size:2.8rem;margin-bottom:.8rem;opacity:.6;}
+
+/* FINAL */
+#screen-final{align-items:center;}
+.comparison-block{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem;}
+.comparison-card{background:var(--bg2);border:1px solid rgba(212,160,23,.1);border-radius:var(--radius);padding:1.2rem;text-align:center;}
+.comparison-card-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.8rem;}
+.comparison-belt-circle{width:60px;height:60px;border-radius:50%;margin:0 auto .8rem;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:1.3rem;color:white;}
+.comparison-belt-name{font-size:.95rem;font-weight:600;color:var(--text);}
+.delta-block{background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:var(--radius);padding:1.4rem;text-align:center;margin-bottom:1.5rem;}
+.delta-title{font-family:var(--font-title);font-size:1.25rem;color:var(--gold-light);margin-bottom:.4rem;}
+.delta-desc{color:var(--text2);font-size:.92rem;}
+
+/* FINAL DOMAIN SCORES — delta */
+.final-score-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.final-score-label{font-size:.83rem;color:var(--text2);width:200px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.final-score-bars{flex:1;display:flex;flex-direction:column;gap:3px;}
+.final-score-bar-init{height:4px;background:rgba(212,160,23,.25);border-radius:2px;}
+.final-score-bar-final{height:5px;border-radius:2px;background:linear-gradient(to right,#1d6b3a,#22c55e);}
+.final-score-delta{font-size:.78rem;font-family:var(--font-mono);width:56px;text-align:right;flex-shrink:0;}
+
+/* DIPLOMA MODAL */
+.diploma-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:2000;flex-direction:column;align-items:center;overflow-y:auto;}
+.diploma-overlay.open{display:flex;}
+.diploma-toolbar{position:sticky;top:0;background:#1a1814;border-bottom:1px solid rgba(212,160,23,0.3);padding:12px 24px;width:100%;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:10;}
+.diploma-toolbar .btn-dl{background:linear-gradient(135deg,#a07a10,#d4a017);color:#0f0e0c;font-weight:700;padding:10px 22px;border:none;border-radius:8px;cursor:pointer;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.diploma-toolbar .btn-print{background:transparent;color:#d4a017;font-weight:600;padding:10px 22px;border:1.5px solid rgba(212,160,23,0.5);border-radius:8px;cursor:pointer;font-size:14px;font-family:var(--font-body);}
+.diploma-toolbar .btn-close{background:transparent;color:#8a7d6a;font-weight:600;padding:10px 18px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;cursor:pointer;font-size:14px;font-family:var(--font-body);}
+.diploma-toolbar .hint{color:#8a7d6a;font-size:12px;}
+.diploma-toolbar .btn-dl:hover,.diploma-toolbar .btn-print:hover{opacity:0.85;}
+#diploma-canvas-wrap{padding:20px 0 40px;display:flex;justify-content:center;}
+#diploma-canvas-wrap canvas{max-width:calc(100vw - 40px);box-shadow:0 8px 60px rgba(0,0,0,0.9);}
+@media print{.diploma-toolbar{display:none!important;}.diploma-overlay{position:static;background:white;overflow:visible;}#diploma-canvas-wrap canvas{max-width:100%;box-shadow:none;}}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface2);border:1px solid rgba(212,160,23,.3);border-radius:var(--radius-sm);padding:.75rem 1.1rem;font-size:.88rem;color:var(--text);z-index:1000;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .quiz-layout{flex-direction:column;}
+  .quiz-sidebar{width:100%;min-width:0;position:static;max-height:none;display:flex;flex-wrap:wrap;gap:6px;padding:.9rem;border-right:none;border-bottom:1px solid rgba(212,160,23,.1);}
+  .sidebar-section-title{width:100%;}
+  .sidebar-progress-wrap{display:none;}
+  .domain-nav-item{padding:.35rem .6rem;}
+  .quiz-main{padding:1.2rem;}
+  .comparison-block{grid-template-columns:1fr;}
+  .dojo-header h1{font-size:1.7rem;}
+  .welcome-title{font-size:2rem;}
+  .welcome-kanji{font-size:3.5rem;}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.animate-in{animation:fadeUp .5s ease forwards;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ===== WELCOME ===== -->
+<div id="screen-welcome" class="screen active">
+  <div class="dojo-header">
+    <div class="dojo-mon">道</div>
+    <h1>IA Dojo</h1>
+    <p>Grille de positionnement — Compétences IA de l'enseignant</p>
+  </div>
+  <div class="welcome-container" style="margin:auto;">
+    <span class="welcome-kanji">知</span>
+    <h2 class="welcome-title">Quel est votre rang ?</h2>
+    <p class="welcome-sub">Évaluez vos compétences sur 5 domaines clés de l'IA, et progressez sur l'échelle des ceintures — du novice à l'expert.</p>
+
+    <div class="belts-row">
+      <div class="belt-chip"><div class="belt-band" style="background:#d8d5c8;"></div>⚪ Découverte</div>
+      <div class="belt-chip"><div class="belt-band" style="background:#f0c800;"></div>🟡 Initiation</div>
+      <div class="belt-chip"><div class="belt-band" style="background:#e07800;"></div>🟠 Application</div>
+      <div class="belt-chip"><div class="belt-band" style="background:#2e8b57;"></div>🟢 Maîtrise</div>
+      <div class="belt-chip"><div class="belt-band" style="background:#1a6fbf;"></div>🔵 Expertise</div>
+      <div class="belt-chip"><div class="belt-band" style="background:#7a4010;"></div>🟤 Perfectionnt</div>
+      <div class="belt-chip"><div class="belt-band" style="background:#1a1614;border:1px solid #444;"></div>⚫ Expert</div>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step"><div class="flow-step-num">1</div><div class="flow-step-label">Positionnement initial</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">2</div><div class="flow-step-label">Ceinture & bilan</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">3</div><div class="flow-step-label">Formation 2 jours</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">4</div><div class="flow-step-label">Positionnement final</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">5</div><div class="flow-step-label">Progression</div></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+      <button class="btn btn-primary" onclick="startNew()" style="font-size:1.05rem;padding:.95rem 2.5rem;">⚔ Commencer l'évaluation initiale</button>
+      <button class="btn btn-ghost" onclick="showResume()">📂 Charger mon fichier — évaluation finale</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NAME ===== -->
+<div id="screen-name" class="screen">
+  <div class="dojo-header"><div class="dojo-mon">道</div><h1>IA Dojo</h1></div>
+  <div class="name-container" style="margin:auto;">
+    <h2>Votre identité</h2>
+    <p>Ces informations figureront sur votre bilan de compétences.</p>
+    <div class="field-group"><label>Prénom &amp; Nom</label><input type="text" id="input-name" placeholder="Ex : Marie Dupont" autocomplete="name"></div>
+    <div class="field-group"><label>Établissement</label><input type="text" id="input-school" placeholder="Ex : Lycée Victor Hugo, Besançon"></div>
+    <div class="field-group"><label>Discipline enseignée</label><input type="text" id="input-subject" placeholder="Ex : Mathématiques, Français…"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:1.5rem;">
+      <button class="btn btn-secondary" onclick="showScreen('welcome')">← Retour</button>
+      <button class="btn btn-primary" onclick="startQuiz()">Démarrer l'évaluation →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="screen-quiz" class="screen">
+  <div class="dojo-header dojo-header-slim">
+    <h1>IA Dojo — Évaluation</h1>
+    <p id="quiz-user-label"></p>
+  </div>
+  <div class="quiz-layout">
+    <div class="quiz-sidebar">
+      <div class="sidebar-section-title">Domaines</div>
+      <div id="domain-nav"></div>
+      <div class="sidebar-progress-wrap">
+        <div class="sidebar-progress-label"><span>Progression</span><span id="progress-pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="quiz-main">
+      <div id="domain-blocks"></div>
+      <div class="quiz-nav">
+        <button class="btn btn-secondary" id="btn-prev" onclick="prevDomain()" style="visibility:hidden">← Précédent</button>
+        <button class="btn btn-primary" id="btn-next" onclick="nextDomain()">Suivant →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div id="screen-result" class="screen">
+  <div class="dojo-header"><div class="dojo-mon">道</div><h1>IA Dojo</h1><p>Résultat de positionnement</p></div>
+  <div class="result-container">
+    <div class="result-header animate-in">
+      <div class="result-belt-circle" id="res-belt-circle"><span class="result-belt-kanji" id="res-belt-kanji">白</span></div>
+      <h2 class="result-belt-name" id="res-belt-name">Ceinture Blanche</h2>
+      <p class="result-belt-desc" id="res-belt-desc"></p>
+    </div>
+    <div class="result-section">
+      <div class="result-section-title">Score par domaine</div>
+      <div id="domain-scores"></div>
+    </div>
+    <div class="result-section" id="res-detail-section">
+      <div class="result-section-title">Détail — niveau atteint</div>
+      <div id="domain-levels-detail"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="downloadResult()">⬇ Télécharger mon bilan initial</button>
+      <button class="btn btn-ghost" onclick="showScreen('welcome')">↩ Retour à l'accueil</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESUME ===== -->
+<div id="screen-resume" class="screen">
+  <div class="dojo-header"><div class="dojo-mon">道</div><h1>IA Dojo</h1><p>Repositionnement final — Fin de formation</p></div>
+  <div class="resume-container" style="margin:auto;">
+    <h2 style="font-family:var(--font-title);color:var(--gold-light);margin-bottom:.5rem;">Chargez votre bilan initial</h2>
+    <p style="color:var(--text2);margin-bottom:1.8rem;">Importez le fichier JSON téléchargé lors de votre positionnement de départ.</p>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📂</div>
+      <h3 style="font-size:1.05rem;margin-bottom:.4rem;">Glissez votre fichier ici</h3>
+      <p style="font-size:.88rem;color:var(--text3);">ou cliquez pour parcourir (.json)</p>
+    </div>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="loadFile(event)">
+    <button class="btn btn-secondary" onclick="showScreen('welcome')">← Retour</button>
+  </div>
+</div>
+
+<!-- ===== FINAL ===== -->
+<div id="screen-final" class="screen">
+  <div class="dojo-header"><div class="dojo-mon">道</div><h1>IA Dojo</h1><p>Bilan final de formation</p></div>
+  <div class="result-container">
+    <div id="final-user-info" style="text-align:center;margin-bottom:1.8rem;color:var(--text2);font-size:.92rem;"></div>
+    <div class="comparison-block">
+      <div class="comparison-card">
+        <div class="comparison-card-label">Avant formation</div>
+        <div class="comparison-belt-circle" id="final-belt-before"></div>
+        <div class="comparison-belt-name" id="final-belt-before-name"></div>
+      </div>
+      <div class="comparison-card">
+        <div class="comparison-card-label">Après formation</div>
+        <div class="comparison-belt-circle" id="final-belt-after"></div>
+        <div class="comparison-belt-name" id="final-belt-after-name"></div>
+      </div>
+    </div>
+    <div class="delta-block">
+      <div class="delta-title" id="delta-title"></div>
+      <div class="delta-desc" id="delta-desc"></div>
+    </div>
+    <div class="result-section">
+      <div class="result-section-title">Progression par domaine</div>
+      <div id="final-domain-scores"></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.8rem;">
+      <button class="btn btn-primary" onclick="downloadDiploma()">🎓 Télécharger mon diplôme PDF</button>
+      <button class="btn btn-ghost" onclick="showScreen('welcome')">↩ Retour</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<!-- DIPLOMA MODAL -->
+<div class="diploma-overlay" id="diploma-overlay">
+  <div class="diploma-toolbar">
+    <a id="diploma-dl-link" href="#" download="diplome.png" class="btn-dl">⬇ Télécharger (PNG)</a>
+    <button class="btn-print" onclick="saveDiplomaAsPdf()">📄 Télécharger en PDF</button>
+    <button class="btn-close" onclick="closeDiploma()">✕ Fermer</button>
+  </div>
+  <div id="diploma-canvas-wrap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// REFERENTIEL — 5 DOMAINES × 7 NIVEAUX
+// ============================================================
+const LEVELS = [
+  { id:1, key:'decouverte',        name:'Découverte',        emoji:'⚪', color:'#c8c5b8', bg:'#2e2c27', formation:true  },
+  { id:2, key:'initiation',        name:'Initiation',        emoji:'🟡', color:'#f0c800', bg:'#332e00', formation:true  },
+  { id:3, key:'application',       name:'Application',       emoji:'🟠', color:'#e07800', bg:'#332000', formation:true  },
+  { id:4, key:'maitrise',          name:'Maîtrise',          emoji:'🟢', color:'#2e8b57', bg:'#0f2a1a', formation:true  },
+  { id:5, key:'expertise',         name:'Expertise',         emoji:'🔵', color:'#1a6fbf', bg:'#0a2040', formation:true  },
+  { id:6, key:'perfectionnement',  name:'Perfectionnement',  emoji:'🟤', color:'#92400e', bg:'#2a1000', formation:false },
+  { id:7, key:'expert',            name:'Expert',            emoji:'⚫', color:'#d4a017', bg:'#0d0c0a', formation:false }
+];
+
+const DOMAINS = [
+  {
+    id:'culture',
+    icon:'🧠',
+    title:'Littéracie et Culture IA',
+    subtitle:'Comprendre',
+    desc:'Concepts fondamentaux, fonctionnement des systèmes d\'IA, limites et enjeux sociétaux',
+    levels: [
+      'Découvre les concepts de base, vocabulaire approximatif, représentations médiatiques',
+      'Différencie IA, ML et DL, cite 3-4 exemples d\'usage courant',
+      'Explique le fonctionnement du ML, schématise un système d\'IA, identifie les limites',
+      'Distingue approches symbolique, connexionniste et hybride, analyse biais et hallucinations',
+      'Comprend les principes des réseaux de neurones, évalue pertinence d\'une solution IA, anticipe les biais',
+      'Maîtrise architectures (transformers, CNN, RNN), positionne l\'IA dans l\'histoire des sciences cognitives',
+      'Maîtrise fondements mathématiques, analyse prospective, vulgarise pour différents publics, contribue à la recherche'
+    ]
+  },
+  {
+    id:'prompt',
+    icon:'✍️',
+    title:'Ingénierie du prompt & Pédagogie',
+    subtitle:'Pratiquer',
+    desc:'Formuler des requêtes efficaces, itérer, concevoir des ressources pédagogiques avec l\'IA',
+    levels: [
+      'Questions vagues, pas d\'itération, accepte les réponses sans questionnement',
+      'Prompts clairs et précis, reformule si nécessaire, 2-3 échanges par session',
+      'Prompts structurés (contexte + consigne + format), itère efficacement, vérifie les résultats',
+      'Maîtrise ROLE, CRAFT, few-shot, génère supports pédagogiques variés, adapte selon le public',
+      'Conçoit chaînes de prompts, exploite fonctionnalités avancées, crée templates réutilisables',
+      'Workflows documentés combinant plusieurs outils IA, bibliothèque organisée, forme les collègues',
+      'Développe méthodologies innovantes, évalue modèles, contribue aux communautés de pratique, publications'
+    ]
+  },
+  {
+    id:'ethique',
+    icon:'⚖️',
+    title:'Éthique, Droit et Esprit critique',
+    subtitle:'Protéger',
+    desc:'RGPD, IA Act, droits d\'auteur, biais algorithmiques, vérification et fact-checking',
+    levels: [
+      'Pas de questionnement éthique, partage données sensibles, attribution inexistante',
+      'Identifie risques de base (confidentialité, plagiat), évite partage données élèves',
+      'Connaît RGPD et IA Act, comprend l\'enjeu de souveraineté numérique, vérifie faits importants, reconnaît hallucinations évidentes',
+      'Anonymise données, cite sources IA, détecte biais simples, comprend l\'impact environnemental de l\'IA, vérifie par recoupement',
+      'Applique RGPD systématiquement, croise 2-3 sources, évalue qualité productions IA',
+      'Protocole de vérification rigoureux, contribue à chartes d\'usage, forme à l\'esprit critique',
+      'Analyses éthiques approfondies, expertise institutionnelle, recherche académique, débats publics'
+    ]
+  },
+  {
+    id:'productivite',
+    icon:'🛠️',
+    title:'Travail de l\'enseignant',
+    subtitle:'Productivité et préparation',
+    desc:'Intégration de l\'IA dans la préparation de cours, différenciation, gain de temps',
+    levels: [
+      'Pas d\'usage professionnel pour la préparation de cours',
+      'Teste occasionnellement, tâches ponctuelles (reformulation, idées d\'activités)',
+      '1-2 usages par semaine, génère supports basiques, adapte productions IA',
+      'Usage régulier, génère exercices et évaluations, utilise pour différenciation',
+      'Intègre l\'IA au workflow quotidien, productions diversifiées, gain de temps mesurable',
+      'Workflows optimisés, bibliothèque de ressources réutilisables, partage méthodologies avec collègues',
+      'Méthodologies innovantes documentées, optimisation complète du système, forme enseignants, reconnaissance institutionnelle'
+    ]
+  },
+  {
+    id:'classe',
+    icon:'📚',
+    title:'L\'IA au service des apprentissages',
+    subtitle:'En classe avec les élèves',
+    desc:'Concevoir et animer des activités pédagogiques intégrant l\'IA, évaluer l\'impact',
+    levels: [
+      'N\'envisage pas l\'usage en classe, représentations négatives ou floues',
+      'Identifie usages potentiels, sensibilise élèves aux limites de l\'IA',
+      'Teste ponctuellement en classe (démonstration, expérimentation encadrée)',
+      'Conçoit activités pédagogiques simples intégrant l\'IA, accompagne usage raisonné',
+      'Plusieurs séances réussies, adapte selon niveau élèves, évalue impact sur apprentissages',
+      'Séquences complètes documentées, développe esprit critique élèves, projets interdisciplinaires',
+      'Dispositifs innovants, forme enseignants, recherche en didactique, rayonnement institutionnel'
+    ]
+  }
+];
+
+// Belt system: based on average level index (1-7)
+// Calibrage : basé sur le niveau MÉDIAN parmi les 5 domaines (1-7)
+// Blanche=1, Jaune=2, Orange=3, Verte=4, Bleue=5, Marron=6, Noire=7
+const BELTS = [
+  { thresh:1, name:'Ceinture Blanche',        kanji:'白', color:'#c8c5b8', bg:'linear-gradient(135deg,#3a3730,#2a2820)', desc:'Vous débutez dans l\'univers de l\'IA. La formation va tout changer !' },
+  { thresh:2, name:'Ceinture Jaune',          kanji:'黄', color:'#f0c800', bg:'linear-gradient(135deg,#4a3a00,#332a00)', desc:'Des premières notions s\'installent. L\'apprentissage commence vraiment.' },
+  { thresh:3, name:'Ceinture Orange',         kanji:'橙', color:'#e07800', bg:'linear-gradient(135deg,#4a2800,#321a00)', desc:'Vous avancez bien ! Des fondations solides se mettent en place.' },
+  { thresh:4, name:'Ceinture Verte',          kanji:'緑', color:'#2e8b57', bg:'linear-gradient(135deg,#153d26,#0a2018)', desc:'Bonne maîtrise des usages fondamentaux. Vous intégrez l\'IA en classe.' },
+  { thresh:5, name:'Ceinture Bleue',          kanji:'青', color:'#1a6fbf', bg:'linear-gradient(135deg,#0d2a50,#071830)', desc:'Vous utilisez l\'IA de façon autonome et réfléchie dans vos pratiques.' },
+  { thresh:6, name:'Ceinture Marron',         kanji:'茶', color:'#92400e', bg:'linear-gradient(135deg,#3a1a06,#200e00)', desc:'Niveau avancé. Vous êtes une ressource pour vos collègues.' },
+  { thresh:7, name:'Ceinture Noire',          kanji:'黒', color:'#d4a017', bg:'linear-gradient(135deg,#1a1612,#0a0806)', desc:'Expert·e reconnu·e. Vous formez, innovez et contribuez au domaine.' }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  mode: 'initial',
+  user: { name:'', school:'', subject:'' },
+  currentDomain: 0,
+  answers: {}, // { domainId: levelIndex 1-7 }
+  initialData: null
+};
+
+// La ceinture = niveau médian parmi les domaines répondus
+// Ex: [5,5,5,6,6] → médiane=5 → Ceinture Bleue ✓
+function getMedian(answers) {
+  const vals = Object.values(answers).filter(v=>v>0).sort((a,b)=>a-b);
+  if (!vals.length) return 0;
+  const mid = Math.floor(vals.length/2);
+  return vals.length%2===0 ? (vals[mid-1]+vals[mid])/2 : vals[mid];
+}
+function getBelt(answers) {
+  const med = getMedian(answers);
+  const floored = Math.floor(med); // niveau dominant
+  for (let i=BELTS.length-1; i>=0; i--) {
+    if (floored >= BELTS[i].thresh) return BELTS[i];
+  }
+  return BELTS[0];
+}
+// computeAvg reste utile pour l'affichage des scores
+function computeAvg(answers) {
+  const vals = Object.values(answers).filter(v=>v>0);
+  if (!vals.length) return 0;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function getLevelName(val) {
+  const l = LEVELS[val-1];
+  return l ? l.emoji+' '+l.name : '';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function startNew() {
+  state.mode='initial'; state.answers={}; state.currentDomain=0;
+  showScreen('name');
+}
+function showResume() { showScreen('resume'); }
+
+function startQuiz() {
+  const name = document.getElementById('input-name').value.trim();
+  if (!name) { showToast('Merci de saisir votre nom 😊'); return; }
+  state.user.name = name;
+  state.user.school = document.getElementById('input-school').value.trim();
+  state.user.subject = document.getElementById('input-subject').value.trim();
+  buildQuiz();
+  showScreen('quiz');
+  document.getElementById('quiz-user-label').textContent = name + (state.user.school ? ' — '+state.user.school : '');
+}
+
+// ============================================================
+// BUILD QUIZ
+// ============================================================
+function buildQuiz() {
+  const nav = document.getElementById('domain-nav');
+  const blocks = document.getElementById('domain-blocks');
+  nav.innerHTML=''; blocks.innerHTML='';
+
+  DOMAINS.forEach((domain, i) => {
+    // Nav
+    const ni = document.createElement('div');
+    ni.className='domain-nav-item'+(i===0?' active':'');
+    ni.id='nav-'+domain.id;
+    ni.onclick=()=>goToDomain(i);
+    ni.innerHTML=`<div class="domain-nav-dot" id="dot-${domain.id}"></div><div class="domain-nav-label">${domain.icon} ${domain.title}</div>`;
+    nav.appendChild(ni);
+
+    // Block
+    const block = document.createElement('div');
+    block.className='domain-block'+(i===0?' active':'');
+    block.id='block-'+domain.id;
+
+    const levelsHtml = LEVELS.map((lvl, li) => {
+      const isFormation = lvl.formation;
+      const tag = isFormation ? '<span class="lvl-formation-tag">objectif formation</span>' : '';
+      return `<button class="lvl-btn" data-domain="${domain.id}" data-val="${lvl.id}" onclick="setAnswer('${domain.id}',${lvl.id},this)">
+        <div class="lvl-dot" style="background:${lvl.color};"></div>
+        <div class="lvl-text">
+          <span class="lvl-name">${lvl.emoji} ${lvl.name}${tag}</span>
+          <span class="lvl-desc">${domain.levels[li]}</span>
+        </div>
+      </button>`;
+    }).join('');
+
+    block.innerHTML=`
+      <div class="domain-header">
+        <div class="domain-icon-big">${domain.icon}</div>
+        <h2 class="domain-title">${domain.title} <span style="font-size:.85rem;color:var(--text3);font-family:var(--font-body);font-weight:400;">— ${domain.subtitle}</span></h2>
+        <p class="domain-desc">${domain.desc}</p>
+      </div>
+      <div class="domain-question">
+        <div class="domain-question-title">Quel niveau décrit le mieux votre pratique actuelle ?</div>
+        <div class="domain-question-hint">Sélectionnez l'indicateur qui correspond le mieux à ce que vous faites réellement — pas ce que vous aimeriez faire.</div>
+        <div class="levels-grid">${levelsHtml}</div>
+      </div>`;
+    blocks.appendChild(block);
+  });
+
+  goToDomain(0);
+}
+
+function setAnswer(domainId, val, btn) {
+  state.answers[domainId] = val;
+  const grid = btn.closest('.levels-grid');
+  grid.querySelectorAll('.lvl-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const dot = document.getElementById('dot-'+domainId);
+  if (dot) dot.classList.add('done');
+  updateProgress();
+}
+
+function goToDomain(i) {
+  document.querySelectorAll('.domain-block').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.domain-nav-item').forEach(b=>b.classList.remove('active'));
+  state.currentDomain=i;
+  document.getElementById('block-'+DOMAINS[i].id).classList.add('active');
+  document.getElementById('nav-'+DOMAINS[i].id).classList.add('active');
+  document.getElementById('btn-prev').style.visibility = i===0?'hidden':'visible';
+  const btnNext = document.getElementById('btn-next');
+  const isLast = i===DOMAINS.length-1;
+  btnNext.textContent = isLast ? '✅ Terminer l\'évaluation' : 'Suivant →';
+  btnNext.onclick = isLast ? finishQuiz : nextDomain;
+  window.scrollTo(0,0);
+}
+function nextDomain() { if(state.currentDomain<DOMAINS.length-1) goToDomain(state.currentDomain+1); }
+function prevDomain() { if(state.currentDomain>0) goToDomain(state.currentDomain-1); }
+function updateProgress() {
+  const pct = Math.round((Object.keys(state.answers).length/DOMAINS.length)*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-pct').textContent=pct+'%';
+}
+
+// ============================================================
+// FINISH
+// ============================================================
+function finishQuiz() {
+  if (Object.keys(state.answers).length < DOMAINS.length) {
+    showToast('Merci de vous positionner sur chaque domaine 🙏');
+    return;
+  }
+  if (state.mode==='final' && state.initialData) showFinalResultScreen();
+  else showResultScreen();
+}
+
+function showResultScreen() {
+  const avg = computeAvg(state.answers);
+  const belt = getBelt(state.answers);
+  // Belt circle
+  const circle = document.getElementById('res-belt-circle');
+  circle.style.background = belt.bg;
+  document.getElementById('res-belt-kanji').textContent = belt.kanji;
+  document.getElementById('res-belt-name').textContent = belt.name;
+  document.getElementById('res-belt-desc').textContent = belt.desc;
+  // Domain scores
+  document.getElementById('domain-scores').innerHTML = DOMAINS.map(d=>{
+    const val = state.answers[d.id]||0;
+    const pct = Math.round((val/7)*100);
+    const lvl = LEVELS[val-1];
+    return `<div class="domain-score-row">
+      <div class="domain-score-label">${d.icon} ${d.title}</div>
+      <div class="domain-score-bar-wrap"><div class="domain-score-bar" style="width:${pct}%"></div></div>
+      <div class="domain-score-val">${lvl?lvl.emoji+' '+lvl.name:'-'}</div>
+    </div>`;
+  }).join('');
+  // Detail
+  document.getElementById('domain-levels-detail').innerHTML = DOMAINS.map(d=>{
+    const val = state.answers[d.id]||0;
+    const lvl = LEVELS[val-1];
+    const indicator = d.levels[val-1]||'';
+    return `<div style="margin-bottom:1rem;padding:.9rem 1rem;background:var(--bg3);border-radius:var(--radius-sm);border-left:3px solid ${lvl?lvl.color:'#444'};">
+      <div style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;">${d.icon} ${d.title}</div>
+      <div style="font-size:.9rem;font-weight:600;color:${lvl?lvl.color:'var(--text2)'};margin-bottom:4px;">${lvl?lvl.emoji+' '+lvl.name:'-'}</div>
+      <div style="font-size:.83rem;color:var(--text2);line-height:1.5;">${indicator}</div>
+    </div>`;
+  }).join('');
+  showScreen('result');
+}
+
+function lighten(hex) {
+  const n=parseInt(hex.replace('#',''),16);
+  const r=Math.min(255,((n>>16)&0xff)+50),g=Math.min(255,((n>>8)&0xff)+50),b=Math.min(255,(n&0xff)+50);
+  return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+}
+
+// ============================================================
+// DOWNLOAD / UPLOAD
+// ============================================================
+function downloadResult() {
+  const avg = computeAvg(state.answers);
+  const belt = getBelt(state.answers);
+  const domainDetails = {};
+  DOMAINS.forEach(d=>{
+    const val=state.answers[d.id]||0;
+    domainDetails[d.id]={label:d.title,levelIndex:val,levelName:val?LEVELS[val-1].name:'',indicator:val?d.levels[val-1]:''};
+  });
+  const data={version:'2.0',timestamp:new Date().toISOString(),phase:'initial',user:state.user,belt:{name:belt.name,kanji:belt.kanji,avg:avg.toFixed(2)},answers:state.answers,domainDetails};
+  _downloadJSON(data, `IA_Dojo_Initial_${(state.user.name||'stagiaire').replace(/[^a-z0-9]/gi,'_')}_${new Date().toISOString().slice(0,10)}.json`);
+  showToast('📥 Bilan initial téléchargé !');
+}
+
+function _downloadJSON(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 200);
+}
+
+function loadFile(event) {
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try {
+      const data=JSON.parse(e.target.result);
+      if(!data.answers||!data.user){showToast('❌ Fichier invalide');return;}
+      state.initialData=data;state.user=data.user;state.mode='final';state.answers={};
+      document.getElementById('input-name').value=data.user.name||'';
+      document.getElementById('input-school').value=data.user.school||'';
+      document.getElementById('input-subject').value=data.user.subject||'';
+      showToast('✅ Données chargées — démarrage du test final !');
+      setTimeout(()=>{buildQuiz();showScreen('quiz');document.getElementById('quiz-user-label').textContent=(data.user.name||'')+ ' — Évaluation finale';},900);
+    } catch(err){showToast('❌ Impossible de lire le fichier');}
+  };
+  reader.readAsText(file);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const zone=document.getElementById('upload-zone');
+  if(!zone)return;
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragging');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('dragging'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('dragging');const f=e.dataTransfer.files[0];if(f)loadFile({target:{files:[f]}});});
+});
+
+function showFinalResultScreen() {
+  const initAns=state.initialData.answers;
+  const finalAns=state.answers;
+  const initAvg=computeAvg(initAns);
+  const finalAvg=computeAvg(finalAns);
+  const initBelt=getBelt(initAns);
+  const finalBelt=getBelt(finalAns);
+
+  document.getElementById('final-user-info').innerHTML=`<strong>${state.user.name}</strong>${state.user.school?' · '+state.user.school:''}${state.user.subject?' · '+state.user.subject:''}`;
+
+  const bc=document.getElementById('final-belt-before');
+  bc.style.background=initBelt.bg;bc.textContent=initBelt.kanji;
+  document.getElementById('final-belt-before-name').textContent=initBelt.name;
+  const ac=document.getElementById('final-belt-after');
+  ac.style.background=finalBelt.bg;ac.textContent=finalBelt.kanji;
+  document.getElementById('final-belt-after-name').textContent=finalBelt.name;
+
+  const delta=finalAvg-initAvg;
+  const beltDelta=BELTS.indexOf(finalBelt)-BELTS.indexOf(initBelt);
+  let t,d;
+  if(delta<=0){t='🤔 Résultat stable';d=`Score moyen : ${finalAvg.toFixed(1)}/7. La formation a permis une prise de conscience — la progression viendra avec la pratique !`;}
+  else if(beltDelta===0){t='📈 Progression dans votre ceinture !';d=`+${delta.toFixed(1)} point(s) de moyenne. Vous avez progressé dans votre ${finalBelt.name}.`;}
+  else{t=`🎉 Vous avez progressé de ${beltDelta} ceinture${beltDelta>1?'s':''} !`;d=`De "${initBelt.name}" à "${finalBelt.name}" — gain de +${delta.toFixed(1)} points. Bravo pour votre engagement !`;}
+  document.getElementById('delta-title').textContent=t;
+  document.getElementById('delta-desc').textContent=d;
+
+  document.getElementById('final-domain-scores').innerHTML=DOMAINS.map(dom=>{
+    const iv=initAns[dom.id]||0,fv=finalAns[dom.id]||0;
+    const dd=fv-iv;
+    const sign=dd>0?'+':'';
+    const col=dd>0.5?'#22c55e':dd<-0.5?'#ef4444':'#888';
+    const iLvl=LEVELS[iv-1],fLvl=LEVELS[fv-1];
+    return `<div class="final-score-row">
+      <div class="final-score-label">${dom.icon} ${dom.title}</div>
+      <div class="final-score-bars">
+        <div class="final-score-bar-init" style="width:${Math.round((iv/7)*100)}%;"></div>
+        <div class="final-score-bar-final" style="width:${Math.round((fv/7)*100)}%;"></div>
+      </div>
+      <div class="final-score-delta" style="color:${col};">${sign}${dd} niv.<br><span style="font-size:.7rem;color:var(--text3);">${fLvl?fLvl.emoji:''} ${fLvl?fLvl.name:''}</span></div>
+    </div>`;
+  }).join('');
+
+  showScreen('final');
+}
+
+function downloadDiploma() {
+  const initAns = state.initialData.answers;
+  const finalAns = state.answers;
+  const initBelt = getBelt(initAns);
+  const finalBelt = getBelt(finalAns);
+  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+  function hexToRgb(hex){
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // Build diploma as canvas 794×1123 px (A4 @96dpi)
+  const canvas = document.createElement('canvas');
+  const scale = 2; // retina
+  canvas.width = 794 * scale;
+  canvas.height = 1123 * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  const W=794, H=1123;
+
+  // --- FOND ---
+  ctx.fillStyle = '#0f0e0c';
+  ctx.fillRect(0,0,W,H);
+
+  // Motif grain subtil
+  for(let i=0;i<H;i+=61) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.012)';
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();
+  }
+
+  // Bordure dorée double
+  ctx.strokeStyle='#d4a017'; ctx.lineWidth=3;
+  ctx.strokeRect(20,20,W-40,H-40);
+  ctx.strokeStyle='rgba(180,130,15,0.5)'; ctx.lineWidth=1;
+  ctx.strokeRect(28,28,W-56,H-56);
+
+  // Coins décoratifs
+  function drawCorner(x,y,dx,dy){
+    ctx.strokeStyle='#d4a017'; ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(x+dx*40,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*40);ctx.stroke();
+    ctx.strokeStyle='rgba(212,160,23,0.35)'; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x+dx*55,y+dy*8);ctx.lineTo(x+dx*8,y+dy*8);ctx.lineTo(x+dx*8,y+dy*55);ctx.stroke();
+  }
+  drawCorner(20,20,1,1); drawCorner(W-20,20,-1,1);
+  drawCorner(20,H-20,1,-1); drawCorner(W-20,H-20,-1,-1);
+
+  // --- MÉDAILLON ---
+  const cx=W/2, cy=88;
+  // Halo
+  const halo=ctx.createRadialGradient(cx,cy,10,cx,cy,50);
+  halo.addColorStop(0,'rgba(212,160,23,0.25)');halo.addColorStop(1,'rgba(212,160,23,0)');
+  ctx.fillStyle=halo; ctx.beginPath();ctx.arc(cx,cy,50,0,Math.PI*2);ctx.fill();
+  // Cercle or
+  ctx.fillStyle='#d4a017'; ctx.beginPath();ctx.arc(cx,cy,36,0,Math.PI*2);ctx.fill();
+  // Cercle intérieur
+  ctx.fillStyle='#0f0e0c'; ctx.beginPath();ctx.arc(cx,cy,28,0,Math.PI*2);ctx.fill();
+  // Texte 道
+  ctx.fillStyle='#f0c040';
+  ctx.font='bold 30px serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('道',cx,cy+2);
+
+  // --- TITRE ---
+  ctx.fillStyle='#f0c040';
+  ctx.font='bold 52px Georgia, serif';
+  ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  ctx.fillText('IA DOJO',W/2,180);
+
+  ctx.fillStyle='#c4b898';
+  ctx.font='13px Arial, sans-serif';
+  ctx.letterSpacing='3px';
+  ctx.fillText('CERTIFICAT DE COMPÉTENCES  —  FORMATION IA',W/2,204);
+  ctx.letterSpacing='0px';
+
+  // Ligne
+  const grad1=ctx.createLinearGradient(60,0,W-60,0);
+  grad1.addColorStop(0,'rgba(212,160,23,0)');grad1.addColorStop(0.5,'#d4a017');grad1.addColorStop(1,'rgba(212,160,23,0)');
+  ctx.strokeStyle=grad1; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(60,218);ctx.lineTo(W-60,218);ctx.stroke();
+
+  // --- NOM ---
+  ctx.fillStyle='#c4b898'; ctx.font='15px Arial, sans-serif';
+  ctx.fillText('Ce certificat est décerné à',W/2,250);
+
+  ctx.fillStyle='#f0ead8'; ctx.font='bold 38px Georgia, serif';
+  ctx.fillText(state.user.name||'', W/2,295);
+
+  if(state.user.school||state.user.subject){
+    ctx.fillStyle='#8a7d6a'; ctx.font='italic 14px Arial, sans-serif';
+    const sub=[state.user.subject,state.user.school].filter(Boolean).join('  ·  ');
+    ctx.fillText(sub,W/2,320);
+  }
+
+  // --- CEINTURE FINALE ---
+  const beltY=344;
+  // Badge ceinture (fond + reflet)
+  const bgrad=ctx.createLinearGradient(W/2-150,beltY,W/2+150,beltY+64);
+  bgrad.addColorStop(0, hexToRgb(finalBelt.color));
+  bgrad.addColorStop(1, 'rgba(0,0,0,0.35)');
+  roundRect(ctx, W/2-150,beltY,300,64,12, bgrad);
+  const shine=ctx.createLinearGradient(0,beltY,0,beltY+32);
+  shine.addColorStop(0,'rgba(255,255,255,0.18)');shine.addColorStop(1,'rgba(255,255,255,0)');
+  roundRect(ctx, W/2-150,beltY,300,32,12, shine);
+
+  // Pastille kanji gauche
+  const kCx = W/2-110, kCy = beltY+32, kR = 24;
+  // Cercle or extérieur
+  ctx.beginPath(); ctx.arc(kCx, kCy, kR, 0, Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=1.5;
+  ctx.stroke();
+  // Kanji
+  ctx.fillStyle='white';
+  ctx.font='bold 26px serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(finalBelt.kanji, kCx, kCy+1);
+  ctx.textBaseline='alphabetic';
+
+  // Nom ceinture (décalé à droite de la pastille)
+  ctx.fillStyle='rgba(0,0,0,0.80)';
+  ctx.font='bold 21px Arial, sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText(finalBelt.name.toUpperCase(), W/2+18, beltY+40);
+
+  // Description
+  ctx.fillStyle='#c4b898'; ctx.font='italic 13px Arial, sans-serif';
+  wrapText(ctx, finalBelt.desc, W/2, beltY+82, 500, 18);
+
+  // --- PROGRESSION ---
+  const sepY=440;
+  const sep2=ctx.createLinearGradient(60,0,W-60,0);
+  sep2.addColorStop(0,'rgba(212,160,23,0)');sep2.addColorStop(0.5,'rgba(212,160,23,0.5)');sep2.addColorStop(1,'rgba(212,160,23,0)');
+  ctx.strokeStyle=sep2; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(60,sepY);ctx.lineTo(W-60,sepY);ctx.stroke();
+
+  ctx.fillStyle='#d4a017'; ctx.font='bold 13px Arial, sans-serif';
+  ctx.letterSpacing='2px';
+  ctx.fillText('PROGRESSION PAR DOMAINE',W/2,sepY+22);
+  ctx.letterSpacing='0px';
+
+  // Barres par domaine
+  const barStartY=sepY+42;
+  const barLeftX=60, labelW=230, barX=barLeftX+labelW+10, barW=W-barX-90, rowH=52;
+
+  DOMAINS.forEach((dom,i)=>{
+    const y=barStartY + i*rowH;
+    const iv=initAns[dom.id]||0, fv=finalAns[dom.id]||0;
+    const iLvl=LEVELS[iv-1], fLvl=LEVELS[fv-1];
+
+    // Fond domaine alterné
+    if(i%2===0){ctx.fillStyle='rgba(255,255,255,0.02)';ctx.fillRect(barLeftX-5,y-6,W-barLeftX*2+10,rowH-2);}
+
+    // Icône + label
+    ctx.fillStyle='#e0d8c4'; ctx.font='bold 12px Arial, sans-serif';
+    ctx.textAlign='left';
+    ctx.fillText(dom.icon+' '+dom.title, barLeftX, y+8);
+    ctx.fillStyle='#6a5f50'; ctx.font='italic 11px Arial, sans-serif';
+    ctx.fillText(dom.subtitle, barLeftX+18, y+22);
+    ctx.textAlign='center';
+
+    // Barre fond
+    ctx.fillStyle='#2e2921';
+    ctx.beginPath();ctx.roundRect(barX, y, barW, 10, 5);ctx.fill();
+
+    // Barre initiale
+    if(iv>0){
+      ctx.fillStyle='rgba(160,120,50,0.7)';
+      const w=Math.round((iv/7)*barW);
+      ctx.beginPath();ctx.roundRect(barX,y,w,10,5);ctx.fill();
+    }
+    // Barre finale (par-dessus, plus claire)
+    if(fv>0){
+      const gBar=ctx.createLinearGradient(barX,0,barX+barW,0);
+      gBar.addColorStop(0,'#1d6b3a');gBar.addColorStop(1,'#34d36a');
+      const w=Math.round((fv/7)*barW);
+      ctx.fillStyle=gBar;
+      ctx.beginPath();ctx.roundRect(barX,y+12,w,7,3);ctx.fill();
+    }
+
+    // Labels niveaux à droite
+    ctx.textAlign='left';
+    if(iLvl){ctx.fillStyle='#a07830';ctx.font='11px Arial';ctx.fillText(iLvl.emoji+' '+iLvl.name, barX+barW+8, y+9);}
+    if(fLvl){ctx.fillStyle='#34d36a';ctx.font='bold 11px Arial';ctx.fillText(fLvl.emoji+' '+fLvl.name, barX+barW+8, y+23);}
+    ctx.textAlign='center';
+  });
+
+  // Légende
+  const legY = barStartY + DOMAINS.length*rowH + 8;
+  ctx.textAlign='left';
+  ctx.fillStyle='rgba(160,120,50,0.7)'; ctx.fillRect(barX,legY,30,8);
+  ctx.fillStyle='#a07830'; ctx.font='11px Arial'; ctx.fillText('Avant formation',barX+35,legY+8);
+  const gleg=ctx.createLinearGradient(barX+170,0,barX+200,0);
+  gleg.addColorStop(0,'#1d6b3a');gleg.addColorStop(1,'#34d36a');
+  ctx.fillStyle=gleg; ctx.fillRect(barX+170,legY,30,8);
+  ctx.fillStyle='#34d36a'; ctx.fillText('Après formation',barX+205,legY+8);
+  ctx.textAlign='center';
+
+  // --- AVANT / APRÈS ---
+  const compY2 = legY + 30;
+  const sep3=ctx.createLinearGradient(60,0,W-60,0);
+  sep3.addColorStop(0,'rgba(212,160,23,0)');sep3.addColorStop(0.5,'rgba(212,160,23,0.4)');sep3.addColorStop(1,'rgba(212,160,23,0)');
+  ctx.strokeStyle=sep3;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(60,compY2);ctx.lineTo(W-60,compY2);ctx.stroke();
+
+  // Badge avant — avec pastille kanji
+  roundRect(ctx, 60, compY2+8, 255, 44, 9, hexToRgb(initBelt.color));
+  // pastille kanji
+  ctx.beginPath(); ctx.arc(83, compY2+30, 17, 0, Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='white'; ctx.font='bold 18px serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(initBelt.kanji, 83, compY2+31);
+  ctx.textBaseline='alphabetic';
+  ctx.fillStyle='rgba(0,0,0,0.70)'; ctx.font='bold 13px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('AVANT', 186, compY2+24);
+  ctx.font='bold 14px Arial';
+  ctx.fillText(initBelt.name, 186, compY2+42);
+
+  // Flèche
+  ctx.fillStyle='#d4a017'; ctx.font='bold 26px Arial';
+  ctx.fillText('→', W/2, compY2+35);
+
+  // Badge après — avec pastille kanji
+  roundRect(ctx, W-315, compY2+8, 255, 44, 9, hexToRgb(finalBelt.color));
+  ctx.beginPath(); ctx.arc(W-292, compY2+30, 17, 0, Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='white'; ctx.font='bold 18px serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(finalBelt.kanji, W-292, compY2+31);
+  ctx.textBaseline='alphabetic';
+  ctx.fillStyle='rgba(0,0,0,0.70)'; ctx.font='bold 13px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('APRÈS', W-189, compY2+24);
+  ctx.font='bold 14px Arial';
+  ctx.fillText(finalBelt.name, W-189, compY2+42);
+
+  // --- PIED DE PAGE ---
+  const footY = H-70;
+  const sep4=ctx.createLinearGradient(60,0,W-60,0);
+  sep4.addColorStop(0,'rgba(212,160,23,0)');sep4.addColorStop(0.5,'#d4a017');sep4.addColorStop(1,'rgba(212,160,23,0)');
+  ctx.strokeStyle=sep4;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(60,footY);ctx.lineTo(W-60,footY);ctx.stroke();
+
+  ctx.fillStyle='#6a5f50'; ctx.font='12px Arial';
+  ctx.fillText('Formation IA — 2 jours  ·  Délivré le '+today, W/2, footY+22);
+  ctx.fillStyle='rgba(212,160,23,0.4)'; ctx.font='11px Arial';
+  ctx.fillText('IA Dojo  ·  Grille de positionnement enseignant', W/2, footY+40);
+
+  // --- AFFICHAGE DANS LA MODALE ---
+  const wrap = document.getElementById('diploma-canvas-wrap');
+  wrap.innerHTML = '';
+  // Cloner le canvas pour l'affichage (scale visuel 1x)
+  const display = document.createElement('canvas');
+  display.width = canvas.width;
+  display.height = canvas.height;
+  display.style.width = Math.round(canvas.width / scale) + 'px';
+  display.style.height = Math.round(canvas.height / scale) + 'px';
+  display.getContext('2d').drawImage(canvas, 0, 0);
+  wrap.appendChild(display);
+
+  // Lien de téléchargement PNG
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const safeName = (state.user.name||'stagiaire').replace(/[^a-z0-9]/gi,'_');
+    const link = document.getElementById('diploma-dl-link');
+    link.href = url;
+    link.download = `Diplome_IA_Dojo_${safeName}_${new Date().toISOString().slice(0,10)}.png`;
+  }, 'image/png');
+
+  // Ouvrir la modale
+  document.getElementById('diploma-overlay').classList.add('open');
+  showToast('🎓 Diplôme généré !');
+}
+
+// Helpers canvas
+function roundRect(ctx, x, y, w, h, r, fillStyle) {
+  ctx.fillStyle = fillStyle;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+function wrapText(ctx, text, x, y, maxW, lineH) {
+  const words = text.split(' ');
+  let line='';
+  for(let i=0;i<words.length;i++){
+    const test=line+words[i]+' ';
+    if(ctx.measureText(test).width>maxW && i>0){
+      ctx.fillText(line.trim(),x,y); line=words[i]+' '; y+=lineH;
+    } else { line=test; }
+  }
+  if(line.trim()) ctx.fillText(line.trim(),x,y);
+}
+
+function downloadFinalResult() { downloadDiploma(); }function downloadFinalResult() { downloadDiploma(); }
+
+function saveDiplomaAsPdf() {
+  const wrap = document.getElementById('diploma-canvas-wrap');
+  const cvs = wrap.querySelector('canvas');
+  if (!cvs) { showToast('Erreur : diplome non genere'); return; }
+
+  showToast('Generation du PDF...');
+
+  const dataUrl = cvs.toDataURL('image/jpeg', 0.92);
+  const b64 = dataUrl.split(',')[1];
+  const raw = atob(b64);
+  const imgLen = raw.length;
+  const imgW = cvs.width, imgH = cvs.height;
+
+  // A4 en points PDF : 595 x 842
+  const PW = 595, PH = 842;
+
+  // Construit le PDF minimal avec image JPEG embarquee
+  // obj 1: Catalog, 2: Pages, 3: Page, 4: ContentStream, 5: Image XObject
+  const stream = 'q ' + PW + ' 0 0 ' + PH + ' 0 0 cm /Im1 Do Q';
+
+  const obj1 = '<< /Type /Catalog /Pages 2 0 R >>';
+  const obj2 = '<< /Type /Pages /Kids [3 0 R] /Count 1 >>';
+  const obj3 = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + PW + ' ' + PH + '] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>';
+  const obj4 = '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream';
+  const obj5hdr = '<< /Type /XObject /Subtype /Image /Width ' + imgW + ' /Height ' + imgH + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + imgLen + ' >>';
+
+  function enc(s) {
+    const u = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i) & 0xff;
+    return u;
+  }
+
+  const parts = [];
+  const offsets = [];
+  let pos = 0;
+
+  function push(u8) { parts.push(u8); pos += u8.length; }
+  function pushStr(s) { push(enc(s)); }
+
+  pushStr('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n');
+
+  offsets.push(pos);
+  pushStr('1 0 obj\n' + obj1 + '\nendobj\n');
+
+  offsets.push(pos);
+  pushStr('2 0 obj\n' + obj2 + '\nendobj\n');
+
+  offsets.push(pos);
+  pushStr('3 0 obj\n' + obj3 + '\nendobj\n');
+
+  offsets.push(pos);
+  pushStr('4 0 obj\n' + obj4 + '\nendobj\n');
+
+  offsets.push(pos);
+  pushStr('5 0 obj\n' + obj5hdr + '\nstream\n');
+  // Image bytes bruts
+  const imgBytes = new Uint8Array(imgLen);
+  for (let i = 0; i < imgLen; i++) imgBytes[i] = raw.charCodeAt(i);
+  push(imgBytes);
+  pushStr('\nendstream\nendobj\n');
+
+  const xrefPos = pos;
+  let xref = 'xref\n0 6\n0000000000 65535 f \n';
+  for (const off of offsets) xref += String(off).padStart(10,'0') + ' 00000 n \n';
+  xref += 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xrefPos + '\n%%EOF';
+  pushStr(xref);
+
+  // Merge all parts
+  const total = parts.reduce((s,p) => s + p.length, 0);
+  const out = new Uint8Array(total);
+  let cursor = 0;
+  for (const p of parts) { out.set(p, cursor); cursor += p.length; }
+
+  const blob = new Blob([out], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = (state.user.name||'stagiaire').replace(/[^a-z0-9]/gi,'_');
+  a.href = url;
+  a.download = 'Diplome_IA_Dojo_' + safeName + '_' + new Date().toISOString().slice(0,10) + '.pdf';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+  showToast('PDF telecharge !');
+}
+
+function closeDiploma() {
+  document.getElementById('diploma-overlay').classList.remove('open');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

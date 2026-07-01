@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lightbot 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #2a3050;
+    --surface: #303660;
+    --surface2: #363c68;
+    --border: #252a38;
+    --text: #e2e6f0;
+    --text-dim: #5a6178;
+    --accent: #4f8aff;
+    --accent2: #7c6af7;
+    --lit: #ffd060;
+    --lit-glow: rgba(255,208,80,0.35);
+    --proc1: #f97316;
+    --proc2: #a855f7;
+    --success: #4ade80;
+    --danger: #f87171;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    letter-spacing: .18em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--lit); }
+  .level-info { display:flex; align-items:center; gap:16px; }
+  .level-badge { font-family:'Space Mono',monospace; font-size:.72rem; color:var(--text-dim); letter-spacing:.06em; }
+  .level-badge strong { color:var(--text); }
+  .level-dots { display:flex; gap:5px; }
+  .level-dot { width:7px; height:7px; border-radius:50%; transition: background .3s, transform .15s, box-shadow .15s, opacity .3s; cursor:pointer; }
+  .level-dot:hover { transform:scale(1.6); opacity:1 !important; }
+  .level-dot.active { cursor:default; transform:none; opacity:1 !important; }
+  .level-dot.done { opacity:.6 !important; }
+
+  .game-layout {
+    display: grid;
+    grid-template-columns: 1fr 270px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* THREE.JS CANVAS AREA */
+  .canvas-area {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  #three-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .level-hud {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+  }
+  .level-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: .58rem;
+    letter-spacing: .18em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .level-desc {
+    font-size: .85rem;
+    color: var(--text);
+    font-weight: 300;
+    margin-top: 3px;
+  }
+  .status-msg {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .06em;
+    color: var(--text-dim);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: color .3s;
+  }
+  .status-msg.ok { color: var(--success); }
+  .status-msg.err { color: var(--danger); }
+  .status-msg.run { color: var(--accent); }
+
+  .run-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .07em;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #3a78f0; }
+  .btn:disabled { opacity:.3; cursor:not-allowed; }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 16px;
+    gap: 18px;
+  }
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  .panel-title {
+    font-family: 'Space Mono', monospace;
+    font-size: .56rem;
+    letter-spacing: .18em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* PALETTE */
+  .palette { display:flex; flex-wrap:wrap; gap:6px; }
+  .cmd-btn {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    gap: 1px;
+  }
+  .cmd-btn:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .cmd-btn.cmd-fwd, .cmd-btn.cmd-left, .cmd-btn.cmd-right { border-color:#2a4070; }
+  .cmd-btn.cmd-jump { border-color:#00786b; }
+  .cmd-btn.cmd-light { border-color:#5a4200; }
+  .cmd-btn.cmd-p1 { border-color:#7a3a00; background:#120900; }
+  .cmd-btn.cmd-p2 { border-color:#4a1a80; background:#0a0515; }
+  .cmd-btn.locked { opacity:.18; pointer-events:none; }
+  .cmd-label { font-family:'Space Mono',monospace; font-size:.42rem; color:var(--text-dim); letter-spacing:.04em; }
+
+  /* PROGRAM SLOTS */
+  .program-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .prog-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: .58rem;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+  }
+  .prog-tag {
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .58rem;
+    font-weight: 700;
+  }
+  .p-main { background:var(--accent2); color:#fff; }
+  .p1-tag { background:var(--proc1); color:#fff; }
+  .p2-tag { background:var(--proc2); color:#fff; }
+
+  .slots { display:flex; flex-wrap:wrap; gap:4px; min-height:34px; }
+  .slot {
+    width: 34px; height: 34px;
+    border-radius: 5px;
+    border: 1.5px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .95rem;
+    transition: all .12s;
+    position: relative;
+  }
+  .slot.filled { border-style:solid; border-color:var(--border); background:var(--surface); }
+  .slot.filled.cmd-fwd, .slot.filled.cmd-left, .slot.filled.cmd-right { border-color:#2a4070; }
+  .slot.filled.cmd-light { border-color:#6b5200; background:#0e0900; }
+  .slot.filled.cmd-jump { border-color:#00786b; background:#001a17; }
+  .slot.filled.cmd-p1 { border-color:var(--proc1); background:#130800; }
+  .slot.filled.cmd-p2 { border-color:var(--proc2); background:#0c0518; }
+  .slot.filled:hover { border-color:var(--danger); cursor:pointer; }
+  .slot.executing {
+    border-color: #fff !important;
+    background: rgba(255,255,255,.1) !important;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.3), 0 0 8px rgba(255,255,255,.15);
+    transform: scale(1.14);
+    z-index: 2;
+  }
+
+  /* HINT */
+  .hint-box {
+    background: #0b1020;
+    border: 1px solid #1a2850;
+    border-radius: 7px;
+    padding: 9px 11px;
+    font-size: .76rem;
+    color: #6a94c8;
+    line-height: 1.6;
+  }
+  .hint-box strong { color: #96b8e0; }
+
+  /* ROBOT SELECTOR */
+  .robot-selector {
+    display: flex;
+    gap: 8px;
+  }
+  .robot-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: .58rem;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: all .15s;
+    text-align: center;
+  }
+  .robot-btn:hover { border-color: var(--accent); color: var(--text); }
+  .robot-btn.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* OVERLAY */
+  .overlay {
+    position: fixed; inset:0;
+    background: rgba(10,12,16,.9);
+    display:flex; align-items:center; justify-content:center;
+    z-index:200; opacity:0; pointer-events:none; transition:opacity .3s;
+  }
+  .overlay.show { opacity:1; pointer-events:all; }
+  .overlay-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:32px 38px; text-align:center; max-width:360px;
+    transform:translateY(16px); transition:transform .3s;
+  }
+  .overlay.show .overlay-card { transform:translateY(0); }
+  .ov-emoji { font-size:2.8rem; margin-bottom:10px; }
+  .ov-title { font-family:'Space Mono',monospace; font-size:1rem; margin-bottom:7px; }
+  .ov-sub { font-size:.82rem; color:var(--text-dim); margin-bottom:22px; line-height:1.6; }
+  .ov-actions { display:flex; gap:9px; justify-content:center; }
+
+  /* SOUND TOGGLE */
+  .sound-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'Space Mono', monospace;
+    font-size: .6rem;
+    letter-spacing: .08em;
+    color: var(--text-dim);
+    user-select: none;
+  }
+  .sound-toggle:hover { border-color: var(--accent); color: var(--text); }
+  .sound-toggle.on { border-color: var(--accent); color: var(--accent); }
+  .sound-toggle .toggle-knob {
+    width: 32px; height: 16px;
+    background: var(--border);
+    border-radius: 8px;
+    position: relative;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .sound-toggle.on .toggle-knob { background: var(--accent); }
+  .sound-toggle .toggle-knob::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: transform .2s;
+  }
+  .sound-toggle.on .toggle-knob::after { transform: translateX(16px); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LIGHT<span>BOT</span> <span style="font-size:.6rem;color:var(--text-dim);letter-spacing:.1em;">3D</span></div>
+  <div class="level-info">
+    <span class="level-badge">Niveau <strong id="hdr-level">1</strong> / 35</span>
+    <div class="level-dots" id="level-dots"></div>
+  </div>
+</header>
+
+<div class="game-layout">
+  <div class="canvas-area">
+    <canvas id="three-canvas"></canvas>
+    <div class="level-hud">
+      <div class="level-tag" id="lv-tag"></div>
+      <div class="level-desc" id="lv-desc"></div>
+    </div>
+    <div class="status-msg" id="status-msg">Place tes instructions puis lance le programme.</div>
+    <div class="run-controls">
+      <button class="btn" onclick="resetLevel()">↺ Réinitialiser</button>
+      <button class="btn primary" id="btn-run" onclick="runProgram()">▶ Lancer</button>
+    </div>
+  </div>
+
+  <div class="right-panel" id="right-panel">
+    <div>
+      <div class="panel-title">Commandes</div>
+      <div class="palette" id="palette"></div>
+    </div>
+    <div>
+      <div class="panel-title">Programme principal</div>
+      <div class="program-block" id="block-main">
+        <div class="prog-header"><span class="prog-tag p-main">M</span> MAIN</div>
+        <div class="slots" id="slots-main"></div>
+      </div>
+    </div>
+    <div id="proc-container"></div>
+    <div>
+      <div class="panel-title">Robot</div>
+      <div class="robot-selector">
+        <button class="robot-btn active" id="btn-robot-lamp" onclick="selectRobot('lamp')">🔦 Lampe</button>
+        <button class="robot-btn" id="btn-robot-bot" onclick="selectRobot('bot')">🤖 Robot</button>
+        <button class="robot-btn" id="btn-robot-ant" onclick="selectRobot('ant')">🐜 Fourmi</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel-title">Son</div>
+      <div class="sound-toggle on" id="sound-toggle" onclick="toggleSound()">
+        <div class="toggle-knob"></div>
+        <span id="sound-label">Son activé</span>
+      </div>
+    </div>
+    <div class="hint-box" id="hint-box"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <div class="ov-emoji" id="ov-emoji">⭐</div>
+    <div class="ov-title" id="ov-title">Niveau réussi !</div>
+    <div class="ov-sub" id="ov-sub"></div>
+    <div class="ov-actions">
+      <button class="btn" onclick="hideOverlay();resetLevel();">↺ Rejouer</button>
+      <button class="btn primary" id="ov-next" onclick="nextLevel()">→ Suivant</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ===================== LEVELS =====================
+const LEVELS = [
+
+  // ══════════════════════════════════════════════════
+  // SÉRIE 1 — SANS PROCÉDURE · TERRAIN PLAT
+  // ══════════════════════════════════════════════════
+
+  {
+    tag:"Découverte · Avancer", desc:"Amène la lampe sur la case ★.",
+    hint:"Utilise <strong>▶</strong> pour avancer d'une case.",
+    grid:[[0,0,0,0,0],[0,1,1,2,0],[0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:5, procs:[], unlocked:['fwd'], autoLight:true,
+  },
+  {
+    tag:"Découverte · Chemin en U", desc:"Suis le chemin et atteins la case ★.",
+    hint:"Avance plusieurs fois, puis tourne pour suivre le virage.",
+    grid:[[0,0,0,0,0],[0,1,1,1,0],[0,1,0,0,0],[0,1,1,2,0],[0,0,0,0,0]],
+    robot:{row:1,col:3,dir:3}, mainSlots:8, procs:[], unlocked:['fwd','left','right'], autoLight:true,
+  },
+  {
+    tag:"Découverte · Tourner", desc:"Atteins la case ★ en tournant.",
+    hint:"<strong>↶ ↷</strong> tournent sans avancer. Tourne puis avance.",
+    grid:[[0,0,0,0,0],[0,1,1,0,0],[0,0,1,0,0],[0,0,2,0,0],[0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:6, procs:[], unlocked:['fwd','left','right'], autoLight:true,
+  },
+  {
+    tag:"Découverte · Allumer", desc:"Allume les deux cases ★ avec ✦.",
+    hint:"Avance sur une case ★ puis appuie sur <strong>✦</strong> pour l'allumer.",
+    grid:[[0,0,0,0,0,0],[0,1,2,1,2,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:8, procs:[], unlocked:['fwd','left','right','light'],
+  },
+  {
+    tag:"Découverte · Zigzag", desc:"Suis le zigzag et allume les 3 cases ★.",
+    hint:"Avance, tourne à droite, avance, tourne à gauche... repère le pattern.",
+    grid:[[0,0,0,0,0,0],[0,1,2,0,0,0],[0,0,1,2,0,0],[0,0,0,1,2,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:12, procs:[], unlocked:['fwd','left','right','light'],
+  },
+  {
+    tag:"Découverte · Grand L", desc:"Allume les 4 cases ★ sur ce chemin en L.",
+    hint:"Commence par la ligne, puis descends. Compte bien tes avancées.",
+    grid:[[0,0,0,0,0,0],[0,1,2,2,2,0],[0,0,0,0,1,0],[0,0,0,0,2,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:12, procs:[], unlocked:['fwd','left','right','light'],
+  },
+
+  // ══════════════════════════════════════════════════
+  // SÉRIE 2 — SANS PROCÉDURE · SAUT
+  // ══════════════════════════════════════════════════
+
+  {
+    tag:"Saut · Escalier droit", desc:"Monte les trois marches et allume la case ★ au sommet.",
+    hint:"Utilise <strong>⬆</strong> pour monter d'une marche. <strong>▶</strong> ne peut pas monter.",
+    grid:[[0,0,0,0,0,0],[0,1,11,21,32,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:5, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Escalier en spirale", desc:"Monte les trois marches qui tournent et allume la case ★ au sommet.",
+    hint:"Utilise <strong>⬆</strong> pour monter chaque marche. Tourne à droite entre chaque saut.",
+    grid:[[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,11,0,0,0],[0,32,21,0,0,0],[0,0,0,0,0,0]],
+    robot:{row:3,col:1,dir:1}, mainSlots:7, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Descente en escalier", desc:"Descends l'escalier et allume les 4 cases ★.",
+    hint:"Alterne <strong>⬆</strong> pour descendre d'une marche et <strong>▶</strong> pour avancer sur le même niveau.",
+    grid:[[0,0,0,0,0,0],[0,0,0,21,21,0],[0,0,12,21,21,0],[0,2,12,11,0,0],[0,2,1,0,0,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:4,dir:3}, mainSlots:15, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Grille mixte", desc:"Allume les 4 cases ★ sur cette petite grille à 3 hauteurs.",
+    hint:"Pars vers le bas, puis remonte en zigzag. <strong>⬆</strong> monte et descend, <strong>▶</strong> reste à plat.",
+    grid:[[0,0,0,0,0],[0,1,22,12,0],[0,1,12,2,0],[0,0,0,0,0]],
+    robot:{row:1,col:1,dir:2}, mainSlots:12, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Mélange de hauteurs", desc:"Allume les 3 cases ★ dispersées sur différentes hauteurs.",
+    hint:"Commence par allumer là où tu es, puis utilise <strong>⬆</strong> pour descendre et <strong>▶</strong> pour avancer au même niveau.",
+    grid:[[0,0,0,0,0],[0,11,11,22,0],[0,12,1,1,0],[0,1,1,2,0],[0,0,0,0,0]],
+    robot:{row:1,col:3,dir:3}, mainSlots:12, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Hauteurs extrêmes", desc:"Monte jusqu'au sommet h3 en traversant la plateforme h2.",
+    hint:"Monte d'abord jusqu'à la case ★ h2, puis traverse la plateforme et monte au sommet h3.",
+    grid:[[0,0,0,0,0],[0,32,1,1,0],[0,31,1,1,0],[0,21,21,22,0],[0,1,1,11,0],[0,1,1,11,0],[0,0,0,0,0]],
+    robot:{row:5,col:2,dir:1}, mainSlots:12, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+
+  {
+    tag:"Saut · Colonnes mixtes", desc:"Allume les 3 cases ★ en haut, depuis le bas de la grille.",
+    hint:"Monte par la colonne centrale, puis utilise <strong>⬆</strong> et <strong>▶</strong> pour atteindre chaque étoile.",
+    grid:[
+      [0,  0,  0,  0,  0],
+      [0, 22, 12, 12,  0],
+      [0,  1, 21, 21,  0],
+      [0,  1, 11,  1,  0],
+      [0,  1,  1,  1,  0],
+      [0,  0,  0,  0,  0],
+    ],
+    robot:{row:4,col:2,dir:0}, mainSlots:12, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Pyramide inversée", desc:"Atteins les 3 cases ★ à différentes hauteurs.",
+    hint:"Monte par la gauche jusqu'en h2, traverse, puis saute en h3 pour la dernière étoile.",
+    grid:[
+      [0,  0,  0,  0,  0,  0],
+      [0, 21, 21, 22, 22,  0],
+      [0, 21,  1,  1, 32,  0],
+      [0, 11,  1,  1, 21,  0],
+      [0,  1,  1,  1,  1,  0],
+      [0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:4,col:1,dir:0}, mainSlots:12, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+  {
+    tag:"Saut · Îlots", desc:"Saute entre les plateformes pour atteindre chaque étoile.",
+    hint:"Les plateformes sont surélevées. Oriente-toi bien avant de sauter.",
+    grid:[[0,0,0,0,0,0],[0,1,11,0,0,0],[0,1,12,1,0,0],[0,0,1,11,0,0],[0,0,12,12,0,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:12, procs:[], unlocked:['fwd','left','right','jump','light'],
+  },
+
+  // ══════════════════════════════════════════════════
+  // SÉRIE 3 — 1 PROCÉDURE · TERRAIN PLAT
+  // ══════════════════════════════════════════════════
+
+  {
+    tag:"Procédure · Intro P1", desc:"Utilise P1 pour éviter de répéter les mêmes gestes.",
+    hint:"Mets <strong>▶✦</strong> dans P1, puis appelle P1 depuis MAIN autant de fois que nécessaire.",
+    grid:[[0,0,0,0,0,0,0],[0,1,2,2,2,2,0],[0,0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:5,
+    procs:[{id:'p1',label:'P1',slots:3,color:'p1-tag'}],
+    unlocked:['fwd','left','right','light','p1'],
+  },
+  {
+    tag:"Procédure · Zigzag P1", desc:"Le zigzag se répète. Mets-le dans P1.",
+    hint:"P1 = avancer + allumer + tourner + avancer + allumer + tourner.",
+    grid:[[0,0,0,0,0,0],[0,1,2,0,0,0],[0,0,1,2,0,0],[0,0,0,1,2,0],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:5,
+    procs:[{id:'p1',label:'P1',slots:5,color:'p1-tag'}],
+    unlocked:['fwd','left','right','light','p1'],
+  },
+
+  {
+    tag:"Procédure · Couloir en U", desc:"Allume les 3 cases ★ aux coins du couloir.",
+    hint:"Le couloir fait 3 côtés d'un rectangle. P1 = <strong>▶▶▶✦</strong>, MAIN = P1 ↷ P1 ↷ P1.",
+    grid:[
+      [0, 0, 0, 0, 0, 0],
+      [0, 1, 1, 1, 2, 0],
+      [0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 1, 0],
+      [0, 2, 1, 1, 2, 0],
+      [0, 0, 0, 0, 0, 0],
+    ],
+    robot:{row:1,col:1,dir:1}, mainSlots:5,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'}],
+    unlocked:['fwd','left','right','light','p1'],
+  },
+
+  // ══════════════════════════════════════════════════
+  // SÉRIE 4 — 1 PROCÉDURE · SAUT
+  // ══════════════════════════════════════════════════
+
+  {
+    tag:"Saut · Grand escalier P1", desc:"Gravis le grand escalier jusqu'à la case ★ au sommet.",
+    hint:"Le pattern <strong>⬆</strong> se répète. Mets-le dans P1 et appelle-le 4 fois.",
+    grid:[[0,0,0,0,0,0,0],[0,1,11,21,31,42,0],[0,0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:4,
+    procs:[{id:'p1',label:'P1',slots:2,color:'p1-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1'],
+  },
+
+  {
+    tag:"Saut · Terrasses P1", desc:"Monte les terrasses et allume les 2 cases ★.",
+    hint:"Cherche le pattern répétitif entre les niveaux et mets-le dans P1.",
+    grid:[
+      [0,  0,  0,  0,  0,  0],
+      [0, 21, 21, 21, 22,  0],
+      [0, 12, 11, 11, 11,  0],
+      [0,  1,  1,  1,  2,  0],
+      [0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:3,col:1,dir:1}, mainSlots:9,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1'],
+  },
+
+  {
+    tag:"Saut · Ligne surélevée", desc:"Allume les 6 cases ★ sur la ligne surélevée.",
+    hint:"La ligne est en h1, tu pars du sol h0. P1 = <strong>⬆✦▶</strong> ou similaire.",
+    grid:[
+      [0, 0,  0,  0,  0,  0,  0,  0,  0],
+      [0, 1,  1,  1,  1,  1,  1,  1,  0],
+      [0, 1, 12, 12, 12, 12, 12, 12,  0],
+      [0, 1,  1,  1,  1,  1,  1,  1,  0],
+      [0, 0,  0,  0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:3,col:3,dir:3}, mainSlots:8,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1'],
+  },
+
+  {
+    tag:"Saut · L retourné", desc:"Contourne la marche pour atteindre la case ★.",
+    hint:"<strong>P1 = ▶▶▶▶</strong> parcourt une ligne. MAIN utilise P1 deux fois en contournant la marche h1.",
+    grid:[
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0,11,11,11,11, 1, 0],
+      [0, 2, 1, 1, 1, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+    ],
+    robot:{row:1,col:1,dir:1}, mainSlots:8,
+    procs:[{id:'p1',label:'P1',slots:8,color:'p1-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1'],
+  },
+  {
+    tag:"Saut · Escalier 2 cibles", desc:"Deux cibles à des hauteurs différentes — planifie bien.",
+    hint:"P1 gère la montée d'une marche. Appelle-la le bon nombre de fois pour chaque cible.",
+    grid:[[0,0,0,0,0,0,0],[0,1,11,22,31,1,0],[0,0,0,0,32,1,0],[0,0,0,0,1,1,0],[0,0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:7,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'},{id:'p2',label:'P2',slots:4,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+  {
+    tag:"Saut · Deux procédures hauteurs", desc:"P1 monte, P2 descend — coordonne-les.",
+    hint:"P1 = <strong>⬆✦</strong>, P2 = <strong>▶✦</strong>. MAIN les alterne.",
+    grid:[[0,0,0,0,0,0,0],[0,1,12,11,22,0,0],[0,0,0,11,0,0,0],[0,0,0,12,0,0,0],[0,0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:7,
+    procs:[{id:'p1',label:'P1',slots:3,color:'p1-tag'},{id:'p2',label:'P2',slots:4,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+  {
+    tag:"Saut · Défi final", desc:"Le défi ultime — tout ce que tu as appris.",
+    hint:"Planifie soigneusement. Chaque procédure doit couvrir un motif précis.",
+    grid:[[0,0,0,0,0,0,0],[0,11,12,11,22,11,0],[0,0,0,11,0,11,0],[0,0,0,12,0,12,0],[0,0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:8,
+    procs:[{id:'p1',label:'P1',slots:5,color:'p1-tag'},{id:'p2',label:'P2',slots:5,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+
+  {
+    tag:"Saut · Cadre symétrique", desc:"Allume les 8 cases ★ sur le cadre symétrique.",
+    hint:"La grille est symétrique. P1 fait tout le tour — MAIN se résume à un seul appel.",
+    grid:[
+      [0,  0,  0,  0,  0,  0,  0],
+      [0, 22, 21, 12, 21, 22,  0],
+      [0, 21,  1,  1,  1, 21,  0],
+      [0, 12,  1,  1,  1, 12,  0],
+      [0, 21,  1,  1,  1, 21,  0],
+      [0, 22, 21, 12, 21, 22,  0],
+      [0,  0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:1,col:2,dir:3}, mainSlots:1,
+    procs:[{id:'p1',label:'P1',slots:8,color:'p1-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1'],
+  },
+
+  // ══════════════════════════════════════════════════
+  // SÉRIE 5 — 2 PROCÉDURES · TERRAIN PLAT
+  // ══════════════════════════════════════════════════
+
+  {
+    tag:"Procédures · Serpentin", desc:"Allume les 12 cases ★ sur ce chemin en serpentin.",
+    hint:"Le couloir serpente sur 3 lignes. P1 avance d'un pas, P2 parcourt une ligne entière.",
+    grid:[
+      [0,  0,   0,   0,   0,   0,  0],
+      [0, 21,  22,  22,  22,  22,  0],
+      [0,  0,   0,   0,   0,  21,  0],
+      [0, 22,  22,  22,  22,  21,  0],
+      [0, 21,   0,   0,   0,   0,  0],
+      [0, 21,  22,  22,  22,  22,  0],
+      [0,  0,   0,   0,   0,   0,  0],
+    ],
+    robot:{row:1,col:1,dir:1}, mainSlots:9,
+    procs:[{id:'p1',label:'P1',slots:2,color:'p1-tag'},{id:'p2',label:'P2',slots:8,color:'p2-tag'}],
+    unlocked:['fwd','left','right','light','p1','p2'],
+  },
+
+  {
+    tag:"Procédures · Deux chemins", desc:"P1 et P2 pour deux parties du chemin.",
+    hint:"P1 gère la ligne du haut, P2 gère le virage et la ligne du bas.",
+    grid:[[0,0,0,0,0,0],[0,1,2,2,2,0],[0,0,0,0,1,0],[0,0,0,0,2,2],[0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:4,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'},{id:'p2',label:'P2',slots:4,color:'p2-tag'}],
+    unlocked:['fwd','left','right','light','p1','p2'],
+  },
+
+  // ══════════════════════════════════════════════════
+  // SÉRIE 6 — 2 PROCÉDURES · SAUT (DÉFIS)
+  // ══════════════════════════════════════════════════
+
+  {
+    tag:"Saut · Labyrinthe vertical", desc:"Monte et descends les plateformes. Cherche le pattern.",
+    hint:"Combine <strong>⬆</strong> et <strong>▶</strong> — l'un monte, l'autre descend.",
+    grid:[[0,0,0,0,0,0,0],[0,1,12,11,22,21,0],[0,0,0,0,0,1,0],[0,0,0,0,0,12,0],[0,0,0,0,0,0,0]],
+    robot:{row:1,col:1,dir:1}, mainSlots:8,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'},{id:'p2',label:'P2',slots:4,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+
+  {
+    tag:"Saut · Damier de blocs", desc:"Allume les 15 cases ★ sur ce damier de blocs h0/h1.",
+    hint:"P1 et P2 couvrent chacune une ligne. MAIN les appelle en alternance.",
+    grid:[
+      [0,  0,  0,  0,  0,  0,  0,  0],
+      [0,  1,  1,  1, 12, 12, 12,  0],
+      [0, 12, 12, 12,  1,  1,  1,  0],
+      [0,  1,  1,  1, 12, 12, 12,  0],
+      [0, 12, 12, 12,  1,  1,  1,  0],
+      [0,  1,  1,  1, 12, 12, 12,  0],
+      [0,  0,  0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:1,col:6,dir:3}, mainSlots:3,
+    procs:[{id:'p1',label:'P1',slots:8,color:'p1-tag'},{id:'p2',label:'P2',slots:8,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+  {
+    tag:"Saut · Quatre coins", desc:"Allume les 16 cases ★ dans les 4 coins surélevés.",
+    hint:"Chaque coin est un bloc 2×2 en h1. P1 allume un bloc, P2 traverse et allume le suivant.",
+    grid:[
+      [0,  0,  0,  0,  0,  0,  0],
+      [0, 12, 12,  1, 12, 12,  0],
+      [0, 12, 12,  1, 12, 12,  0],
+      [0,  1,  1,  1,  1,  1,  0],
+      [0, 12, 12,  1, 12, 12,  0],
+      [0, 12, 12,  1, 12, 12,  0],
+      [0,  0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:1,col:5,dir:3}, mainSlots:8,
+    procs:[{id:'p1',label:'P1',slots:3,color:'p1-tag'},{id:'p2',label:'P2',slots:8,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+  {
+    tag:"Saut · Cadre complet", desc:"Allume les 16 cases ★ qui forment le cadre.",
+    hint:"Les coins sont en h2, les bords en h1. P1 et P2 se partagent le tour complet.",
+    grid:[
+      [0,  0,  0,  0,  0,  0,  0],
+      [0, 22, 12, 12, 12, 22,  0],
+      [0, 12,  1,  1,  1, 12,  0],
+      [0, 12,  1,  1,  1, 12,  0],
+      [0, 12,  1,  1,  1, 12,  0],
+      [0, 22, 12, 12, 12, 22,  0],
+      [0,  0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:5,col:1,dir:1}, mainSlots:1,
+    procs:[{id:'p1',label:'P1',slots:9,color:'p1-tag'},{id:'p2',label:'P2',slots:4,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+  {
+    tag:"Saut · Croix symétrique", desc:"Allume les 8 cases ★ sur cette grille symétrique.",
+    hint:"La grille est symétrique par rotation. P1 et P2 se partagent les 8 cibles.",
+    grid:[
+      [0,  0,  0,  0,  0,  0,  0],
+      [0,  2, 11,  1, 11,  2,  0],
+      [0, 11, 12,  1, 12, 11,  0],
+      [0,  1,  1, 11,  1,  1,  0],
+      [0, 11, 12,  1, 12, 11,  0],
+      [0,  2, 11,  1, 11,  2,  0],
+      [0,  0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:5,col:1,dir:1}, mainSlots:4,
+    procs:[{id:'p1',label:'P1',slots:8,color:'p1-tag'},{id:'p2',label:'P2',slots:8,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+  {
+    tag:"Saut · Diamant", desc:"Allume les 20 cases ★ sur ce motif en diamant.",
+    hint:"Le motif est symétrique. P1 et P2 se partagent les diagonales. MAIN orchestre tout.",
+    grid:[
+      [0,  0,  0,  0,  0,  0],
+      [0, 12, 22, 32, 42,  0],
+      [0, 22,  1,  1, 32,  0],
+      [0, 32,  1,  1, 22,  0],
+      [0, 42, 32, 22, 12,  0],
+      [0, 32,  1,  1, 22,  0],
+      [0, 22,  1,  1, 32,  0],
+      [0, 12, 22, 32, 42,  0],
+      [0,  0,  0,  0,  0,  0],
+    ],
+    robot:{row:4,col:4,dir:2}, mainSlots:12,
+    procs:[{id:'p1',label:'P1',slots:3,color:'p1-tag'},{id:'p2',label:'P2',slots:8,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+    {
+    tag:"Saut · Damier 3D", desc:"Allume les 16 étoiles du damier. Robot en (3,7), direction Nord.",
+    hint:"P1 = <strong>▶⬆✦↶</strong>. P2 = P1×4 puis <strong>↶⬆⬆⬆⬆↷⬆⬆↶</strong>. MAIN = <strong>✦ P2 P2 P2 P2</strong>.",
+    grid:[
+      [0,0,0,0,0,0,0,0,0],
+      [0,12,1,12,1,12,1,12,0],
+      [0,1,1,1,1,1,1,1,0],
+      [0,12,1,12,1,12,1,12,0],
+      [0,1,1,1,1,1,1,1,0],
+      [0,12,1,12,1,12,1,12,0],
+      [0,1,1,1,1,1,1,1,0],
+      [0,12,1,12,1,12,1,12,0],
+      [0,0,0,0,0,0,0,0,0],
+    ],
+    robot:{row:3,col:7,dir:0}, mainSlots:5,
+    procs:[{id:'p1',label:'P1',slots:4,color:'p1-tag'},{id:'p2',label:'P2',slots:13,color:'p2-tag'}],
+    unlocked:['fwd','left','right','jump','light','p1','p2'],
+  },
+
+]
+
+const CMDS = {
+  fwd:  {emoji:'▶', label:'FWD',  cls:'cmd-fwd'},
+  left: {emoji:'↶', label:'L',    cls:'cmd-left'},
+  right:{emoji:'↷', label:'R',    cls:'cmd-right'},
+  jump: {emoji:'⬆', label:'JUMP', cls:'cmd-jump'},
+  light:{emoji:'✦', label:'LIT',  cls:'cmd-light'},
+  p1:   {emoji:'P1',label:'',     cls:'cmd-p1'},
+  p2:   {emoji:'P2',label:'',     cls:'cmd-p2'},
+};
+
+// Grid cell encoding: value = height*10 + type
+// type: 0=empty, 1=floor, 2=target(unlit), 3=lit
+// height: 0,1,2,3... (stack of tiles)
+// e.g. 0=empty, 1=floor h0, 2=target h0, 11=floor h1, 12=target h1, 21=floor h2
+function tileType(v)   { return v % 10; }
+function tileHeight(v) { return Math.floor(v / 10); }
+function isEmpty(v)    { return v === 0; }
+
+// ===================== STATE =====================
+let currentLevel = 0;
+let programs = {};
+let robotState = {};
+let gridState = [];
+let running = false;
+let animTimeout = null;
+let focusedProg = 'main';
+
+// ===================== THREE.JS =====================
+let scene, camera, renderer;
+let tileMeshes = [];
+let lampGroup, lampBase, lampArmLow, lampArmHigh, lampHead, lampBulb, lampLight;
+let lampPivotBase, lampPivotElbow, lampPivotHead;
+// Robot bot
+let botGroup, botAntennaBall, botAntennaLight, botAntennaPointLight;
+// Ant robot
+let antGroup, antLegs=[], antAntennae=[], antArcLine, antArcActive=false, antArcTimer=0;
+let activeRobot = 'lamp'; // 'lamp', 'bot', or 'ant'
+
+const TILE_SIZE = 1.1;
+const TILE_GAP  = 0.08;
+const STEP = TILE_SIZE + TILE_GAP;
+
+// Materials
+const matFloor    = () => new THREE.MeshStandardMaterial({color:0x2e3d5a, roughness:.8, metalness:.1});
+const matTarget   = () => new THREE.MeshStandardMaterial({color:0x2a2200, roughness:.7, metalness:.05});
+const matLit      = () => new THREE.MeshStandardMaterial({color:0x5a4000, roughness:.5, metalness:.2, emissive:0xffd060, emissiveIntensity:.5});
+
+// Lamp colors
+const LAMP_CREAM  = 0xf5f0e0;
+const LAMP_DARK   = 0x2a2520;
+const LAMP_BULB   = 0xffe880;
+
+function initThree() {
+  const canvas = document.getElementById('three-canvas');
+  const area = canvas.parentElement;
+
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x2a3050);
+  scene.fog = new THREE.Fog(0x2a3050, 20, 35);
+
+  camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
+
+  // Ambient
+  const amb = new THREE.AmbientLight(0x8090c0, 0.5);
+  scene.add(amb);
+
+  // Directional rim
+  const dir = new THREE.DirectionalLight(0xaabbff, 0.6);
+  dir.position.set(-5, 8, -3);
+  dir.castShadow = true;
+  dir.shadow.mapSize.set(1024,1024);
+  scene.add(dir);
+
+  // subtle fill
+  const fill = new THREE.DirectionalLight(0xfff0c0, 0.2);
+  fill.position.set(6,4,6);
+  scene.add(fill);
+
+  buildLamp();
+  buildRobot();
+  buildAnt();
+  botGroup.visible = false;
+  antGroup.visible = false;
+  resize();
+  window.addEventListener('resize', resize);
+  animate();
+}
+
+function resize() {
+  const area = document.querySelector('.canvas-area');
+  const w = area.clientWidth, h = area.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+// ---- BUILD LAMP (Pixar style) ----
+function buildLamp() {
+  lampGroup = new THREE.Group();
+  scene.add(lampGroup);
+
+  const armMat  = new THREE.MeshStandardMaterial({color:LAMP_CREAM, roughness:.25, metalness:.55});
+  const darkMat = new THREE.MeshStandardMaterial({color:LAMP_DARK,  roughness:.2,  metalness:.8});
+
+  // --- Base: flat disc ---
+  const baseGeo = new THREE.CylinderGeometry(0.28, 0.32, 0.08, 24);
+  const baseMat = new THREE.MeshStandardMaterial({color:LAMP_CREAM, roughness:.3, metalness:.5});
+  lampBase = new THREE.Mesh(baseGeo, baseMat);
+  lampBase.castShadow = true;
+  lampGroup.add(lampBase);
+
+  // ── PIVOT BASE: sits on top of base disc ──
+  // We tilt the whole arm assembly BACKWARD (negative X = lean back)
+  // so the elbow ends up behind the lamp, arm-high curves forward
+  lampPivotBase = new THREE.Group();
+  lampPivotBase.position.y = 0.04;
+  lampGroup.add(lampPivotBase);
+
+  // Arm low: goes upward-backward
+  const armLowGeo = new THREE.CylinderGeometry(0.045, 0.055, 0.62, 12);
+  lampArmLow = new THREE.Mesh(armLowGeo, armMat);
+  lampArmLow.position.y = 0.31;
+  lampArmLow.castShadow = true;
+  lampPivotBase.add(lampArmLow);
+
+  // Spring coils on arm low
+  const springGeo = new THREE.TorusGeometry(0.055, 0.012, 8, 20, Math.PI*2);
+  const springMat = new THREE.MeshStandardMaterial({color:0xc8c0a8, roughness:.4, metalness:.6});
+  for(let i=0;i<3;i++){
+    const coil = new THREE.Mesh(springGeo, springMat);
+    coil.position.y = 0.10 + i*0.11;
+    coil.rotation.x = Math.PI/2;
+    lampArmLow.add(coil);
+  }
+
+  // ── PIVOT ELBOW: at top of arm low ──
+  // A strong positive-X rotation here folds arm-high forward-down
+  lampPivotElbow = new THREE.Group();
+  lampPivotElbow.position.y = 0.62;
+  lampPivotBase.add(lampPivotElbow);
+
+  const elbowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.072, 16, 16), darkMat);
+  lampPivotElbow.add(elbowMesh);
+
+  // Arm high: goes downward-forward from elbow
+  const armHighGeo = new THREE.CylinderGeometry(0.04, 0.048, 0.58, 12);
+  lampArmHigh = new THREE.Mesh(armHighGeo, armMat);
+  lampArmHigh.position.y = 0.29;
+  lampArmHigh.castShadow = true;
+  lampPivotElbow.add(lampArmHigh);
+
+  // ── PIVOT HEAD: at tip of arm high ──
+  lampPivotHead = new THREE.Group();
+  lampPivotHead.position.y = 0.58;
+  lampPivotElbow.add(lampPivotHead);
+
+  // Neck joint
+  const neck = new THREE.Mesh(new THREE.SphereGeometry(0.062, 16, 16), darkMat);
+  lampPivotHead.add(neck);
+
+  // Shade — open end faces -Y (downward) by default
+  const shadeGeo = new THREE.CylinderGeometry(0.23, 0.11, 0.30, 20, 1, true);
+  const shadeMat = new THREE.MeshStandardMaterial({color:LAMP_CREAM, roughness:.2, metalness:.4, side:THREE.DoubleSide});
+  lampHead = new THREE.Mesh(shadeGeo, shadeMat);
+  lampHead.position.y = -0.13;
+  lampHead.rotation.x = Math.PI;
+  lampHead.castShadow = true;
+  lampPivotHead.add(lampHead);
+
+  // Rim
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.014, 12, 32), darkMat);
+  rim.position.y = -0.28;
+  rim.rotation.x = Math.PI/2;
+  lampPivotHead.add(rim);
+
+  // Inside emissive
+  const insideGeo = new THREE.CylinderGeometry(0.22, 0.10, 0.29, 20, 1, true);
+  const insideMat = new THREE.MeshStandardMaterial({color:0xe8c060, roughness:.4, side:THREE.BackSide, emissive:0xffc030, emissiveIntensity:0.0});
+  lampBulb = new THREE.Mesh(insideGeo, insideMat);
+  lampBulb.position.y = -0.13;
+  lampBulb.rotation.x = Math.PI;
+  lampPivotHead.add(lampBulb);
+
+  // Bulb sphere
+  const bulbMat = new THREE.MeshStandardMaterial({color:LAMP_BULB, emissive:LAMP_BULB, emissiveIntensity:0.0, roughness:.1});
+  const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), bulbMat);
+  bulbMesh.position.y = -0.09;
+  lampPivotHead.add(bulbMesh);
+  lampBulb._bulbMesh = bulbMesh;
+
+  // SpotLight — target at -Y so it points where the open shade faces
+  lampLight = new THREE.SpotLight(0xffd060, 0.7, 5.5, Math.PI*0.26, 0.32, 1.0);
+  lampLight.position.set(0, -0.05, 0);
+  lampLight.target = new THREE.Object3D();
+  lampLight.target.position.set(0, -1.5, 0);
+  lampPivotHead.add(lampLight);
+  lampPivotHead.add(lampLight.target);
+  lampLight.castShadow = true;
+  lampLight.shadow.mapSize.set(512, 512);
+
+  // ── POSE ──
+  // The lamp faces +Z (South, dir=2). We want:
+  //   - arm-low leans BACKWARD  → negative X rotation on pivotBase
+  //   - elbow is BEHIND the lamp → achieved by backward lean + strong forward fold at elbow
+  //   - arm-high points FORWARD-DOWN → large positive X at elbow
+  //   - cone points FORWARD and slightly DOWN
+  lampPivotBase.rotation.x  = -0.72;  // lean whole assembly backward
+  lampPivotElbow.rotation.x =  1.85;  // fold arm-high strongly forward at elbow
+  lampPivotHead.rotation.x  = -1.55;  // raise head further so cone aims at tile ahead
+
+  lampGroup.position.set(0, 0.04, 0);
+}
+
+function setLampLightOn(on) {
+  // Lamp
+  lampLight.intensity = on ? 2.4 : 0.7;
+  lampBulb.material.emissiveIntensity = on ? 0.9 : 0.25;
+  if(lampBulb._bulbMesh) lampBulb._bulbMesh.material.emissiveIntensity = on ? 1.4 : 0.4;
+  // Bot antenna
+  if(botAntennaBall){
+    botAntennaBall.material.emissiveIntensity = on ? 1.8 : 0.0;
+    botAntennaBall.material.emissive.setHex(on ? 0xffd060 : 0x4488ff);
+    botAntennaBall.material.color.setHex(on ? 0xffd060 : 0x90aacc);
+    botAntennaPointLight.color.setHex(on ? 0xffd060 : 0x88ccff);
+    botAntennaPointLight.intensity = on ? 2.0 : 0.4;
+  }
+}
+
+// ---- BUILD ROBOT (Lightbot classic) ----
+function buildRobot() {
+  botGroup = new THREE.Group();
+  scene.add(botGroup);
+
+  const bodyMat  = new THREE.MeshStandardMaterial({color:0xb0bcd0, roughness:.3, metalness:.4});
+  const darkMat  = new THREE.MeshStandardMaterial({color:0x3a4560, roughness:.25, metalness:.6});
+  const eyeMat   = new THREE.MeshStandardMaterial({color:0xffffff, roughness:.1, metalness:.0, emissive:0xffffff, emissiveIntensity:.15});
+  const pupilMat = new THREE.MeshStandardMaterial({color:0x1a2040, roughness:.2});
+
+  // ── Feet (two small spheres at base) ──
+  for(let s of [-0.12, 0.12]){
+    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.10, 14, 10), bodyMat);
+    foot.scale.y = 0.75;
+    foot.position.set(s, 0.06, 0);
+    foot.castShadow = true;
+    botGroup.add(foot);
+  }
+
+  // ── Body (large sphere, slightly squashed) ──
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 16), bodyMat);
+  body.scale.y = 0.88;
+  body.position.y = 0.28;
+  body.castShadow = true;
+  botGroup.add(body);
+
+  // ── Neck connector ──
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.08, 12), darkMat);
+  neck.position.y = 0.52;
+  botGroup.add(neck);
+
+  // ── Head (round sphere) ──
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), bodyMat);
+  head.position.y = 0.68;
+  head.castShadow = true;
+  botGroup.add(head);
+
+  // ── Eyes (face toward +Z = South, matching lamp default orientation) ──
+  for(let [ex, ez] of [[-0.085, 0.16], [0.085, 0.16]]){
+    const eyeBase = new THREE.Mesh(new THREE.SphereGeometry(0.068, 14, 12), eyeMat);
+    eyeBase.position.set(ex, 0.70, ez);
+    botGroup.add(eyeBase);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.038, 12, 10), pupilMat);
+    pupil.position.set(ex*1.05, 0.70, ez*1.08);
+    botGroup.add(pupil);
+  }
+
+  // ── Nose (small bump on front face, reinforces +Z direction) ──
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8),
+    new THREE.MeshStandardMaterial({color:0x8898b0, roughness:.3, metalness:.3}));
+  nose.position.set(0, 0.66, 0.195);
+  botGroup.add(nose);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.28, 10), darkMat);
+  stem.position.y = 0.99;
+  botGroup.add(stem);
+
+  // ── Antenna ball (glows when lighting) ──
+  const antennaMat = new THREE.MeshStandardMaterial({
+    color: 0x90aacc, roughness:.15, metalness:.3,
+    emissive: 0x4488ff, emissiveIntensity: 0.0
+  });
+  botAntennaBall = new THREE.Mesh(new THREE.SphereGeometry(0.055, 14, 12), antennaMat);
+  botAntennaBall.position.y = 1.15;
+  botGroup.add(botAntennaBall);
+
+  // ── Point light from antenna ──
+  botAntennaPointLight = new THREE.PointLight(0x88ccff, 0.4, 3.0);
+  botAntennaPointLight.position.y = 1.15;
+  botGroup.add(botAntennaPointLight);
+
+  botGroup.position.set(0, 0.04, 0);
+}
+
+function selectRobot(type) {
+  activeRobot = type;
+  lampGroup.visible = (type === 'lamp');
+  botGroup.visible  = (type === 'bot');
+  antGroup.visible  = (type === 'ant');
+  document.getElementById('btn-robot-lamp').classList.toggle('active', type==='lamp');
+  document.getElementById('btn-robot-bot').classList.toggle('active', type==='bot');
+  document.getElementById('btn-robot-ant').classList.toggle('active', type==='ant');
+  if(robotState.row !== undefined){
+    updateLampPosition(robotState.row, robotState.col, robotState.dir, true);
+  }
+}
+
+// ---- BUILD ANT ----
+function buildAnt() {
+  antGroup = new THREE.Group();
+  scene.add(antGroup);
+
+  const bodyMat  = new THREE.MeshStandardMaterial({color:0xf0e8ff, roughness:.10, metalness:.80});
+  const jointMat = new THREE.MeshStandardMaterial({color:0x360c60, roughness:.20, metalness:.85});
+  const eyeMat   = new THREE.MeshStandardMaterial({color:0xdd55ff, roughness:.02, metalness:.0, emissive:0xcc00ff, emissiveIntensity:2.2});
+  const legMat   = new THREE.MeshStandardMaterial({color:0x360c60, roughness:.28, metalness:.82});
+
+  // ── Abdomen (upright, at the bottom — acts as the "torso base") ──
+  const abdomen = new THREE.Mesh(new THREE.SphereGeometry(0.20, 16, 12), bodyMat);
+  abdomen.scale.set(0.85, 1.3, 0.9);
+  abdomen.position.set(0, 0.22, 0.08);
+  abdomen.castShadow = true;
+  antGroup.add(abdomen);
+
+  // ── Petiole (narrow waist) ──
+  const waist = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), jointMat);
+  waist.position.set(0, 0.50, 0.04);
+  antGroup.add(waist);
+
+  // ── Thorax (upright middle section) ──
+  const thorax = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), bodyMat);
+  thorax.scale.set(0.9, 1.1, 0.9);
+  thorax.position.set(0, 0.63, 0.00);
+  thorax.castShadow = true;
+  antGroup.add(thorax);
+
+  // ── Neck ──
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.034, 0.08, 10), jointMat);
+  neck.position.set(0, 0.78, -0.02);
+  antGroup.add(neck);
+
+  // ── Head ──
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 14), bodyMat);
+  head.scale.set(1.05, 1.0, 1.0);
+  head.position.set(0, 0.88, -0.03);
+  head.castShadow = true;
+  antGroup.add(head);
+
+  // ── Eyes ──
+  for(let ex of [-0.075, 0.075]){
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.030, 10, 8), eyeMat);
+    eye.position.set(ex, 0.90, -0.12);
+    antGroup.add(eye);
+  }
+
+  // ── Mandibles (small curved bumps at front of head) ──
+  for(let mx of [-0.055, 0.055]){
+    const mand = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 6), jointMat);
+    mand.scale.set(1, 0.6, 1.4);
+    mand.position.set(mx, 0.84, -0.15);
+    antGroup.add(mand);
+  }
+
+  // ── Antennae — two segments pointing forward-up ──
+  antAntennae = [];
+  for(let side of [-1, 1]){
+    const base = new THREE.Group();
+    base.position.set(side*0.07, 0.93, -0.05);
+    antGroup.add(base);
+
+    // Segment 1: goes up and forward
+    const seg1 = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.010, 0.014, 0.20, 8), jointMat);
+    seg1.rotation.x = -0.55;
+    seg1.rotation.z = side * 0.28;
+    seg1.position.set(side*0.03, 0.09, -0.07);
+    base.add(seg1);
+
+    // Segment 2: bends more forward
+    const seg2 = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.007, 0.010, 0.16, 8), jointMat);
+    seg2.rotation.x = -1.0;
+    seg2.rotation.z = side * 0.4;
+    seg2.position.set(side*0.06, 0.20, -0.16);
+    base.add(seg2);
+
+    // Tip ball (glowing red)
+    const tip = new THREE.Mesh(
+      new THREE.SphereGeometry(0.020, 10, 8),
+      new THREE.MeshStandardMaterial({color:0xff0000, roughness:.02,
+        emissive:0xff0000, emissiveIntensity:2.2}));
+    tip.position.set(side*0.09, 0.28, -0.25);
+    base.add(tip);
+    antAntennae.push(tip);
+  }
+
+  // ── Rear legs (2) — planted on ground, supporting upright posture ──
+  antLegs = [];
+  for(let side of [-1, 1]){
+    const leg = new THREE.Group();
+    leg.position.set(side*0.14, 0.18, 0.12);
+    antGroup.add(leg);
+
+    // Upper rear leg: goes outward and down
+    const upper = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.013, 0.017, 0.22, 8), legMat);
+    upper.rotation.z = side * 0.9;
+    upper.rotation.x = 0.5;
+    upper.position.set(side*0.07, -0.07, 0.06);
+    leg.add(upper);
+
+    // Lower rear leg: goes more down to ground
+    const lower = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.010, 0.013, 0.20, 8), legMat);
+    lower.rotation.z = side * 0.6;
+    lower.rotation.x = 0.9;
+    lower.position.set(side*0.15, -0.17, 0.13);
+    leg.add(lower);
+
+    // Foot
+    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 6), legMat);
+    foot.position.set(side*0.20, -0.26, 0.18);
+    leg.add(foot);
+
+    antLegs.push(leg);
+  }
+
+  // ── Front 4 legs — raised/gesturing forward, 2 pairs ──
+  const frontLegDefs = [
+    // [side, yOffset, zOffset, upperRotZ, lowerRotZ, upperRotX]
+    [-1,  0.68, -0.02,  1.5, 1.1, -0.8],
+    [ 1,  0.68, -0.02, -1.5,-1.1, -0.8],
+    [-1,  0.58,  0.04,  1.3, 0.9, -0.5],
+    [ 1,  0.58,  0.04, -1.3,-0.9, -0.5],
+  ];
+  for(let [side, ly, lz, urz, lrz, urx] of frontLegDefs){
+    const leg = new THREE.Group();
+    leg.position.set(side*0.11, ly, lz);
+    antGroup.add(leg);
+
+    const upper = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.011, 0.015, 0.18, 8), legMat);
+    upper.rotation.z = urz;
+    upper.rotation.x = urx;
+    upper.position.set(side*0.06, 0.05, -0.04);
+    leg.add(upper);
+
+    const lower = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.008, 0.011, 0.15, 8), legMat);
+    lower.rotation.z = lrz;
+    lower.rotation.x = urx - 0.4;
+    lower.position.set(side*0.13, 0.10, -0.09);
+    leg.add(lower);
+
+    antLegs.push(leg);
+  }
+
+  // ── Arc line placeholder ──
+  antArcLine = null;
+
+  antGroup.position.set(0, 0, 0);
+  antGroup.rotation.y = Math.PI;
+}
+function triggerAntArc() {
+  // Remove old arc
+  if(antArcLine){ antGroup.remove(antArcLine); antArcLine = null; }
+
+  // Build a jagged red arc between the two antenna tips using world→local transform
+  const pts = [];
+  const nSeg = 10;
+  // Antenna tips are in antAntennae[0] and [1] — get their world positions
+  const p0 = new THREE.Vector3(); antAntennae[0].getWorldPosition(p0);
+  const p1 = new THREE.Vector3(); antAntennae[1].getWorldPosition(p1);
+  antGroup.worldToLocal(p0); antGroup.worldToLocal(p1);
+
+  for(let i=0; i<=nSeg; i++){
+    const t = i/nSeg;
+    const x = p0.x + (p1.x-p0.x)*t + (i>0&&i<nSeg ? (Math.random()-.5)*0.06 : 0);
+    const y = p0.y + (p1.y-p0.y)*t + (i>0&&i<nSeg ? (Math.random()-.5)*0.05 : 0);
+    const z = p0.z + (p1.z-p0.z)*t + (i>0&&i<nSeg ? (Math.random()-.5)*0.04 : 0);
+    pts.push(new THREE.Vector3(x, y, z));
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const mat = new THREE.LineBasicMaterial({color:0xcc22ff, linewidth:2,
+    transparent:true, opacity:1.0});
+  antArcLine = new THREE.Line(geo, mat);
+  antGroup.add(antArcLine);
+  antArcActive = true;
+  antArcTimer = 0;
+}
+
+// ---- BUILD GRID ----
+let markerMeshes = [];
+
+function buildGrid(grid) {
+  // Remove old tiles and markers
+  tileMeshes.forEach(row => { if(Array.isArray(row)) row.forEach(m => { if(m) scene.remove(m); }); });
+  markerMeshes.forEach(m => scene.remove(m));
+  tileMeshes = [];
+  markerMeshes = [];
+
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const offX = -(cols-1)*STEP/2;
+  const offZ = -(rows-1)*STEP/2;
+
+  for(let r=0;r<rows;r++){
+    tileMeshes[r] = [];
+    for(let c=0;c<cols;c++){
+      const v = grid[r][c];
+      if(isEmpty(v)){ tileMeshes[r][c]=null; continue; }
+
+      // Tile body — stacked height
+      const th = tileHeight(v);
+      const tt = tileType(v);
+      const tileH = 0.18 + th * 0.28; // total height of stack
+      const geo = new THREE.BoxGeometry(TILE_SIZE, tileH, TILE_SIZE);
+      let mat = tt===1 ? matFloor() : tt===2 ? matTarget() : matLit();
+      // Add height tint for stacked tiles
+      if(th>0 && tt===1){
+        mat = new THREE.MeshStandardMaterial({color: th===1?0x2e3e5a:th===2?0x344568:0x3a4d78, roughness:.75, metalness:.15});
+      }
+      const mesh = new THREE.Mesh(geo, mat);
+      const tileTopY = th * 0.28; // top surface Y
+      mesh.position.set(offX + c*STEP, tileTopY - tileH/2, offZ + r*STEP);
+      mesh.receiveShadow = true;
+      mesh.castShadow = true;
+      scene.add(mesh);
+      tileMeshes[r][c] = mesh;
+      mesh._topY = tileTopY; // store top surface
+
+      // Star marker for target
+      if(tileType(v)===2||tileType(v)===3){
+        // Build a 5-pointed star shape
+        const starShape = new THREE.Shape();
+        const spikes = 5, outerR = 0.13, innerR = 0.055;
+        for(let i=0;i<spikes*2;i++){
+          const r = i%2===0 ? outerR : innerR;
+          const angle = (i / (spikes*2)) * Math.PI*2 - Math.PI/2;
+          i===0 ? starShape.moveTo(Math.cos(angle)*r, Math.sin(angle)*r)
+                : starShape.lineTo(Math.cos(angle)*r, Math.sin(angle)*r);
+        }
+        starShape.closePath();
+        const starGeo = new THREE.ExtrudeGeometry(starShape, {depth:0.022, bevelEnabled:false});
+        const markerMat = new THREE.MeshStandardMaterial({
+          color: tileType(v)===3 ? 0xffd060 : 0x6b5000,
+          emissive: tileType(v)===3 ? 0xffd060 : 0x3a2800,
+          emissiveIntensity: v===3 ? 0.7 : 0.4,
+          roughness:.4, metalness:.2
+        });
+        const marker = new THREE.Mesh(starGeo, markerMat);
+        // Star is in XY plane, rotate to lie flat on tile (XZ plane)
+        marker.rotation.x = -Math.PI/2;
+        const mTopY = tileHeight(v)*0.28 + 0.01;
+        marker.position.set(offX+c*STEP, mTopY, offZ+r*STEP);
+        scene.add(marker);
+        markerMeshes.push(marker);
+        mesh._marker = marker;
+      }
+    }
+  }
+
+  // Reposition camera
+  const cx = 0, cz = 0;
+  const dist = Math.max(cols,rows)*STEP * 1.15;
+  camera.position.set(cx + dist*0.6, dist*0.85, cz + dist*0.95);
+  camera.lookAt(cx, 0, cz);
+}
+
+function tileWorldPos(row, col) {
+  const rows = gridState.length;
+  const cols = gridState[0].length;
+  const offX = -(cols-1)*STEP/2;
+  const offZ = -(rows-1)*STEP/2;
+  const v = gridState[row][col];
+  const topY = tileHeight(v) * 0.28;
+  return new THREE.Vector3(offX+col*STEP, topY, offZ+row*STEP);
+}
+
+function updateLampPosition(row, col, dir, instant) {
+  const pos = tileWorldPos(row, col);
+  const yRot = [Math.PI, Math.PI/2, 0, -Math.PI/2][dir]; // N E S W
+
+  // Apply to both groups (only active one is visible)
+  for(const g of [lampGroup, botGroup, antGroup]){
+    if(!g) continue;
+    // Ant has a built-in PI offset so it faces +Z like the others
+    const rot = (g === antGroup) ? yRot + Math.PI : yRot;
+    if(instant){
+      g.position.set(pos.x, pos.y + 0.04, pos.z);
+      g.rotation.y = rot;
+    }
+    g._targetX  = pos.x;
+    g._targetY  = pos.y + 0.04;
+    g._targetZ  = pos.z;
+    g._targetRY = rot;
+  }
+}
+
+// ---- ANIMATION LOOP ----
+let clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Gentle idle breathe on X axis (forward lean pose) — lamp only
+  if(!running && lampGroup && lampGroup.visible){
+    lampPivotBase.rotation.x  = -0.72 + Math.sin(t*0.7)*0.03;
+    lampPivotElbow.rotation.x =  1.85 + Math.sin(t*0.9+1)*0.04;
+    lampPivotHead.rotation.x  = -1.55 + Math.sin(t*0.6+2)*0.025;
+  }
+
+  // Smooth movement for active robot group
+  for(const g of [lampGroup, botGroup, antGroup]){
+    if(!g || g._targetX === undefined) continue;
+    g.position.x += (g._targetX - g.position.x)*0.18;
+    g.position.y += ((g._targetY||0.04) - g.position.y)*0.18;
+    g.position.z += (g._targetZ - g.position.z)*0.18;
+    let dR = g._targetRY - g.rotation.y;
+    if(dR > Math.PI) dR -= Math.PI*2;
+    if(dR < -Math.PI) dR += Math.PI*2;
+    g.rotation.y += dR * 0.18;
+  }
+  // Bot idle: gentle bounce
+  if(!running && botGroup && botGroup.visible){
+    botGroup.position.y = (botGroup._targetY||0.04) + Math.sin(t*1.8)*0.015;
+    botAntennaBall.position.y = 1.15 + Math.sin(t*2.2)*0.02;
+  }
+
+  // Ant idle: rear legs sway, front legs gesture, body sways
+  if(antGroup && antGroup.visible){
+    // Gentle body sway
+    antGroup.position.y = (antGroup._targetY||0.04) + Math.sin(t*1.4)*0.012;
+    antGroup.rotation.z = Math.sin(t*1.4)*0.025;
+    // Rear legs (indices 0-1): subtle ground contact sway
+    if(antLegs[0]) antLegs[0].rotation.x = Math.sin(t*1.8)*0.08;
+    if(antLegs[1]) antLegs[1].rotation.x = Math.sin(t*1.8+Math.PI)*0.08;
+    // Front legs (indices 2-5): expressive forward gestures
+    for(let i=2; i<antLegs.length; i++){
+      if(antLegs[i]) antLegs[i].rotation.x = Math.sin(t*1.6 + i*0.9)*0.15;
+    }
+    if(antArcActive && antArcLine){
+      antArcTimer += 0.016;
+      if(antArcTimer < 0.4){
+        const pts2 = [];
+        const p0 = new THREE.Vector3(); antAntennae[0].getWorldPosition(p0);
+        const p1 = new THREE.Vector3(); antAntennae[1].getWorldPosition(p1);
+        antGroup.worldToLocal(p0); antGroup.worldToLocal(p1);
+        for(let i=0; i<=12; i++){
+          const tt=i/12;
+          pts2.push(new THREE.Vector3(
+            p0.x+(p1.x-p0.x)*tt+(i>0&&i<12?(Math.random()-.5)*0.07:0),
+            p0.y+(p1.y-p0.y)*tt+(i>0&&i<12?(Math.random()-.5)*0.06:0),
+            p0.z+(p1.z-p0.z)*tt+(i>0&&i<12?(Math.random()-.5)*0.04:0)));
+        }
+        antArcLine.geometry.setFromPoints(pts2);
+        antArcLine.material.opacity = 1.0 - antArcTimer/0.4;
+      } else {
+        antGroup.remove(antArcLine); antArcLine=null; antArcActive=false;
+      }
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ---- LIGHT UP TILE ----
+function lightTile(row, col) {
+  const mesh = tileMeshes[row] && tileMeshes[row][col];
+  if(!mesh) return;
+  mesh.material = matLit();
+
+  if(mesh._marker){
+    mesh._marker.material.color.setHex(0xffd060);
+    mesh._marker.material.emissive.setHex(0xffd060);
+    mesh._marker.material.emissiveIntensity = 0.7;
+  }
+
+  // Brief local glow
+  const glow = new THREE.PointLight(0xffd060, 2, 2);
+  glow.position.copy(mesh.position).y += 0.5;
+  scene.add(glow);
+  setTimeout(()=>{ scene.remove(glow); }, 600);
+}
+
+// ===================== SOUND ENGINE =====================
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx() {
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const el = document.getElementById('sound-toggle');
+  const lb = document.getElementById('sound-label');
+  el.classList.toggle('on', soundEnabled);
+  lb.textContent = soundEnabled ? 'Son activé' : 'Son coupé';
+}
+
+// Generic tone builder
+function playTone(freq, type, duration, gainVal, delay=0, detune=0) {
+  if(!soundEnabled) return;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+  osc.detune.setValueAtTime(detune, ctx.currentTime + delay);
+  gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + delay + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+  osc.start(ctx.currentTime + delay);
+  osc.stop(ctx.currentTime + delay + duration + 0.02);
+}
+
+function playNoise(duration, gainVal, filterFreq=800, delay=0) {
+  if(!soundEnabled) return;
+  const ctx = getAudioCtx();
+  const bufLen = ctx.sampleRate * duration;
+  const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0; i<bufLen; i++) data[i] = Math.random()*2-1;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const filt = ctx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.frequency.setValueAtTime(filterFreq, ctx.currentTime);
+  const gain = ctx.createGain();
+  src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(gainVal, ctx.currentTime + delay);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+  src.start(ctx.currentTime + delay);
+  src.stop(ctx.currentTime + delay + duration + 0.02);
+}
+
+// ── Sound effects per action ──
+const SFX = {
+  // Forward step: short mechanical click
+  fwd() {
+    playTone(180, 'square', 0.06, 0.12);
+    playNoise(0.05, 0.06, 400);
+  },
+  // Turn left: descending whoosh
+  left() {
+    const ctx = getAudioCtx(); if(!soundEnabled) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(320, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime+0.12);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.14);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.16);
+  },
+  // Turn right: ascending whoosh
+  right() {
+    const ctx = getAudioCtx(); if(!soundEnabled) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(180, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime+0.12);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.14);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.16);
+  },
+  // Jump: boing spring
+  jump() {
+    const ctx = getAudioCtx(); if(!soundEnabled) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(260, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime+0.08);
+    osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime+0.22);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.25);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.27);
+  },
+  // Light: bright ding + sparkle
+  light() {
+    playTone(880, 'sine', 0.25, 0.18);
+    playTone(1320, 'sine', 0.20, 0.10, 0.02);
+    playTone(1760, 'sine', 0.15, 0.07, 0.04);
+    playNoise(0.08, 0.05, 2000, 0.01);
+  },
+  // Win fanfare
+  win() {
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((f, i) => {
+      playTone(f, 'sine', 0.3, 0.18, i*0.12);
+      playTone(f*1.5, 'triangle', 0.2, 0.08, i*0.12+0.05);
+    });
+  },
+  // Error: low buzzer
+  error() {
+    playTone(120, 'sawtooth', 0.18, 0.15);
+    playTone(90, 'square', 0.15, 0.08, 0.05);
+  },
+  // Button click (add to slot)
+  click() {
+    playTone(440, 'sine', 0.06, 0.08);
+  },
+  // Reset
+  reset() {
+    playTone(300, 'triangle', 0.08, 0.1);
+    playTone(200, 'triangle', 0.08, 0.08, 0.06);
+  },
+};
+
+// ===================== GAME LOGIC =====================
+function initLevel(idx) {
+  currentLevel = idx;
+  const lv = LEVELS[idx];
+  programs = {main:[]};
+  lv.procs.forEach(p => programs[p.id]=[]);
+  gridState = lv.grid.map(r=>[...r]);
+  robotState = {...lv.robot};
+
+  document.getElementById('hdr-level').textContent = idx+1;
+  document.getElementById('lv-tag').textContent = lv.tag;
+  document.getElementById('lv-desc').textContent = lv.desc;
+  document.getElementById('hint-box').innerHTML = lv.hint;
+  setStatus('','');
+
+  renderDots();
+  buildGrid(gridState);
+  updateLampPosition(robotState.row, robotState.col, robotState.dir, true);
+  setLampLightOn(false);
+  renderPalette();
+  renderPrograms();
+}
+
+// Series color map (0-indexed level ranges)
+const SERIES_COLORS = [
+  [0,  5,  '#4b5563', '#6b7280'],  // S1: plat sans proc
+  [6,  14, '#1d4ed8', '#3b82f6'],  // S2: saut sans proc
+  [15, 21, '#c2410c', '#f97316'],  // S3: 1 proc
+  [22, 27, '#7e22ce', '#a855f7'],  // S4: 2 proc plat/mixte
+  [28, 34, '#991b1b', '#ef4444'],  // S5: 2 proc saut difficile
+];
+function getSeriesColor(i, done) {
+  for(const [s,e,dark,light] of SERIES_COLORS)
+    if(i>=s && i<=e) return done ? light : dark;
+  return '#6b7280';
+}
+
+function renderDots(){
+  const c=document.getElementById('level-dots'); c.innerHTML='';
+  LEVELS.forEach((_,i)=>{
+    const d=document.createElement('div');
+    const isDone = i < currentLevel;
+    const isActive = i === currentLevel;
+    const col = getSeriesColor(i, isDone || isActive);
+    if(isActive){
+      d.className='level-dot active';
+      d.style.background = col;
+      d.style.boxShadow = `0 0 6px ${col}`;
+    } else if(isDone){
+      d.className='level-dot done';
+      d.style.background = col;
+      d.style.opacity = '0.5';
+    } else {
+      d.className='level-dot';
+      d.style.background = col;
+      d.style.opacity = '0.35';
+    }
+    d.title=`Niveau ${i+1}`;
+    if(!isActive){ d.onclick=()=>{ if(!running) initLevel(i); }; }
+    c.appendChild(d);
+  });
+  // Insert separators between series
+  const dots = c.querySelectorAll('.level-dot');
+  const breaks = [5,14,21,27]; // after these 0-indexed levels, insert gap
+  breaks.forEach(b => {
+    if(dots[b]) dots[b].style.marginRight = '6px';
+  });
+}
+
+function renderPalette(){
+  const lv=LEVELS[currentLevel];
+  const pal=document.getElementById('palette'); pal.innerHTML='';
+  ['fwd','left','right','jump','light','p1','p2'].forEach(id=>{
+    const cmd=CMDS[id];
+    const btn=document.createElement('button');
+    btn.className='cmd-btn '+cmd.cls;
+    btn.innerHTML=`<span>${cmd.emoji}</span>`;
+    if(cmd.label) btn.innerHTML+=`<span class="cmd-label">${cmd.label}</span>`;
+    if(!lv.unlocked.includes(id)) btn.classList.add('locked');
+    else btn.onclick=()=>addToFocused(id);
+    pal.appendChild(btn);
+  });
+}
+
+function renderPrograms(){
+  const lv=LEVELS[currentLevel];
+  renderSlots('main','slots-main',lv.mainSlots);
+  const pc=document.getElementById('proc-container'); pc.innerHTML='';
+  lv.procs.forEach(proc=>{
+    const wrap=document.createElement('div');
+    wrap.innerHTML=`<div class="panel-title">Procédure</div>`;
+    const block=document.createElement('div');
+    block.className='program-block';
+    block.id='block-'+proc.id;
+    block.innerHTML=`<div class="prog-header"><span class="prog-tag ${proc.color}">${proc.label}</span> ${proc.id.toUpperCase()}</div><div class="slots" id="slots-${proc.id}"></div>`;
+    wrap.appendChild(block);
+    pc.appendChild(wrap);
+    renderSlots(proc.id,`slots-${proc.id}`,proc.slots);
+  });
+  setFocus('main');
+  // Click to focus
+  document.querySelectorAll('.program-block').forEach(b=>{
+    b.onclick=()=>{
+      const s=b.querySelector('.slots');
+      if(s) setFocus(s.id.replace('slots-',''));
+    };
+  });
+}
+
+function renderSlots(progId,containerId,max){
+  const el=document.getElementById(containerId); if(!el) return;
+  el.innerHTML='';
+  const prog=programs[progId]||[];
+  for(let i=0;i<max;i++){
+    const s=document.createElement('div');
+    s.className='slot';
+    if(i<prog.length){
+      const id=prog[i];
+      s.className=`slot filled ${CMDS[id].cls}`;
+      s.textContent=CMDS[id].emoji;
+      s.title='Clic pour supprimer';
+      const idx=i;
+      s.onclick=(e)=>{ e.stopPropagation(); removeCmd(progId,idx,containerId,max); };
+    }
+    el.appendChild(s);
+  }
+  highlightFocused();
+}
+
+function setFocus(id){
+  focusedProg=id;
+  highlightFocused();
+}
+function highlightFocused(){
+  document.querySelectorAll('.program-block').forEach(b=>b.style.borderColor='');
+  const block=document.getElementById('block-'+focusedProg)||document.getElementById('block-main');
+  if(block){
+    const col = focusedProg==='main'?'var(--accent2)':focusedProg==='p1'?'var(--proc1)':'var(--proc2)';
+    block.style.borderColor=col;
+  }
+}
+function addToFocused(cmdId){
+  const lv=LEVELS[currentLevel];
+  let max=lv.mainSlots;
+  if(focusedProg!=='main'){ const p=lv.procs.find(x=>x.id===focusedProg); if(p) max=p.slots; }
+  if(programs[focusedProg].length>=max){ setStatus('Programme plein !','err'); return; }
+  if(cmdId===focusedProg){ setStatus('Récursion directe non autorisée.','err'); return; }
+  SFX.click();
+  programs[focusedProg].push(cmdId);
+  renderSlots(focusedProg,`slots-${focusedProg}`,max);
+  setFocus(focusedProg);
+}
+function removeCmd(progId,idx,containerId,max){
+  programs[progId].splice(idx,1);
+  renderSlots(progId,containerId,max);
+  setFocus(progId);
+}
+
+// ---- HIGHLIGHT EXECUTING SLOT ----
+function highlightSlot(progId,idx){
+  document.querySelectorAll('.slot.executing').forEach(s=>s.classList.remove('executing'));
+  if(progId===null) return;
+  const el=document.getElementById(`slots-${progId}`);
+  if(!el) return;
+  const slots=el.querySelectorAll('.slot');
+  if(slots[idx]) slots[idx].classList.add('executing');
+}
+
+// ---- RUN ----
+async function runProgram(){
+  if(running) return;
+  running=true;
+  document.getElementById('btn-run').disabled=true;
+  setStatus('Exécution...','run');
+
+  gridState=LEVELS[currentLevel].grid.map(r=>[...r]);
+  robotState={...LEVELS[currentLevel].robot};
+  buildGrid(gridState);
+  updateLampPosition(robotState.row,robotState.col,robotState.dir,true);
+  setLampLightOn(false);
+
+  try {
+    await executeProgram('main',0);
+    highlightSlot(null,-1);
+    checkWin();
+  } catch(e){
+    highlightSlot(null,-1);
+    SFX.error();
+    setStatus(e.message||'Erreur !','err');
+  }
+
+  running=false;
+  document.getElementById('btn-run').disabled=false;
+}
+
+const DELAY=420;
+function sleep(ms){ return new Promise(r=>{ animTimeout=setTimeout(r,ms); }); }
+
+async function executeProgram(progId,depth){
+  if(depth>60) throw new Error('Trop de récursions !');
+  const prog=programs[progId]||[];
+  for(let i=0;i<prog.length;i++){
+    const cmd=prog[i];
+    highlightSlot(progId,i);
+    if(cmd==='p1'||cmd==='p2'){
+      await executeProgram(cmd,depth+1);
+      highlightSlot(progId,i);
+    } else {
+      await executeCmd(cmd);
+    }
+  }
+  highlightSlot(null,-1);
+}
+
+async function executeCmd(cmd){
+  const {row,col,dir}=robotState;
+  if(cmd==='fwd'){
+    SFX.fwd();
+    const dR=[-1,0,1,0][dir], dC=[0,1,0,-1][dir];
+    const nr=row+dR, nc=col+dC;
+    const rows=gridState.length, cols=gridState[0].length;
+    if(nr<0||nr>=rows||nc<0||nc>=cols||isEmpty(gridState[nr][nc]))
+      throw new Error('La lampe est tombée dans le vide !');
+    // Check height: can only step to same level or 1 down (not up) with fwd
+    const curH = tileHeight(gridState[row][col]);
+    const nxtH = tileHeight(gridState[nr][nc]);
+    if(nxtH > curH) throw new Error('Trop haut ! Utilisez ⬆ pour sauter.');
+    // Falling down any number of steps is fine
+    robotState.row=nr; robotState.col=nc;
+    if(LEVELS[currentLevel].autoLight && tileType(gridState[nr][nc])===2){
+      gridState[nr][nc] = nxtH*10+3;
+      lightTile(nr,nc);
+    }
+    updateLampPosition(nr,nc,dir,false);
+    await jumpAnimation(false);
+
+  } else if(cmd==='left'){
+    SFX.left();
+    robotState.dir=(dir+3)%4;
+    updateLampPosition(row,col,robotState.dir,false);
+  } else if(cmd==='right'){
+    SFX.right();
+    robotState.dir=(dir+1)%4;
+    updateLampPosition(row,col,robotState.dir,false);
+  } else if(cmd==='jump'){
+    SFX.jump();
+    // Jump: can go up exactly 1 step, or down any number
+    const dR=[-1,0,1,0][dir], dC=[0,1,0,-1][dir];
+    const nr=row+dR, nc=col+dC;
+    const rows=gridState.length, cols=gridState[0].length;
+    if(nr<0||nr>=rows||nc<0||nc>=cols||isEmpty(gridState[nr][nc]))
+      throw new Error('La lampe saute dans le vide !');
+    const curH = tileHeight(gridState[row][col]);
+    const nxtH = tileHeight(gridState[nr][nc]);
+    if(nxtH > curH+1) throw new Error('Trop haut pour sauter !');
+    robotState.row=nr; robotState.col=nc;
+    if(LEVELS[currentLevel].autoLight && tileType(gridState[nr][nc])===2){
+      gridState[nr][nc] = nxtH*10+3;
+      lightTile(nr,nc);
+    }
+    updateLampPosition(nr,nc,dir,false);
+    await jumpAnimation(nxtH > curH);
+
+  } else if(cmd==='light'){
+    const {row:r,col:c}=robotState;
+    if(tileType(gridState[r][c])===2){
+      SFX.light();
+      const h=tileHeight(gridState[r][c]);
+      gridState[r][c]=h*10+3;
+      lightTile(r,c);
+      await lightAnimation();
+    }
+  }
+  await sleep(DELAY);
+}
+
+function jumpAnimation(up=false){
+  return new Promise(res => {
+    const g = activeRobot === 'bot' ? botGroup : activeRobot === 'ant' ? antGroup : lampGroup;
+    const startY = g.position.y;
+    const targetY = g._targetY || startY;
+    const arcH = up ? 0.45 : 0.22;
+    let t = 0;
+    const hop = setInterval(()=>{
+      t += 0.10;
+      const baseY = startY + (targetY - startY) * t;
+      g.position.y = baseY + Math.sin(t * Math.PI) * arcH;
+      if(t >= 1){
+        g.position.y = targetY;
+        clearInterval(hop);
+        res();
+      }
+    }, 18);
+  });
+}
+
+async function lightAnimation(){
+  if(activeRobot === 'ant'){
+    // Ant: electric arc between antennae
+    triggerAntArc();
+    await sleep(420);
+  } else if(activeRobot === 'bot'){
+    // Bot: antenna flashes bright then goes back off
+    setLampLightOn(true);
+    const origY = botGroup.position.y;
+    botGroup.position.y = origY + 0.08;
+    await sleep(150);
+    botGroup.position.y = origY;
+    await sleep(150);
+    setLampLightOn(false);
+  } else {
+    // Lamp: head dips forward
+    const origX = lampPivotHead.rotation.x;
+    lampPivotHead.rotation.x = origX - 0.35;
+    setLampLightOn(true);
+    await sleep(300);
+    lampPivotHead.rotation.x = origX;
+    await sleep(80);
+  }
+}
+
+function checkWin(){
+  let remaining=0;
+  for(let r=0;r<gridState.length;r++)
+    for(let c=0;c<gridState[0].length;c++)
+      if(tileType(gridState[r][c])===2) remaining++;
+  if(remaining===0){ setLampLightOn(true); showWin(); }
+  else setStatus(`Il reste ${remaining} case(s) à allumer.`,'err');
+}
+
+function showWin(){
+  SFX.win();
+  const isLast=currentLevel===LEVELS.length-1;
+  document.getElementById('ov-emoji').textContent=isLast?'🏆':'⭐';
+  document.getElementById('ov-title').textContent=isLast?'Félicitations !':'Niveau réussi !';
+  document.getElementById('ov-sub').textContent=isLast
+    ?'Tu as terminé tous les niveaux. Bravo !'
+    :'Toutes les cases sont allumées !';
+  document.getElementById('ov-next').textContent=isLast?'↩ Recommencer':'→ Suivant';
+  document.getElementById('ov-next').onclick=isLast?()=>{hideOverlay();initLevel(0);}:nextLevel;
+  document.getElementById('overlay').classList.add('show');
+}
+function hideOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+function nextLevel(){ hideOverlay(); if(currentLevel<LEVELS.length-1) initLevel(currentLevel+1); }
+function resetLevel(){ SFX.reset(); if(animTimeout) clearTimeout(animTimeout); running=false; initLevel(currentLevel); }
+function setStatus(msg,type){
+  const el=document.getElementById('status-msg');
+  el.textContent=msg||'Place tes instructions puis lance le programme.';
+  el.className='status-msg'+(type?' '+type:'');
+}
+
+// ===================== BOOT =====================
+initThree();
+initLevel(0);
+</script>
+  <div style="position:fixed;bottom:6px;left:50%;transform:translateX(-50%);
+    font-family:'Space Mono',monospace;font-size:.48rem;color:#4a5270;
+    letter-spacing:.06em;white-space:nowrap;pointer-events:none;z-index:50;">
+    Vibe Codé avec Claude Sonnet&nbsp;4.6 (Anthropic) par Olivier&nbsp;Thöni, sur une idée originale de Danny&nbsp;Yaroslavski
+  </div>
+</body>
+</html>

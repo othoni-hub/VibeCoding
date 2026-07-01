@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LogoKids</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#171b26;--surface2:#1e2333;--surface3:#252b3d;
+  --border:#2e3550;--accent:#00e5a0;--adim:rgba(0,229,160,0.12);
+  --text:#e8eaf2;--muted:#7a82a0;--dim:#4a5270;
+  --yellow:#ffcc44;--blue:#5599ff;--red:#ff4455;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+header{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.lm{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#000;flex-shrink:0;}
+.lt{font-size:17px;font-weight:700;letter-spacing:-0.5px;}
+.ls{font-size:11px;color:var(--muted);}
+.ha{margin-left:auto;display:flex;gap:6px;}
+.btn{padding:6px 13px;border-radius:8px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;transition:all 0.15s;}
+.brun{background:var(--accent);color:#000;}.brun:hover{background:#00ffb2;}
+.bsec{background:var(--surface3);color:var(--muted);border:1px solid var(--border);}
+.bsec:hover{color:var(--text);}
+.bdanger:hover{color:var(--red);border-color:var(--red);}
+.bfile{background:var(--surface3);color:var(--blue);border:1px solid rgba(85,153,255,0.3);}
+.bfile:hover{border-color:var(--blue);}
+#fi{display:none;}
+.ws{display:grid;grid-template-columns:370px 1fr 265px;flex:1;min-height:0;}
+.ep{display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--border);min-height:0;}
+.ph{padding:8px 14px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.pd{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+.ew{display:flex;flex:1;min-height:0;}
+#ln{width:36px;padding:14px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:20.8px;color:var(--dim);user-select:none;background:var(--surface2);border-right:1px solid var(--border);overflow:hidden;flex-shrink:0;}
+#ln span{display:block;padding-right:8px;}
+#ed{flex:1;background:transparent;border:none;outline:none;resize:none;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:20.8px;color:var(--text);padding:14px 12px;caret-color:var(--accent);tab-size:2;white-space:pre;overflow-wrap:normal;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#ed::selection{background:rgba(0,229,160,0.25);}
+.cp{display:flex;flex-direction:column;background:var(--bg);min-height:0;}
+.cw{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;min-height:0;}
+#tc{border-radius:var(--r);border:1px solid var(--border);background:#111520;max-width:100%;max-height:100%;}
+.cb{height:126px;border-top:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;flex-shrink:0;}
+#co{flex:1;overflow-y:scroll;padding:5px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.cl{white-space:pre-wrap;word-break:break-all;}
+.cok{color:var(--accent);}.cerr{color:var(--red);}.cinf{color:var(--blue);}.cpr{color:var(--yellow);}
+.rp{display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--border);min-height:0;}
+.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.tab{flex:1;padding:8px 4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--dim);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all 0.15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tc{display:none;flex:1;overflow-y:scroll;padding:10px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0;}
+.tc.active{display:block;}
+.rs{margin-bottom:11px;}
+.rt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:4px;}
+.ri{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 9px;margin-bottom:3px;cursor:pointer;transition:border-color 0.12s;}
+.ri:hover{border-color:var(--accent);background:var(--adim);}
+.rc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;}
+.rd{font-size:10px;color:var(--muted);margin-top:1px;}
+.ec{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;cursor:pointer;transition:border-color 0.12s;}
+.ec:hover{border-color:var(--accent);}
+.en{font-size:13px;font-weight:600;margin-bottom:2px;}
+.ed2{font-size:11px;color:var(--muted);}
+.ecode{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-top:5px;white-space:pre;overflow:hidden;max-height:34px;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.sc{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;}
+.sl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.8px;}
+.sv{font-size:15px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.sr{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.sr label{font-size:11px;color:var(--muted);white-space:nowrap;}
+input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;}
+select{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;}
+.cpv{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);display:inline-block;vertical-align:middle;}
+</style>
+</head>
+<body>
+<header>
+  <div class="lm">&#x1F422;</div>
+  <div><div class="lt">LogoKids</div><div class="ls">Simulateur Logo &mdash; Seymour Papert</div></div>
+  <div class="ha">
+    <button class="btn bfile" onclick="saveProgram()">&#x2B07; Enregistrer</button>
+    <button class="btn bfile" onclick="document.getElementById('fi').click()">&#x2B06; Charger</button>
+    <input type="file" id="fi" accept=".txt,.logo" onchange="loadProgram(event)">
+    <button class="btn bsec bdanger" onclick="resetAll()">&#x21BA; R&eacute;initialiser</button>
+    <button class="btn bsec" onclick="clearEd()">&times; Effacer</button>
+    <button class="btn brun" id="br" onclick="runCode()">&#x25B6; Ex&eacute;cuter</button>
+  </div>
+</header>
+<div class="ws">
+  <div class="ep">
+    <div class="ph"><div class="pd"></div>Editeur Logo &nbsp;<span style="color:var(--dim);font-weight:400">F5 = ex&eacute;cuter</span></div>
+    <div class="ew">
+      <div id="ln"><span>1</span></div>
+      <textarea id="ed" spellcheck="false" placeholder="Ecris ton programme Logo ici..."></textarea>
+    </div>
+  </div>
+  <div class="cp">
+    <div class="cw"><canvas id="tc" width="540" height="440"></canvas></div>
+    <div class="cb">
+      <div class="ph" style="padding:6px 14px;">
+        <div class="pd" style="background:var(--yellow)"></div>Console
+        <span style="margin-left:auto;font-size:10px;cursor:pointer;color:var(--dim)" onclick="clearCon()">effacer</span>
+      </div>
+      <div id="co"></div>
+    </div>
+  </div>
+  <div class="rp">
+    <div class="tabs">
+      <div class="tab active" onclick="swTab('ref')">R&eacute;f&eacute;rence</div>
+      <div class="tab" onclick="swTab('ex')">Exemples</div>
+      <div class="tab" onclick="swTab('st')">Tortue</div>
+    </div>
+    <div id="tab-ref" class="tc active">
+      <div class="rs"><div class="rt">Mouvement</div>
+        <div class="ri" onclick="ins('AV 100')"><div class="rc">AV n</div><div class="rd">Avancer de n pas</div></div>
+        <div class="ri" onclick="ins('RE 100')"><div class="rc">RE n</div><div class="rd">Reculer de n pas</div></div>
+        <div class="ri" onclick="ins('TD 90')"><div class="rc">TD n</div><div class="rd">Tourner &agrave; droite de n degr&eacute;s</div></div>
+        <div class="ri" onclick="ins('TG 90')"><div class="rc">TG n</div><div class="rd">Tourner &agrave; gauche de n degr&eacute;s</div></div>
+        <div class="ri" onclick="ins('ORIGINE')"><div class="rc">ORIGINE</div><div class="rd">Retourner au centre (0,0), cap=0</div></div>
+        <div class="ri" onclick="ins('FPOS [50 80]')"><div class="rc">FPOS [x y]</div><div class="rd">Aller directement en (x,y)</div></div>
+        <div class="ri" onclick="ins('FCAP 90')"><div class="rc">FCAP n</div><div class="rd">Fixer le cap (0=nord, 90=est)</div></div>
+      </div>
+      <div class="rs"><div class="rt">Stylo / Crayon</div>
+        <div class="ri" onclick="ins('BC')"><div class="rc">BC &nbsp;(BaisseCrayon)</div><div class="rd">Poser le crayon &mdash; trace active</div></div>
+        <div class="ri" onclick="ins('LC')"><div class="rc">LC &nbsp;(LeveCrayon)</div><div class="rd">Lever le crayon &mdash; sans trace</div></div>
+        <div class="ri" onclick="ins('CC &quot;rouge')"><div class="rc">CC &quot;couleur &nbsp;(CouleurCrayon)</div><div class="rd">rouge vert bleu cyan jaune blanc orange rose…</div></div>
+        <div class="ri" onclick="ins('EP 3')"><div class="rc">EP n &nbsp;(EpaisseurCrayon)</div><div class="rd">Epaisseur du trait en pixels</div></div>
+        <div class="ri" onclick="ins('CF &quot;bleu')"><div class="rc">CF &quot;couleur &nbsp;(CouleurFond)</div><div class="rd">Couleur de remplissage</div></div>
+        <div class="ri" onclick="ins('CERCLE 50')"><div class="rc">CERCLE r</div><div class="rd">Cercle centr&eacute; sur la tortue</div></div>
+        <div class="ri" onclick="ins('DISQUE 40')"><div class="rc">DISQUE r</div><div class="rd">Disque plein centr&eacute; sur la tortue</div></div>
+        <div class="ri" onclick="ins('VE')"><div class="rc">VE &nbsp;(VideEcran)</div><div class="rd">Effacer tout, replacer la tortue au centre</div></div>
+      </div>
+      <div class="rs"><div class="rt">Controle</div>
+        <div class="ri" onclick="ins('REPETE 4 [AV 100 TD 90]')"><div class="rc">REPETE n [...]</div><div class="rd">R&eacute;p&eacute;ter n fois les instructions</div></div>
+        <div class="ri" onclick="ins('SI :x > 0 [AV 10] [RE 10]')"><div class="rc">SI cond [...] [...]</div><div class="rd">Si-alors / si-alors-sinon</div></div>
+        <div class="ri" onclick="ins('TANTQUE [:n < 10] [DONNE &quot;n :n+1]')"><div class="rc">TANTQUE [cond] [corps]</div><div class="rd">Boucle tant que la condition est vraie</div></div>
+        <div class="ri" onclick="ins('POUR i 1 10 1 [AV :i TD 10]')"><div class="rc">POUR var deb fin pas [corps]</div><div class="rd">Boucle num&eacute;rique avec compteur</div></div>
+        <div class="ri" onclick="ins('STOP')"><div class="rc">STOP</div><div class="rd">Sortir de la proc&eacute;dure en cours</div></div>
+        <div class="ri" onclick="ins('ATTENDS 200')"><div class="rc">ATTENDS n</div><div class="rd">Pause de n millisecondes</div></div>
+      </div>
+      <div class="rs"><div class="rt">Procedures et Variables</div>
+        <div class="ri" onclick="ins('DONNE &quot;n 42')"><div class="rc">DONNE &quot;var valeur</div><div class="rd">Affecter une valeur &agrave; une variable</div></div>
+        <div class="ri" onclick="ins('PROC carre :c\n  REPETE 4 [AV :c TD 90]\nFIN')"><div class="rc">PROC nom [:p1 :p2&hellip;]<br>&nbsp;&nbsp;&hellip;<br>FIN</div><div class="rd">D&eacute;finir une proc&eacute;dure r&eacute;utilisable</div></div>
+        <div class="ri" onclick="ins('RENDS :n * 2')"><div class="rc">RENDS expr</div><div class="rd">Retourner une valeur depuis une proc&eacute;dure</div></div>
+        <div class="ri" onclick="ins('AFFICHE &quot;Bonjour')"><div class="rc">AFFICHE expr</div><div class="rd">Afficher une valeur dans la console</div></div>
+        <div class="ri" onclick="ins('LIS &quot;val')"><div class="rc">LIS &quot;var</div><div class="rd">Saisir une valeur au clavier</div></div>
+      </div>
+      <div class="rs"><div class="rt">Mathematiques</div>
+        <div class="ri"><div class="rc">+ &nbsp;- &nbsp;* &nbsp;/ &nbsp;RESTE</div><div class="rd">Op&eacute;rations arithm&eacute;tiques</div></div>
+        <div class="ri"><div class="rc">= &nbsp;&lt; &nbsp;&gt; &nbsp;&lt;= &nbsp;&gt;= &nbsp;!=</div><div class="rd">Comparaisons</div></div>
+        <div class="ri"><div class="rc">ET &nbsp;OU &nbsp;NON</div><div class="rd">Op&eacute;rateurs logiques bool&eacute;ens</div></div>
+        <div class="ri" onclick="ins('AFFICHE RACINE 25')"><div class="rc">RACINE n</div><div class="rd">Racine carr&eacute;e</div></div>
+        <div class="ri" onclick="ins('AFFICHE PUISSANCE 2 8')"><div class="rc">PUISSANCE b e</div><div class="rd">b &agrave; la puissance e</div></div>
+        <div class="ri" onclick="ins('AFFICHE SINUS 45')"><div class="rc">SINUS / COSINUS / TANGENTE n</div><div class="rd">Trigonom&eacute;trie (angle en degr&eacute;s)</div></div>
+        <div class="ri" onclick="ins('AFFICHE ABS -5')"><div class="rc">ABS / ENT / ARRONDI n</div><div class="rd">Valeur absolue, partie enti&egrave;re, arrondi</div></div>
+        <div class="ri" onclick="ins('AFFICHE HASARD 100')"><div class="rc">HASARD n</div><div class="rd">Entier al&eacute;atoire entre 0 et n-1</div></div>
+        <div class="ri" onclick="ins('AFFICHE PI')"><div class="rc">PI</div><div class="rd">Constante &pi; &asymp; 3.14159</div></div>
+        <div class="ri" onclick="ins('AFFICHE MAX 3 7')"><div class="rc">MAX a b &nbsp;/ &nbsp;MIN a b</div><div class="rd">Maximum / minimum</div></div>
+      </div>
+      <div class="rs"><div class="rt">Etat de la tortue</div>
+        <div class="ri" onclick="ins('CT')"><div class="rc">CT (CacheTortue) &nbsp;/ &nbsp;MT (MontreTortue)</div><div class="rd">Afficher ou masquer la tortue</div></div>
+        <div class="ri" onclick="ins('AFFICHE CAP')"><div class="rc">CAP</div><div class="rd">Cap actuel en degr&eacute;s (0=nord)</div></div>
+        <div class="ri" onclick="ins('AFFICHE XCOR')"><div class="rc">XCOR &nbsp;/ &nbsp;YCOR</div><div class="rd">Coordonn&eacute;es x et y de la tortue</div></div>
+        <div class="ri" onclick="ins('AFFICHE STYLO')"><div class="rc">STYLO</div><div class="rd">Vrai si le crayon est baiss&eacute;</div></div>
+      </div>
+    </div>
+    <div id="tab-ex" class="tc"><div id="exlist"></div></div>
+    <div id="tab-st" class="tc">
+      <div class="sg">
+        <div class="sc"><div class="sl">Position X</div><div class="sv" id="sx">0</div></div>
+        <div class="sc"><div class="sl">Position Y</div><div class="sv" id="sy">0</div></div>
+        <div class="sc"><div class="sl">Cap (deg)</div><div class="sv" id="scap">0</div></div>
+        <div class="sc"><div class="sl">Crayon</div><div class="sv" id="spen">Baisse</div></div>
+      </div>
+      <div class="sc" style="margin-bottom:6px">
+        <div class="sl">Couleur du crayon</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <div class="cpv" id="scol" style="background:#fff"></div>
+          <span class="sv" id="scoln" style="font-size:12px">#ffffff</span>
+        </div>
+      </div>
+      <div class="sc" style="margin-bottom:8px"><div class="sl">Epaisseur</div><div class="sv" id="swid">1 px</div></div>
+      <div class="sr"><label>Vitesse :</label>
+        <input type="range" min="1" max="10" value="8" id="spd" oninput="updSpd(this.value)">
+        <span style="font-size:11px;color:var(--accent);min-width:18px;text-align:right" id="spdv">8</span>
+      </div>
+      <div class="sr" style="margin-top:4px"><label>Taille :</label>
+        <select id="csz" onchange="resizeCv()">
+          <option value="480,400">480 x 400</option>
+          <option value="540,440" selected>540 x 440</option>
+          <option value="640,520">640 x 520</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// =============================================================
+// CANVAS & TORTUE
+// =============================================================
+const canvas = document.getElementById('tc');
+const ctx    = canvas.getContext('2d');
+let bgData   = null; // pixels du dessin SANS la tortue
+
+let T = {x:0,y:0,angle:0,penDown:true,visible:true,
+         penColor:'#ffffff',fillColor:'#ffffff',penWidth:1};
+
+let vars={}, procs={}, running=false, stopFlag=false, animSpeed=8;
+const getDelay = () => animSpeed>=10 ? 0 : Math.max(1, Math.round(120/animSpeed));
+
+// Couleurs nommees
+const COLORS = {
+  noir:'#000000',bleu:'#0055ff',vert:'#00cc44',cyan:'#00cccc',
+  rouge:'#ff2244',magenta:'#cc00cc',jaune:'#ffcc00',blanc:'#ffffff',
+  orange:'#ff8800',rose:'#ff88aa',violet:'#8800cc',gris:'#888888',
+  marron:'#884422',lime:'#88ff00',turquoise:'#00ccaa',
+  black:'#000000',blue:'#0055ff',green:'#00cc44',red:'#ff2244',
+  yellow:'#ffcc00',white:'#ffffff',pink:'#ff88aa',gray:'#888888',
+  0:'#000000',1:'#0055ff',2:'#00cc44',3:'#00cccc',4:'#ff2244',
+  5:'#cc00cc',6:'#ffcc00',7:'#ffffff',8:'#888888',15:'#ff8800',
+};
+function resolveColor(c){
+  if(typeof c==='number') return COLORS[c]||'#ffffff';
+  const s=String(c).toLowerCase().replace(/["']/g,'').trim();
+  return COLORS[s]||(s.startsWith('#')?s:'#ffffff');
+}
+
+// Coord Logo -> Canvas
+function lx(x){return canvas.width/2+x;}
+function ly(y){return canvas.height/2-y;}
+
+function saveBg(){bgData=ctx.getImageData(0,0,canvas.width,canvas.height);}
+function restBg(){if(bgData)ctx.putImageData(bgData,0,0);else ctx.clearRect(0,0,canvas.width,canvas.height);}
+function showT(){restBg();if(T.visible)drawT();}
+
+// Dessin de la tortue
+// angle Logo: 0=nord=-y canvas. rotation canvas = (angle-90)*PI/180
+// Dans le repere local: -y = avant = direction du deplacement
+function drawT(){
+  const x=lx(T.x), y=ly(T.y);
+  const rad=(T.angle-90)*Math.PI/180;
+  const sz=12;
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(rad);
+  // Corps
+  ctx.beginPath();
+  ctx.fillStyle='#00e5a0'; ctx.strokeStyle='#007a55'; ctx.lineWidth=1.5;
+  ctx.ellipse(0,3,sz*0.65,sz*0.5,0,0,2*Math.PI);
+  ctx.fill(); ctx.stroke();
+  // Tete (vers l'avant = -y local)
+  ctx.beginPath();
+  ctx.ellipse(0,-sz*0.7,sz*0.28,sz*0.3,0,0,2*Math.PI);
+  ctx.fill(); ctx.stroke();
+  // Fleche de direction
+  ctx.beginPath();
+  ctx.fillStyle='#ffcc44';
+  ctx.moveTo(0,-sz*1.25);   // pointe avant
+  ctx.lineTo(-4,-sz*0.6);
+  ctx.lineTo(4,-sz*0.6);
+  ctx.closePath(); ctx.fill();
+  // Pattes
+  ctx.fillStyle='#00b87a';
+  [[-sz*0.55,sz*0.15],[sz*0.55,sz*0.15],[-sz*0.5,sz*0.6],[sz*0.5,sz*0.6]].forEach(function(p){
+    ctx.beginPath(); ctx.arc(p[0],p[1],sz*0.2,0,2*Math.PI); ctx.fill();
+  });
+  ctx.restore();
+}
+
+function moveTurtle(dist){
+  const rad=(T.angle-90)*Math.PI/180;
+  const nx=T.x+dist*Math.cos(rad);
+  const ny=T.y+dist*Math.sin(rad);
+  restBg(); // effacer l'ancienne tortue
+  if(T.penDown){
+    ctx.beginPath();
+    ctx.strokeStyle=T.penColor; ctx.lineWidth=T.penWidth; ctx.lineCap='round';
+    ctx.moveTo(lx(T.x),ly(T.y));
+    ctx.lineTo(lx(nx),ly(ny));
+    ctx.stroke();
+  }
+  T.x=nx; T.y=ny;
+  saveBg();      // sauvegarder fond+trait SANS la tortue
+  if(T.visible) drawT();
+  updState();
+}
+
+// =============================================================
+// CONSOLE
+// =============================================================
+function clog(msg,cls){
+  cls=cls||'cinf';
+  var d=document.getElementById('co');
+  var div=document.createElement('div');
+  div.className='cl '+cls;
+  div.textContent=String(msg);
+  d.appendChild(div);
+  requestAnimationFrame(function(){d.scrollTop=d.scrollHeight;});
+}
+function clearCon(){document.getElementById('co').innerHTML='';}
+
+function updState(){
+  document.getElementById('sx').textContent=Math.round(T.x*10)/10;
+  document.getElementById('sy').textContent=Math.round(T.y*10)/10;
+  document.getElementById('scap').textContent=((Math.round(T.angle)%360)+360)%360;
+  document.getElementById('spen').textContent=T.penDown?'Baisse':'Leve';
+  document.getElementById('scol').style.background=T.penColor;
+  document.getElementById('scoln').textContent=T.penColor;
+  document.getElementById('swid').textContent=T.penWidth+' px';
+}
+
+// =============================================================
+// TOKENIZER
+// =============================================================
+function tokenize(code){
+  var toks=[]; var i=0;
+  while(i<code.length){
+    var c=code[i];
+    if(c===';'){while(i<code.length&&code[i]!=='\n')i++;continue;}
+    if(/\s/.test(c)){i++;continue;}
+    if(c==='['){
+      var depth=1,j=i+1,s='';
+      while(j<code.length&&depth>0){
+        if(code[j]==='[')depth++;
+        if(code[j]===']'){if(--depth===0)break;}
+        s+=code[j++];
+      }
+      toks.push({t:'list',v:s}); i=j+1; continue;
+    }
+    if(c==='"'){
+      var j=i+1,s='';
+      while(j<code.length&&!/[\s\[\]]/.test(code[j]))s+=code[j++];
+      toks.push({t:'str',v:s}); i=j; continue;
+    }
+    if(c===':'){
+      var j=i+1,s='';
+      while(j<code.length&&/[\wÀ-ÿ_]/i.test(code[j]))s+=code[j++];
+      toks.push({t:'var',v:s.toUpperCase()}); i=j; continue;
+    }
+    if(/[+\-*\/=<>!]/.test(c)){
+      var s=c; i++;
+      if(i<code.length&&(code[i]==='='||(c==='<'&&code[i]==='>')))s+=code[i++];
+      toks.push({t:'op',v:s}); continue;
+    }
+    if(/\d/.test(c)||(c==='.'&&/\d/.test(code[i+1]||''))){
+      var j=i,s='';
+      while(j<code.length&&/[\d.]/.test(code[j]))s+=code[j++];
+      toks.push({t:'num',v:parseFloat(s)}); i=j; continue;
+    }
+    var j=i,s='';
+    while(j<code.length&&!/[\s\[\]":+\-*\/=<>!;?]/.test(code[j]))s+=code[j++];
+    if(j<code.length&&code[j]==='?'){s+='?';j++;}
+    if(s){toks.push({t:'word',v:s.toUpperCase()});i=j;continue;}
+    i++;
+  }
+  return toks;
+}
+
+// =============================================================
+// INTERPRETEUR
+// =============================================================
+var VALUE_WORDS=['RACINE','ABS','ENT','ARRONDI','SINUS','COSINUS','TANGENTE',
+  'ARCSINUS','ARCCOSINUS','ARCTANGENTE','LOG','LN','EXP','HASARD',
+  'NON','LONGUEUR','PUISSANCE','MAX','MIN','RESTE','DISTANCE',
+  'PI','VRAI','FAUX','XCOR','YCOR','CAP','STYLO','STYLO?'];
+
+function isVal(t){
+  if(!t)return false;
+  if(t.t==='num'||t.t==='var'||t.t==='str'||t.t==='list')return true;
+  if(t.t==='op'&&t.v==='-')return true;
+  if(t.t==='word'&&(VALUE_WORDS.indexOf(t.v)>=0||procs[t.v]))return true;
+  return false;
+}
+
+function Interp(tokens,locals){
+  this.toks=tokens;
+  this.pos=0;
+  this.locals=locals?locals.map(function(l){return Object.assign({},l);}): [{}];
+}
+Interp.prototype.peek=function(off){return this.toks[this.pos+(off||0)];};
+Interp.prototype.next=function(){return this.toks[this.pos++];};
+Interp.prototype.eof=function(){return this.pos>=this.toks.length;};
+Interp.prototype.getVar=function(name){
+  var n=name.toUpperCase();
+  for(var i=this.locals.length-1;i>=0;i--){if(n in this.locals[i])return this.locals[i][n];}
+  if(n in vars)return vars[n];
+  throw new Error('Variable :'+name+' inconnue');
+};
+Interp.prototype.setVar=function(name,val){
+  var n=name.toUpperCase();
+  this.locals[this.locals.length-1][n]=val;
+  vars[n]=val;
+};
+Interp.prototype.pause=function(){
+  var d=getDelay();
+  if(stopFlag)throw {isStop:true};
+  if(d>0)return new Promise(function(r){setTimeout(r,d);});
+  return Promise.resolve();
+};
+Interp.prototype.readList=function(){
+  var t=this.peek();
+  if(t&&t.t==='list'){this.next();return Promise.resolve(t.v);}
+  return Promise.reject(new Error('Liste [...] attendue'));
+};
+Interp.prototype.execList=async function(code){
+  var sub=new Interp(tokenize(code),this.locals);
+  try{await sub.run();}
+  catch(e){if(e&&(e.isStop||e.isRends||e.isBreak))throw e; throw e;}
+};
+Interp.prototype.callProc=async function(name){
+  var proc=procs[name];
+  if(!proc)throw new Error('Procedure inconnue : '+name);
+  var scope={};
+  for(var i=0;i<proc.params.length;i++)scope[proc.params[i]]=await this.evalExpr();
+  var newLocals=this.locals.map(function(l){return Object.assign({},l);});
+  newLocals.push(scope);
+  var sub=new Interp(tokenize(proc.body),newLocals);
+  try{await sub.run();}
+  catch(e){
+    if(e&&e.isStop)return undefined;
+    if(e&&e.isRends)return e.val;
+    throw e;
+  }
+  return undefined;
+};
+Interp.prototype.run=async function(){
+  while(!this.eof()){
+    if(stopFlag)throw {isStop:true};
+    await this.execOne();
+  }
+};
+
+// ----- Evaluateurs d'expressions -----
+Interp.prototype.evalExpr=async function(){return this.evalOr();};
+Interp.prototype.evalOr=async function(){
+  var l=await this.evalAnd();
+  while(!this.eof()&&this.peek().t==='word'&&this.peek().v==='OU'&&isVal(this.peek(1))){
+    this.next(); l=l||(await this.evalAnd());
+  }
+  return l;
+};
+Interp.prototype.evalAnd=async function(){
+  var l=await this.evalCmp();
+  while(!this.eof()&&this.peek().t==='word'&&this.peek().v==='ET'&&isVal(this.peek(1))){
+    this.next(); l=l&&(await this.evalCmp());
+  }
+  return l;
+};
+Interp.prototype.evalCmp=async function(){
+  var l=await this.evalAdd();
+  while(!this.eof()&&this.peek().t==='op'&&['=','<','>','<=','>=','!=','<>'].indexOf(this.peek().v)>=0&&isVal(this.peek(1))){
+    var op=this.next().v, r=await this.evalAdd();
+    if(op==='=')l=l==r; else if(op==='<')l=l<r; else if(op==='>')l=l>r;
+    else if(op==='<=')l=l<=r; else if(op==='>=')l=l>=r; else l=l!=r;
+  }
+  return l;
+};
+Interp.prototype.evalAdd=async function(){
+  var l=await this.evalMul();
+  while(!this.eof()&&this.peek().t==='op'&&(this.peek().v==='+'||this.peek().v==='-')&&isVal(this.peek(1))){
+    var op=this.next().v, r=await this.evalMul();
+    l=op==='+'?(typeof l==='string'||typeof r==='string'?String(l)+String(r):l+r):l-r;
+  }
+  return l;
+};
+Interp.prototype.evalMul=async function(){
+  var l=await this.evalUnary();
+  while(!this.eof()&&this.peek().t==='op'&&(this.peek().v==='*'||this.peek().v==='/')&&isVal(this.peek(1))){
+    var op=this.next().v, r=await this.evalUnary();
+    l=op==='*'?l*r:l/r;
+  }
+  return l;
+};
+Interp.prototype.evalUnary=async function(){
+  if(!this.eof()&&this.peek().t==='op'&&this.peek().v==='-'){
+    this.next(); return -(await this.evalPrimary());
+  }
+  return this.evalPrimary();
+};
+Interp.prototype.evalPrimary=async function(){
+  var t=this.peek();
+  if(!t)throw new Error('Expression attendue');
+  if(t.t==='num'){this.next();return t.v;}
+  if(t.t==='str'){this.next();return t.v;}
+  if(t.t==='list'){this.next();return t.v;}
+  if(t.t==='var'){this.next();return this.getVar(t.v);}
+  if(t.t==='word'){
+    var w=t.v;
+    if(w==='PI'){this.next();return Math.PI;}
+    if(w==='VRAI'){this.next();return true;}
+    if(w==='FAUX'){this.next();return false;}
+    if(w==='XCOR'){this.next();return T.x;}
+    if(w==='YCOR'){this.next();return T.y;}
+    if(w==='CAP'){this.next();return((T.angle%360)+360)%360;}
+    if(w==='STYLO'||w==='STYLO?'){this.next();return T.penDown;}
+    var UNI={
+      RACINE:Math.sqrt,ABS:Math.abs,ENT:Math.trunc,ARRONDI:Math.round,
+      SINUS:function(v){return Math.sin(v*Math.PI/180);},
+      COSINUS:function(v){return Math.cos(v*Math.PI/180);},
+      TANGENTE:function(v){return Math.tan(v*Math.PI/180);},
+      ARCSINUS:function(v){return Math.asin(v)*180/Math.PI;},
+      ARCCOSINUS:function(v){return Math.acos(v)*180/Math.PI;},
+      ARCTANGENTE:function(v){return Math.atan(v)*180/Math.PI;},
+      LOG:Math.log10,LN:Math.log,EXP:Math.exp,
+      HASARD:function(v){return Math.floor(Math.random()*v);},
+      NON:function(v){return !v;},
+      LONGUEUR:function(v){return String(v).length;}
+    };
+    if(UNI[w]){this.next();var v=await this.evalPrimary();return UNI[w](v);}
+    if(w==='PUISSANCE'){this.next();var a=await this.evalPrimary();var b=await this.evalPrimary();return Math.pow(a,b);}
+    if(w==='MAX'){this.next();var a=await this.evalPrimary();var b=await this.evalPrimary();return Math.max(a,b);}
+    if(w==='MIN'){this.next();var a=await this.evalPrimary();var b=await this.evalPrimary();return Math.min(a,b);}
+    if(w==='RESTE'){this.next();var a=await this.evalPrimary();var b=await this.evalPrimary();return a%b;}
+    if(w==='DISTANCE'){this.next();var a=await this.evalPrimary();var b=await this.evalPrimary();return Math.sqrt(a*a+b*b);}
+    if(procs[w]){this.next();return await this.callProc(w);}
+  }
+  throw new Error('Valeur attendue, recu : '+JSON.stringify(t));
+};
+
+// ----- Execution d'une instruction -----
+Interp.prototype.execOne=async function(){
+  var t=this.peek();
+  if(!t)return;
+  if(t.t!=='word'){await this.evalExpr();return;}
+  this.next();
+  var cmd=t.v;
+  switch(cmd){
+    // MOUVEMENT
+    case 'AV': case 'AVANCE': moveTurtle(await this.evalExpr()); await this.pause(); break;
+    case 'RE': case 'RECULE': moveTurtle(-(await this.evalExpr())); await this.pause(); break;
+    case 'TD': case 'DROITE':
+      T.angle=(T.angle+(await this.evalExpr()))%360;
+      showT(); await this.pause(); break;
+    case 'TG': case 'GAUCHE':
+      T.angle=((T.angle-(await this.evalExpr()))%360+360)%360;
+      showT(); await this.pause(); break;
+    case 'ORIGINE':
+      if(T.penDown){
+        restBg();
+        ctx.beginPath();ctx.strokeStyle=T.penColor;ctx.lineWidth=T.penWidth;ctx.lineCap='round';
+        ctx.moveTo(lx(T.x),ly(T.y));ctx.lineTo(lx(0),ly(0));ctx.stroke();
+      }
+      T.x=0;T.y=0;T.angle=0;saveBg();showT();await this.pause();break;
+    case 'FPOS': case 'FIXEPOS':{
+      var ls=await this.readList();
+      var p=ls.trim().split(/\s+/);
+      var nx=parseFloat(p[0]),ny=parseFloat(p[1]||0);
+      restBg();
+      if(T.penDown){
+        ctx.beginPath();ctx.strokeStyle=T.penColor;ctx.lineWidth=T.penWidth;ctx.lineCap='round';
+        ctx.moveTo(lx(T.x),ly(T.y));ctx.lineTo(lx(nx),ly(ny));ctx.stroke();
+      }
+      T.x=nx;T.y=ny;saveBg();showT();await this.pause();break;
+    }
+    case 'FCAP': case 'FIXECAP':
+      T.angle=((( await this.evalExpr())%360)+360)%360;
+      showT();break;
+    case 'VERS':{
+      var ls=await this.readList();
+      var p=ls.trim().split(/\s+/);
+      var tx=parseFloat(p[0]),ty=parseFloat(p[1]||0);
+      T.angle=(Math.atan2(tx-T.x,ty-T.y)*180/Math.PI+360)%360;
+      showT();break;
+    }
+    // STYLO
+    case 'BC': case 'BS': case 'BAISSECRAYON': case 'BAISSELASTYLO':
+      T.penDown=true;updState();break;
+    case 'LC': case 'LS': case 'LEVECRAYON': case 'LEVELASTYLO':
+      T.penDown=false;updState();break;
+    case 'CC': case 'FCC': case 'COULEURCRAYON': case 'FIXECOULEURCRAYON':
+      T.penColor=resolveColor(await this.evalExpr());updState();break;
+    case 'CF': case 'FCO': case 'COULEURFOND': case 'FIXECOULEURDOBJET':
+      T.fillColor=resolveColor(await this.evalExpr());break;
+    case 'EP': case 'FEP': case 'EPAISSEURCRAYON': case 'FIXEPAISSEURCRAYON':
+      T.penWidth=Math.max(0.5,await this.evalExpr());updState();break;
+    case 'VE': case 'VIDEECRAN':
+      ctx.clearRect(0,0,canvas.width,canvas.height);bgData=null;
+      T.x=0;T.y=0;T.angle=0;if(T.visible)drawT();updState();break;
+    case 'NETTOIE':
+      ctx.clearRect(0,0,canvas.width,canvas.height);bgData=null;
+      if(T.visible)drawT();break;
+    case 'CERCLE':{
+      var r=await this.evalExpr();
+      restBg();ctx.beginPath();ctx.strokeStyle=T.penColor;ctx.lineWidth=T.penWidth;
+      ctx.arc(lx(T.x),ly(T.y),Math.abs(r),0,2*Math.PI);ctx.stroke();
+      saveBg();showT();await this.pause();break;
+    }
+    case 'DISQUE':{
+      var r=await this.evalExpr();
+      restBg();ctx.beginPath();ctx.fillStyle=T.fillColor;
+      ctx.arc(lx(T.x),ly(T.y),Math.abs(r),0,2*Math.PI);ctx.fill();
+      if(T.penDown){ctx.strokeStyle=T.penColor;ctx.lineWidth=T.penWidth;ctx.stroke();}
+      saveBg();showT();await this.pause();break;
+    }
+    case 'POINT':
+      restBg();ctx.beginPath();ctx.fillStyle=T.penColor;
+      ctx.arc(lx(T.x),ly(T.y),Math.max(1,T.penWidth),0,2*Math.PI);ctx.fill();
+      saveBg();showT();break;
+    case 'TEXTE': case 'ECRISTEXTE':{
+      var txt=String(await this.evalExpr());
+      restBg();ctx.fillStyle=T.penColor;
+      ctx.font=String(Math.max(12,T.penWidth*6))+'px Outfit,sans-serif';
+      ctx.fillText(txt,lx(T.x),ly(T.y));
+      saveBg();showT();break;
+    }
+    // TORTUE
+    case 'CT': case 'CACHT': case 'CACHETORTUE': T.visible=false;restBg();break;
+    case 'MT': case 'MONT': case 'MONTRETORTUE': T.visible=true;showT();break;
+    // CONTROLE
+    case 'REPETE':{
+      var n=Math.round(await this.evalExpr());
+      var body=await this.readList();
+      for(var i=0;i<n;i++){
+        if(stopFlag)throw {isStop:true};
+        var sub=new Interp(tokenize(body),this.locals.map(function(l){return Object.assign({},l);}));
+        sub.locals[sub.locals.length-1]['COMPTEUR']=i+1;
+        try{await sub.run();}
+        catch(e){if(e&&e.isStop)throw e;if(e&&e.isBreak)break;if(e&&e.isRends)throw e;}
+      }
+      break;
+    }
+    // PROC = definition de procedure (mot-cle dedie, sans ambiguite)
+    case 'PROC':{
+      var nt=this.next();
+      if(!nt||nt.t!=='word')throw new Error('PROC : nom de procedure attendu');
+      var procName=nt.v.toUpperCase();
+      var params=[];
+      while(!this.eof()&&this.peek().t==='var')params.push(this.next().v.toUpperCase());
+      var bodyToks=[];var depth=0;
+      while(!this.eof()){
+        var bt=this.next();
+        if(bt.t==='word'&&(bt.v==='PROC'||bt.v==='POUR'))depth++;
+        if(bt.t==='word'&&bt.v==='FIN'){if(depth===0)break;depth--;}
+        bodyToks.push(bt);
+      }
+      procs[procName]={params:params,body:toksToStr(bodyToks)};
+      clog('Procedure definie : '+procName+' ('+params.length+' parametre(s))', 'cok');
+      break;
+    }
+    // POUR = boucle numerique UNIQUEMENT
+    case 'POUR':{
+      var vt=this.peek();
+      if(!vt)break;
+      var varName;
+      if(vt.t==='var'){this.next();varName=vt.v.toUpperCase();}
+      else if(vt.t==='word'){this.next();varName=vt.v.toUpperCase();}
+      else throw new Error('POUR : nom de variable attendu');
+      var debut=await this.evalExpr();
+      var fin=await this.evalExpr();
+      // Pas optionnel : present seulement si le token est un nombre ET le suivant est une liste
+      var pas=fin>=debut?1:-1;
+      if(!this.eof()&&this.peek().t==='num'&&this.peek(1)&&this.peek(1).t==='list'){
+        pas=this.next().v;
+      }
+      var body=await this.readList();
+      var asc=pas>0;
+      for(var v=debut; asc?v<=fin+1e-10:v>=fin-1e-10; v+=pas){
+        if(stopFlag)throw {isStop:true};
+        var sub=new Interp(tokenize(body),this.locals.map(function(l){return Object.assign({},l);}));
+        sub.locals[sub.locals.length-1][varName]=v;
+        vars[varName]=v;
+        try{await sub.run();}
+        catch(e){if(e&&e.isStop)throw e;if(e&&e.isBreak)break;if(e&&e.isRends)throw e;}
+      }
+      break;
+    }
+    case 'SI':{
+      var cond=await this.evalExpr();
+      var thenB=await this.readList();
+      var elseB=null;
+      if(!this.eof()&&this.peek().t==='list')elseB=await this.readList();
+      if(cond)await this.execList(thenB);
+      else if(elseB)await this.execList(elseB);
+      break;
+    }
+    case 'SAUFSI':{
+      var cond=await this.evalExpr();var body=await this.readList();
+      if(!cond)await this.execList(body);break;
+    }
+    case 'TANTQUE':{
+      var condCode=await this.readList();var bodyCode=await this.readList();
+      while(true){
+        if(stopFlag)throw {isStop:true};
+        var ci=new Interp(tokenize(condCode),this.locals.map(function(l){return Object.assign({},l);}));
+        if(!(await ci.evalExpr()))break;
+        await this.execList(bodyCode);
+      }
+      break;
+    }
+    case 'STOP': throw {isStop:true};
+    case 'BREAK': throw {isBreak:true};
+    case 'RENDS':{var val=await this.evalExpr();throw {isRends:true,val:val};}
+    // VARIABLES
+    case 'DONNE':{
+      var vt=this.next();
+      var nm=(vt.t==='str'||vt.t==='word'||vt.t==='var')?vt.v.toUpperCase():'X';
+      this.setVar(nm,await this.evalExpr());break;
+    }
+    // E/S
+    case 'AFFICHE': case 'ECRIS':
+      clog('> '+String(await this.evalExpr()),'cpr');break;
+    case 'AFFICHELIGNE':
+      clog(String(await this.evalExpr()),'cpr');break;
+    case 'LIS':{
+      var vt=this.next();
+      var nm=(vt.t==='str'||vt.t==='word'||vt.t==='var')?vt.v.toUpperCase():'X';
+      var raw=prompt('Entrez une valeur pour '+nm+' :') || '0';
+      var num=parseFloat(raw);
+      this.setVar(nm,isNaN(num)?raw:num);break;
+    }
+    case 'ATTENDS':{
+      var ms=await this.evalExpr();
+      await new Promise(function(r){setTimeout(r,Math.max(0,ms));});
+      break;
+    }
+    case 'FIN': return;
+    default:
+      if(procs[cmd])await this.callProc(cmd);
+      else clog('? Commande inconnue : '+cmd,'cerr');
+  }
+  updState();
+};
+
+function toksToStr(toks){
+  return toks.map(function(t){
+    if(t.t==='list')return '['+t.v+']';
+    if(t.t==='var')return ':'+t.v;
+    if(t.t==='str')return '"'+t.v;
+    return t.v;
+  }).join(' ');
+}
+
+// =============================================================
+// FICHIERS
+// =============================================================
+function saveProgram(){
+  var code=document.getElementById('ed').value;
+  var blob=new Blob([code],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='programme_logo.txt';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  clog('Programme enregistre.','cok');
+}
+function loadProgram(event){
+  var file=event.target.files[0]; if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('ed').value=e.target.result;
+    updLn();
+    clog('Programme charge : '+file.name,'cok');
+  };
+  reader.readAsText(file,'utf-8');
+  event.target.value='';
+}
+
+// =============================================================
+// INTERFACE
+// =============================================================
+function swTab(name){
+  var names=['ref','ex','st'];
+  document.querySelectorAll('.tab').forEach(function(el,i){
+    el.classList.toggle('active',names[i]===name);
+  });
+  document.querySelectorAll('.tc').forEach(function(el){
+    el.classList.toggle('active',el.id==='tab-'+name);
+  });
+}
+function ins(code){
+  var ed=document.getElementById('ed');
+  var s=ed.selectionStart;
+  var before=ed.value.slice(0,s), after=ed.value.slice(s);
+  var nl=(before&&!before.endsWith('\n'))?'\n':'';
+  ed.value=before+nl+code+'\n'+after;
+  updLn(); ed.focus();
+}
+function clearEd(){document.getElementById('ed').value='';updLn();}
+function updSpd(v){animSpeed=parseInt(v);document.getElementById('spdv').textContent=v;}
+function resizeCv(){
+  var v=document.getElementById('csz').value.split(',');
+  canvas.width=parseInt(v[0]);canvas.height=parseInt(v[1]);
+  resetAll();
+}
+function resetAll(){
+  stopFlag=true;
+  setTimeout(function(){
+    stopFlag=false;running=false;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    bgData=null;
+    T={x:0,y:0,angle:0,penDown:true,visible:true,penColor:'#ffffff',fillColor:'#ffffff',penWidth:1};
+    vars={};procs={};
+    drawT();updState();
+    var btn=document.getElementById('br');
+    btn.textContent='Execute'; btn.style.background='var(--accent)'; btn.style.color='#000';
+    clog('Reinitialise.','cinf');
+  },80);
+}
+
+async function runCode(){
+  if(running){stopFlag=true;return;}
+  var code=document.getElementById('ed').value;
+  if(!code.trim())return;
+  running=true;stopFlag=false;
+  var btn=document.getElementById('br');
+  btn.textContent='Arreter'; btn.style.background='#ff4455'; btn.style.color='#fff';
+  clog('Execution...','cinf');
+  try{
+    procs={};
+    var interp=new Interp(tokenize(code));
+    await interp.run();
+    clog('Termine.','cok');
+  }catch(e){
+    if(e&&e.isStop)clog('Arrete.','cinf');
+    else if(e&&e.message)clog('Erreur : '+e.message,'cerr');
+    else clog('Erreur inconnue','cerr');
+  }finally{
+    running=false;stopFlag=false;
+    btn.textContent='Executer'; btn.style.background='var(--accent)'; btn.style.color='#000';
+    saveBg();showT();
+  }
+}
+
+function updLn(){
+  var ed=document.getElementById('ed');
+  var n=Math.max(ed.value.split('\n').length,20);
+  document.getElementById('ln').innerHTML=
+    Array(n).fill(0).map(function(_,i){return '<span>'+(i+1)+'</span>';}).join('');
+}
+
+document.getElementById('ed').addEventListener('input',updLn);
+document.getElementById('ed').addEventListener('scroll',function(){
+  document.getElementById('ln').scrollTop=this.scrollTop;
+});
+document.getElementById('ed').addEventListener('keydown',function(e){
+  if(e.key==='Tab'){
+    e.preventDefault();
+    var s=this.selectionStart;
+    this.value=this.value.slice(0,s)+'  '+this.value.slice(this.selectionEnd);
+    this.selectionStart=this.selectionEnd=s+2; updLn();
+  }
+  if(e.key==='F5'||(e.ctrlKey&&e.key==='Enter')){e.preventDefault();runCode();}
+});
+
+// =============================================================
+// EXEMPLES
+// =============================================================
+var EXAMPLES=[
+  {name:'Carre',desc:'Le premier programme classique',
+   code:'REPETE 4 [AV 100 TD 90]'},
+  {name:'Etoile',desc:'Angle magique de 144 degres',
+   code:'CC "jaune\nEP 2\nREPETE 5 [AV 120 TD 144]'},
+  {name:'Spirale carree',desc:'Compteur qui grandit a chaque pas',
+   code:'POUR i 1 60 2 [AV :i TD 91]'},
+  {name:'Spirale coloree',desc:'Couleurs aleatoires',
+   code:'POUR i 1 72 1 [\n  CC HASARD 8\n  AV :i * 2\n  TD 91\n]'},
+  {name:'Polygone generique',desc:'PROC reutilisable pour tout polygone',
+   code:'PROC POLYGONE :n :c\n  REPETE :n [AV :c TD 360 / :n]\nFIN\n\nCC "rouge\nPOLYGONE 3 80\nLC\nAV 120\nBC\nCC "bleu\nPOLYGONE 6 60\nLC\nAV 100\nBC\nCC "vert\nPOLYGONE 8 45'},
+  {name:'Flocon de Koch',desc:'Fractale classique',
+   code:'PROC KOCH :n :l\n  SI :n = 0 [AV :l STOP]\n  KOCH :n-1 :l/3\n  TG 60\n  KOCH :n-1 :l/3\n  TD 120\n  KOCH :n-1 :l/3\n  TG 60\n  KOCH :n-1 :l/3\nFIN\n\nCC "bleu\nEP 1\nFPOS [-130 80]\nREPETE 3 [KOCH 4 240 TD 120]'},
+  {name:'Arbre fractal',desc:'Recursivite avec retour au point de depart',
+   code:'PROC ARBRE :n :l\n  SI :n = 0 [STOP]\n  AV :l\n  TG 25\n  ARBRE :n-1 :l*0.7\n  TD 50\n  ARBRE :n-1 :l*0.7\n  TG 25\n  RE :l\nFIN\n\nCC "vert\nEP 2\nFPOS [0 -160]\nFCAP 0\nARBRE 8 80'},
+  {name:'Courbe de dragon',desc:'Fractale par pliage de papier',
+   code:'PROC DRAGON :n :l :d\n  SI :n = 0 [AV :l STOP]\n  DRAGON :n-1 :l*0.7071 1\n  TD :d*90\n  DRAGON :n-1 :l*0.7071 -1\nFIN\n\nCC "cyan\nEP 1\nFPOS [-60 0]\nDRAGON 10 160 1'},
+  {name:'Maison',desc:'Carre + toit triangulaire',
+   code:'; Murs\nCC "blanc\nEP 2\nREPETE 4 [AV 100 TD 90]\n; Toit\nAV 100\nTD 30\nAV 115\nTD 120\nAV 115'},
+  {name:'Cercles concentriques',desc:'Cercles de tailles croissantes',
+   code:'POUR i 1 10 1 [\n  CC HASARD 8\n  EP :i * 0.5\n  CERCLE :i * 15\n]'},
+  {name:'Table de multiplication',desc:'Algorithmique - console',
+   code:'DONNE "n 7\nAFFICHE "=== Table de 7 ===\nPOUR i 1 10 1 [\n  AFFICHE :n * :i\n]'},
+  {name:'Suite de Fibonacci',desc:'Les 15 premiers termes',
+   code:'DONNE "a 0\nDONNE "b 1\nAFFICHE "Suite de Fibonacci :\nPOUR i 1 15 1 [\n  AFFICHE :a\n  DONNE "t :b\n  DONNE "b :a + :b\n  DONNE "a :t\n]'},
+];
+
+function buildExamples(){
+  var list=document.getElementById('exlist');
+  EXAMPLES.forEach(function(ex){
+    var card=document.createElement('div');
+    card.className='ec';
+    card.innerHTML='<div class="en">'+ex.name+'</div>'
+      +'<div class="ed2">'+ex.desc+'</div>'
+      +'<div class="ecode">'+ex.code.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';
+    card.onclick=function(){
+      document.getElementById('ed').value=ex.code;
+      updLn(); swTab('ref');
+    };
+    list.appendChild(card);
+  });
+}
+
+// =============================================================
+// INIT
+// =============================================================
+buildExamples();
+
+document.getElementById('ed').value=
+'; Bienvenue dans LogoKids!\n'
++'; F5 ou Ctrl+Entree pour executer\n\n'
++'; Exemple : spirale coloree\n'
++'POUR i 1 72 1 [\n'
++'  CC HASARD 8\n'
++'  AV :i * 2\n'
++'  TD 91\n'
++']';
+
+updLn();
+drawT();
+updState();
+clog('LogoKids pret ! Appuie sur Executer ou F5.','cok');
+clog('Utilise PROC...FIN pour definir tes procedures.','cinf');
+clog('Enregistre et charge tes programmes en .txt','cinf');
+</script>
+</body>
+</html>
