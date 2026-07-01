@@ -29,6 +29,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 - [L'appli *ASIMOV-Simul-invers*](#ASIMOV-Simul-invers)
   
 ### Autres disciplines
+- [L'appli *SAPIENS-IA-TimeLine*](#SAPIENS-IA-TimeLine)
 - [L'appli *S.Y.S.M.O Solarium 3D*](#solarium)
 - [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
 - [L'appli *O.U.L.I.P.O.*](#OULIPO)
@@ -342,6 +343,28 @@ Simulations de lois de probabilités par inversion de leur fonction de répartit
 ---
 
 ## **Autres disciplines**
+
+---
+
+### SAPIENS-IA-TimeLine
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/SAPIENS-IA-TimeLine/index.html" target="_blank" rel="noopener noreferrer">SAPIENS-IA-TimeLine </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="350" height="140" alt="image" src="https://github.com/user-attachments/assets/a62e4783-3d88-429d-adc7-6ffb67e48d9b" />
+
+
+
+*Timeline* sur l'Histoire de l'IA, inspiré de la frise originale de IA4T (Erasmus+). Pour chaque personnage ou événement, une rapide fiche, bascule possible en mode "*FlashCards*"
+
+***destination :*** collège, lycée
+
+[Retour en haut](#VibeCoding)
+
+---
+
 ### Solarium
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/Solarium3D/index.html" target="_blank" rel="noopener noreferrer">Solarium 3D </a></li>
