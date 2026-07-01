@@ -422,7 +422,7 @@ Application proposant un programme de renforcement musculaire aux jeunes lycéen
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="400" height="320" alt="image" src="https://github.com/user-attachments/assets/66b5567d-ff3d-463b-b716-d4a6f6d86a78" />
+<img width="300" height="240" alt="image" src="https://github.com/user-attachments/assets/66b5567d-ff3d-463b-b716-d4a6f6d86a78" />
 
 
 Générateur de mandalas
