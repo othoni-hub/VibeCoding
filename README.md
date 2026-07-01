@@ -480,6 +480,7 @@ Application inutile mais addictive pour observer le chaos, voir les équations d
 ***destination :*** Physique lycée, Électricité
 
 [Retour en haut](#VibeCoding)
+
 ---
 ---
 
