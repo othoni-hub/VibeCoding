@@ -622,7 +622,7 @@ Simulateur de Poker-dés, banqueroute assurée
 ### Demineur
 [*Vibe-Codé* avec Claude 4.6 Sonnet]
 
-<li><a href="https://othoni-hub.github.io/VibeCoding/Demineur/index.html" target="_blank" rel="noopener noreferrer">Demineur </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/Demineur/index.html" target="_blank" rel="noopener noreferrer">Demineur</a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
