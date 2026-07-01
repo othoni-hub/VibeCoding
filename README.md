@@ -18,6 +18,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 ### Mathématiques
 - [L'appli *ELLES-TimeLine*](#ELLES-TimeLine)
 - [L'appli *LOGO-Simulateur*](#LOGO-Simulateur)
+- [L'appli *LightBot*](#LightBot)
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *Lissajous*](#Lissajous)
@@ -121,7 +122,7 @@ Pour donner le goût et la confiance aux futures femmes de sciences !
 
 ---
 ### LOGO-Simulateur
-[*Vibe-Codé* avec Gemini 3.5]
+[*Vibe-Codé* avec Claude 4.6 Sonnet]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/LOGO-Simulateur/index.html" target="_blank" rel="noopener noreferrer">LOGO-Simulateur </a></li> 
 
@@ -135,6 +136,23 @@ Pour donner le goût et la confiance aux futures femmes de sciences !
 
 [Retour en haut](#VibeCoding)
 
+---
+### LightBot
+[*Vibe-Codé* avec Claude 4.6 Sonnet]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/LightBot/index.html" target="_blank" rel="noopener noreferrer">LightBot </a></li> 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="330" height="250" alt="image" src="https://github.com/user-attachments/assets/84ceafda-d205-4aca-baa6-7d601c955f45" />
+
+
+
+LightBot, application d'apprentissage de la programmation, ludique et esthétique, dû à David Jarolawski
+
+***destination :*** Mathématiques, dès la 6<sup>ème</sup>, programmation
+
+[Retour en haut](#VibeCoding)
 ---
 
 ### Constructor
