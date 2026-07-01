@@ -49,6 +49,20 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 
 ***Clic gauche sur les liens pour ouvrir dans le navigateur, clic droit pour télécharger***
 
+**Méthodologie** : 
+* Une idée...
+* Un prompt très structuré décrivant au mieux mon projet
+  **exemple : Pour l'appli "E.L.L.E.S."** : *Tu es spécialiste d’histoire des sciences. Nous allons vibe-coder une application single page à destination de lycéens et de lycéennes pour mettre en avant les femmes mathématiciennes et scientifiques et leurs travaux. L’appli consistera en une timeline verticale, sur laquelle seront placées des étiquettes cliquables avec les noms et dates, pour une trentaine de femmes, le clic ouvrira une fiche présentant la personne. On pourra basculer dans un mode où le clic ouvrira une flashcard.
+Le graphisme doit être moderne, dynamique et engageant, à destination des élèves de lycée, afin d’inciter les jeunes filles à se diriger vers les filières scientifiques. L’appli doit fonctionner aussi bien sur ordi que sur téléphone.
+Écris le Code de cette page*
+
+* Tests dans CodePen : https://codepen.io/
+* Le 1<sup>er</sup> jet de l'IA est toujours parfaitement fonctionnel. 
+* Quelques ajustements sont nécessaires pour affiner exactement l'application.
+* En toute fin, je demande à l'IA de me trouver un "acronyme intelligent et signifiant", pour l'appli
+  **exemple** : "E.L.L.E.S." : **E**xploration des **L**égendes de la **L**ogique et de l' **E**xcellence **S**cientifique
+* L'appli finale est téléchargeable sous forme d'un unique fichier HTML (c'est le principe de la *Single Page Application*), qui s'ouvre directement dans le navigateur.
+
 ---
 
 
