@@ -572,9 +572,10 @@ Le fameux jeux de SIMON récussité
 <img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/f18cdd00-020d-4254-8924-208ecba1e9c5" />
 
 Arbre fractal avec paramètres
+
 téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/ArbreFractal/index.html
 
-***destination :*** tous, fractales
+***destination :*** tous, fractales, informatique : récursivité
 
 [Retour en haut](#VibeCoding)
 
