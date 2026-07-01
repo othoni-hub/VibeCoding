@@ -1,5 +1,5 @@
 # VibeCoding
-Applications "single page" pédagogiques ou autres, *vibe-codées* par **Olivier Thöni**, 
+Applications "page-unique" pédagogiques ou autres, *vibe-codées* par **Olivier Thöni**, 
 
 professeur agrégé de mathématiques en CPGE-ECG, mathématiques appliquées, au lycée St-Charles Ste Croix - Le Mans, formateur d'enseignants, de formateurs et de cadres pédagogiques à l'IFUCOME d'Angers
 
