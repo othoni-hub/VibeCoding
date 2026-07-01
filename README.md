@@ -1,7 +1,9 @@
 # VibeCoding
 Applications "page-unique" pédagogiques ou autres, *vibe-codées* par **Olivier Thöni**, 
 
-professeur agrégé de mathématiques en CPGE-ECG, mathématiques appliquées, au lycée St-Charles Ste Croix - Le Mans, formateur d'enseignants, de formateurs et de cadres pédagogiques à l'IFUCOME d'Angers
+professeur agrégé de mathématiques en CPGE-ECG, mathématiques appliquées, au lycée St-Charles Ste Croix - Le Mans, 
+
+formateur d'enseignants, de formateurs et de cadres pédagogiques à l'IFUCOME d'Angers
 
 avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteur)
 
