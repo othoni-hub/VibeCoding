@@ -61,7 +61,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 Créer des applications page-unique (*SPA : Single Page Application*) pour :
 * Illustrer "au débotté" une notion en direct pendant le cours,
 * Présenter des idées aux collègues en formation, associées à leur discipline,
-* Rescuciter des logiciels pédagogiques ou ludiques anciens,
+* Ressusciter des logiciels pédagogiques ou ludiques anciens,
 * ou simplement se challanger...
 
 ### **Méthodologie** : 
