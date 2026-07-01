@@ -37,6 +37,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 
 ### Jeux
 - [L'appli *PICASSO-Mandalas*](#PICASSO-Mandalas)
+- [L'appli *SIMON*](#SIMON)
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
 - [L'appli *POKER-Dés*](#POKER)
@@ -442,7 +443,6 @@ Application proposant un programme de renforcement musculaire aux jeunes lycéen
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PICASSO-Mandalas/index.html" target="_blank" rel="noopener noreferrer">PICASSO-Mandalas </a></li>
 
-
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="300" height="240" alt="image" src="https://github.com/user-attachments/assets/66b5567d-ff3d-463b-b716-d4a6f6d86a78" />
@@ -454,6 +454,24 @@ téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/PICASSO-Ma
 ***destination :*** tous / Mathématiques 6<sup>ème</sup>, Symétrie axiale
 
 [Retour en haut](#VibeCoding)
+
+---
+
+### SIMON
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/SIMON/index.html" target="_blank" rel="noopener noreferrer">SIMON </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="200" height="325" alt="image" src="https://github.com/user-attachments/assets/c56c2a87-04ae-4ae2-bb2f-9a351803b146" />
+
+Le fameux jeux de SIMON récussité
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
+
+---
 
 ### ArbreFractal
 [*Vibe-Codé* avec Gemini 3.5]
