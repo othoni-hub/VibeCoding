@@ -35,6 +35,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 - [L'appli *timeline* de Marcel Pagnol](#PAGNOL)
 - [L'appli *O.U.L.I.P.O.*](#OULIPO)
 - [L'appli *A.C.T.I.V.E*](#ACTIVE-Renforcement)
+- [L'appli *TriPendulum*](#TriPendulum)
 
 ### Jeux
 - [L'appli *PICASSO-Mandalas*](#PICASSO-Mandalas)
@@ -446,6 +447,21 @@ Un peu de lecture : "100 mille milliards de poésie", de Rayond Queneau, génér
 Application proposant un programme de renforcement musculaire aux jeunes lycéens et lycéennes
 
 ***destination :*** EPS lycée, condition physique
+
+[Retour en haut](#VibeCoding)
+
+---
+### TriPendulum
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/TriPendulum/index.html" target="_blank" rel="noopener noreferrer">TriPendulum </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/96eca99a-55ef-4db9-9e40-f55bcd068513" />
+
+Application inutile mais addictive pour observer le chaos, voir les équations dans le code...
+
+***destination :*** Enseignement supérieur, physique, mathématiques
 
 [Retour en haut](#VibeCoding)
 
