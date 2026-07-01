@@ -83,8 +83,11 @@ Le graphisme doit être moderne, dynamique et engageant, à destination des él�
 * L'appli finale est téléchargeable sous forme d'un unique fichier HTML (c'est le principe de la *Single Page Application*), qui s'ouvre directement dans le navigateur.
 
 
+### **Droits d'auteur**
+Toutes ces applications sont librement utilisables et modifiables, ce qui n'empêche pas d'en citer l'auteur initial. Si elles suscitent d'autres idées, merci d'avance à toutes celles et ceux qui les partageront.
+
 ### **Modifications possibles**
-Télécharger le fichier HTML, le mettre en fichier joint au prompt adressé à n'importe quelle IA générative, et décrire les modifications attendues
+Télécharger le fichier HTML, le mettre en fichier joint au prompt adressé à n'importe quelle IA générative qui décrira les modifications attendues.
 
 ---
 
