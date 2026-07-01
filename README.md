@@ -36,6 +36,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 - [L'appli *O.U.L.I.P.O.*](#OULIPO)
 - [L'appli *A.C.T.I.V.E*](#ACTIVE-Renforcement)
 - [L'appli *TriPendulum*](#TriPendulum)
+- [L'appli *VIBES-Oscilloscope*](#VIBES-Oscilloscope)
 
 ### Jeux
 - [L'appli *PICASSO-Mandalas*](#PICASSO-Mandalas)
@@ -465,6 +466,20 @@ Application inutile mais addictive pour observer le chaos, voir les équations d
 
 [Retour en haut](#VibeCoding)
 
+---
+### VIBES-Oscilloscope
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/VIBES-Oscilloscope/index.html" target="_blank" rel="noopener noreferrer">VIBES-Oscilloscope </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="220" height="230" alt="image" src="https://github.com/user-attachments/assets/256e071d-4a1a-4057-9be7-b0365674e29d" />
+
+Émulateur d'oscilloscope
+
+***destination :*** Physique lycée, Électricité
+
+[Retour en haut](#VibeCoding)
 ---
 ---
 
