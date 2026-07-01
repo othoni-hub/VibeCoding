@@ -57,6 +57,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
 - [L'appli *MindVibe*](#MindVibe)
+- [L'appli *Dojo*](#Dojo)
   
 --- 
 
@@ -708,6 +709,25 @@ GIF-It DID2GI est une application pour smartphone uniquement pour la création d
 
 
 Construction de cartes mentales intégrant images, liens, formules LaTeX, etc. Exports multiples
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### Dojo
+[*Vibe-Codé* avec Claude 4.6 Sonnet]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/Dojo/index.html" target="_blank" rel="noopener noreferrer">Dojo </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="160" height="220" alt="image" src="https://github.com/user-attachments/assets/586c909f-07ae-48cb-9285-e9f681547c36" />
+
+
+Application à destination des professeurs en formation sur les usages padagogiques de l'IA, permettat un positionnement sur 5 domaines de compétences, en début et en fin de formation
 
 ***destination :*** tous 
 
