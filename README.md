@@ -353,7 +353,7 @@ Simulations de lois de probabilités par inversion de leur fonction de répartit
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="350" height="140" alt="image" src="https://github.com/user-attachments/assets/a62e4783-3d88-429d-adc7-6ffb67e48d9b" />
+<img width="350" height="180" alt="image" src="https://github.com/user-attachments/assets/a62e4783-3d88-429d-adc7-6ffb67e48d9b" />
 
 
 
