@@ -1,11 +1,11 @@
 # VibeCoding
-Applications "page-unique" pédagogiques ou autres, *vibe-codées* par **Olivier Thöni**, 
+Applications "page-unique" pédagogiques ou autres, *vibe-codées* avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteur), par **Olivier Thöni**, 
 
 professeur agrégé de mathématiques en CPGE-ECG, mathématiques appliquées, au lycée St-Charles Ste Croix - Le Mans, 
-
 formateur d'enseignants, de formateurs et de cadres pédagogiques à l'IFUCOME d'Angers
 
-avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteur)
+Dans le *vibe-coding*, il n'est pas indispensable de savoir "coder" (c'est-à-dire écrire un programme informatique), même si ça aide.
+Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un outil nouveau et très efficace pour les enseignants et enseignantes, qui ne manquent jamais d'idées !
 
 (Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
