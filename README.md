@@ -558,7 +558,7 @@ Simulateur de Poker-dés, banqueroute assurée
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="1298" height="691" alt="image" src="https://github.com/user-attachments/assets/166c1325-9140-45bb-afc1-4707900f9edf" />
+<img width="650" height="350" alt="image" src="https://github.com/user-attachments/assets/166c1325-9140-45bb-afc1-4707900f9edf" />
 
 Observer le ciel depuis les latitudes françaises(métropole)
 
