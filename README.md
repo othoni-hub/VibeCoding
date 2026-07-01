@@ -22,6 +22,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 - [L'appli *OPTIM-ConeShpere*](#OPTIM-ConeShpere)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
+- [L'appli *Voyageur-de-commerce*](#Voyageur-de-commerce)
 - [L'appli *SPECTRE-Diagonalisation*](#SPECTRE-Diagonalisation)
 - [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)
 - [L'appli *EndomorphiK*](#EndomorphiK)
@@ -253,6 +254,22 @@ Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-
 
 [Retour en haut](#VibeCoding)
 
+---
+
+### Voyageur-de-commerce
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Voyageur-de-commerce/index.html" target="_blank" rel="noopener noreferrer">Voyageur-de-commerce </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/692387e6-7cc7-43e4-a72f-8d2d651e336f" />
+
+Problème d'optimisation du "Voyageur de Commerce", simulant le tour de France des oraux d'un·e élève de prépa
+
+***destination :*** Mathématiques CPGE-ECG, graphes
+
+[Retour en haut](#VibeCoding)
 ---
 
 ### SPECTRE-Diagonalisation
