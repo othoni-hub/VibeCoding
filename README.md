@@ -89,6 +89,9 @@ Toutes ces applications sont librement utilisables et modifiables, ce qui n'emp�
 ### **Modifications possibles**
 Télécharger le fichier HTML, le mettre en fichier joint au prompt adressé à n'importe quelle IA générative qui décrira les modifications attendues.
 
+### **Lecture complémentaire**
+À lire aussi : un article que j'ai commis sur MathémaTICE, de l'association SésaMath : http://revue.sesamath.net/spip.php?article1772 pour tenter de démontrer l'importance de la pensée computationnelle dans la construction de la pensée mathématique, par le biais de 3 petites applications spécialement *vibe-codées* à cet effet (à retrouver ci-dessous :.
+
 ---
 
 
@@ -114,7 +117,7 @@ Pour donner le goût et la confiance aux futures femmes de sciences !
 ---
 
 ### Constructor
-[*Vibe-Codé* avec Gemini 3.5]
+[*Vibe-Codé* avec Claude 4.6 Sonnet ]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/Constructor/index.html" target="_blank" rel="noopener noreferrer">Constructor </a></li> 
 
