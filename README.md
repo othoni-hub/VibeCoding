@@ -45,6 +45,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 
 
 ### Utilitaires
+- [L'appli *STELLAR*](#STELLAR)
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
 - [L'appli *MindVibe*](#MindVibe)
@@ -547,6 +548,26 @@ Simulateur de Poker-dés, banqueroute assurée
 ---
 
 ## Utilitaires
+
+---
+
+### STELLAR
+[*Vibe-Codé* avec Gemini 3.5]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/STELLAR/index.html" target="_blank" rel="noopener noreferrer">STELLAR </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="1298" height="691" alt="image" src="https://github.com/user-attachments/assets/166c1325-9140-45bb-afc1-4707900f9edf" />
+
+Observer le ciel depuis les latitudes françaises(métropole)
+
+***destination :*** tous / astronomie
+
+[Retour en haut](#VibeCoding)
+
+---
+
 ### CHROMA
 
 [*Vibe-Codé* avec Gemini 3.5]
