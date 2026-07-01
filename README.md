@@ -60,7 +60,8 @@ Le graphisme doit être moderne, dynamique et engageant, à destination des él�
 * Tests dans CodePen : https://codepen.io/
 * Le 1<sup>er</sup> jet de l'IA est toujours parfaitement fonctionnel. 
 * Quelques ajustements sont nécessaires pour affiner exactement l'application.
-* En toute fin, je demande à l'IA de me trouver un "acronyme intelligent et signifiant", pour l'appli
+* En toute fin, je demande à l'IA de me trouver un "acronyme intelligent et signifiant", pour l'appli.
+  
   **exemple** : "E.L.L.E.S." : **E**xploration des **L**égendes de la **L**ogique et de l' **E**xcellence **S**cientifique
 * L'appli finale est téléchargeable sous forme d'un unique fichier HTML (c'est le principe de la *Single Page Application*), qui s'ouvre directement dans le navigateur.
 
