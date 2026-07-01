@@ -17,6 +17,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 ## Table des matières
 ### Mathématiques
 - [L'appli *ELLES-TimeLine*](#ELLES-TimeLine)
+- [L'appli *LOGO-Simulateur*](#LOGO-Simulateur)
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *Lissajous*](#Lissajous)
@@ -115,6 +116,22 @@ Télécharger le fichier HTML, le mettre en fichier joint au prompt adressé à 
 Pour donner le goût et la confiance aux futures femmes de sciences !
 
 ***destination :*** Mathématiques, dès la 6<sup>ème</sup>, histoire des sciences
+
+[Retour en haut](#VibeCoding)
+
+---
+### LOGO-Simulateur
+[*Vibe-Codé* avec Gemini 3.5]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/LOGO-Simulateur/index.html" target="_blank" rel="noopener noreferrer">LOGO-Simulateur </a></li> 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/21fe8995-7fd0-4e0a-a029-a5ca8e7ed7e8" />
+
+Émulateur réssuscitant l'antique langage Logo, d'apprentissage de la programmation, grand frère de Scratch.
+
+***destination :*** Mathématiques, dès la 6<sup>ème</sup>, programmation
 
 [Retour en haut](#VibeCoding)
 
