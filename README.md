@@ -49,6 +49,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
 - [L'appli *POKER-Dés*](#POKER)
+- [L'appli *Demineur*](#Demineur)
 
 
 ### Utilitaires
@@ -613,6 +614,22 @@ Sculpteur 3D, façon Sketch Up : extruder, défoncer, trancher
 Simulateur de Poker-dés, banqueroute assurée
 
 ***destination :*** adultes (jeu de hasard), poker dés
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### Demineur
+[*Vibe-Codé* avec Claude 4.6 Sonnet]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Demineur/index.html" target="_blank" rel="noopener noreferrer">Demineur </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="534" height="763" alt="image" src="https://github.com/user-attachments/assets/eb1c31b5-67a2-416a-9a7a-ef4bd69a6cde" />
+
+Le mythique jeu de démineur
+
+***destination :*** tous
 
 [Retour en haut](#VibeCoding)
 
