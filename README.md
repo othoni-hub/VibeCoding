@@ -270,6 +270,7 @@ Problème d'optimisation du "Voyageur de Commerce", simulant le tour de France d
 ***destination :*** Mathématiques CPGE-ECG, graphes
 
 [Retour en haut](#VibeCoding)
+
 ---
 
 ### SPECTRE-Diagonalisation
