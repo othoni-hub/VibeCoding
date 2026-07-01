@@ -22,6 +22,7 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 - [L'appli *OPTIM-ConeShpere*](#OPTIM-ConeShpere)
 - [L'appli *EPIDEMIC - Modèle SIR*](#EPIDEMIC)
 - [L'appli *PHASE - Prédateurs / proies, Lotka-Voltera*](#PredateursProies)
+- [L'appli *SPECTRE-Diagonalisation*](#SPECTRE-Diagonalisation)
 - [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)
 - [L'appli *EndomorphiK*](#EndomorphiK)
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
@@ -238,7 +239,6 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/PredateursProies/index.html" target="_blank" rel="noopener noreferrer">Prédateurs - Proies : Lotka-Voltera </a></li>
 
-
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/c9028662-00ee-46f2-81f7-fc4464ffd0e1" />
@@ -247,6 +247,23 @@ Système Multi-Agents, à la manière de NetLogo : propagation d'épidémie selo
 Système Prédateurs/Proies, à la manière de NetLogo : modélisation de Lotka-Voltera
 
 ***destination :*** Mathématiques CPGE-ECG, systèmes différentiels (temps continu) ou suites imbriquées (temps discret)
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### SPECTRE-Diagonalisation
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/SPECTRE-Diagonalisation/index.html" target="_blank" rel="noopener noreferrer">SPECTRE-Diagonalisation </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="330" height="250" alt="image" src="https://github.com/user-attachments/assets/42d0b085-7c38-4a08-9072-37c70453720a" />
+
+Calculs des valeurs propres, espaces propres des matrices (jussqu'à la taille 5x5)
+
+***destination :*** Mathématiques CPGE-ECG, algèbre linéaire
 
 [Retour en haut](#VibeCoding)
 
