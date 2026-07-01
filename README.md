@@ -57,7 +57,14 @@ avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteu
 
 ***Clic gauche sur les liens pour ouvrir dans le navigateur, clic droit pour télécharger***
 
-**Méthodologie** : 
+### **Objectifs**
+Créer des applications page-unique (*SPA : Single Page Application*) pour :
+* Illustrer "au débotté" une notion en direct pendant le cours,
+* Présenter des idées aux collègues en formation, associées à leur discipline,
+* Rescuciter des logiciels pédagogiques ou ludiques anciens,
+* ou simplement se challanger...
+
+### **Méthodologie** : 
 * Une idée...
 * Un prompt très structuré décrivant au mieux mon projet
   
@@ -72,6 +79,10 @@ Le graphisme doit être moderne, dynamique et engageant, à destination des él�
   
   **exemple** : "E.L.L.E.S." : **E**xploration des **L**égendes de la **L**ogique et de l' **E**xcellence **S**cientifique
 * L'appli finale est téléchargeable sous forme d'un unique fichier HTML (c'est le principe de la *Single Page Application*), qui s'ouvre directement dans le navigateur.
+
+
+### **Modifications possibles**
+Télécharger le fichier HTML, le mettre en fichier joint au prompt adressé à n'importe quelle IA générative, et décrire les modifications attendues
 
 ---
 
