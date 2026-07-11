@@ -680,7 +680,7 @@ Le mythique jeu de démineur
 
 ---
 
-### STELLAR
+### STELLAR :white_check_mark:
 [*Vibe-Codé* avec Gemini 3.5]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/STELLAR/index.html" target="_blank" rel="noopener noreferrer">STELLAR </a></li>
