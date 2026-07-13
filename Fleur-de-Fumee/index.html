@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14 Juillet - Simulateur de Feu d'Artifice</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020208;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #fff;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: crosshair;
+        }
+        
+        /* Bouton Burger */
+        .burger-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 20;
+            background: rgba(10, 10, 25, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        .burger-btn span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        /* Animation Burger en X */
+        .burger-btn.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .burger-btn.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .burger-btn.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* Container UI et Menu Escamotable */
+        .ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            max-width: 350px;
+            height: 100%;
+            z-index: 10;
+            padding: 75px 15px 15px 15px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+        .ui-container.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .header {
+            background: rgba(10, 10, 25, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: linear-gradient(45deg, #ff4b4b, #ffffff, #4b7bff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            margin: 2px 0 0 0;
+            font-size: 0.75rem;
+            color: #8a8ab0;
+        }
+        .controls-panel {
+            background: rgba(10, 10, 25, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            pointer-events: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-size: 0.75rem;
+            color: #aaaaf0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        label span {
+            color: #00ffcc;
+            font-family: monospace;
+        }
+        select, input[type="range"] {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        select:focus, input[type="range"]:focus {
+            border-color: #4b7bff;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            padding: 0;
+            background: rgba(255,255,255,0.1);
+            border: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00ffcc;
+            cursor: pointer;
+        }
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+        button.active {
+            background: rgba(75, 123, 255, 0.25);
+            border-color: #4b7bff;
+            color: #8cc3ff;
+        }
+        .audio-note {
+            font-size: 0.65rem;
+            color: #ff9494;
+            text-align: center;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .credits {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+            margin-top: 5px;
+            line-height: 1.3;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 8px;
+        }
+        .instructions {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        @media (max-width: 480px) {
+            .ui-container {
+                max-width: 100%;
+            }
+            .instructions {
+                font-size: 0.75rem;
+                width: 90%;
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="burgerBtn" class="burger-btn" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <div id="uiContainer" class="ui-container">
+        <div class="header">
+            <h1>Le 14 Juillet à la Maison</h1>
+            <div class="subtitle">Canicule oblige, place au spectacle virtuel !</div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>Style d'artifice</label>
+                <select id="styleSelect">
+                    <option value="mix">Bouquet Varié</option>
+                    <option value="classic">Éclat Circulaire</option>
+                    <option value="glitter">Pluie Scintillante</option>
+                    <option value="crackle">Crépitement Intense</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Densité de particules <span id="countVal">120</span></label>
+                <input type="range" id="countSlider" min="40" max="250" value="120">
+            </div>
+
+            <div class="control-group">
+                <label>Gravité <span id="gravVal">0.15</span></label>
+                <input type="range" id="gravSlider" min="0.03" max="0.4" step="0.01" value="0.15">
+            </div>
+
+            <div class="btn-row">
+                <button id="autoBtn" class="active">Auto: ON</button>
+                <button id="audioBtn" class="active">Sons: ON</button>
+            </div>
+            <div class="audio-note">※ Note : Le son utilise la Web Audio API (Incompatible iOS/iPhone en mode silencieux ou restrictions de sécurité strictes).</div>
+            
+            <div class="credits">Créé par Olivier Thöni, vibe-codé avec l’aide de Gemini 3.5 Flash</div>
+        </div>
+    </div>
+
+    <div class="instructions">Cliquez ou touchez l'écran pour lancer un feu d'artifice !</div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Controles UI
+        const burgerBtn = document.getElementById('burgerBtn');
+        const uiContainer = document.getElementById('uiContainer');
+        const styleSelect = document.getElementById('styleSelect');
+        const countSlider = document.getElementById('countSlider');
+        const countVal = document.getElementById('countVal');
+        const gravSlider = document.getElementById('gravSlider');
+        const gravVal = document.getElementById('gravVal');
+        const autoBtn = document.getElementById('autoBtn');
+        const audioBtn = document.getElementById('audioBtn');
+
+        // Paramètres globaux modifiables
+        let config = {
+            style: 'mix',
+            particleCount: 120,
+            gravity: 0.15,
+            autoLaunch: true,
+            audioEnabled: true
+        };
+
+        // Gestion de l'affichage du menu latéral
+        burgerBtn.addEventListener('click', () => {
+            burgerBtn.classList.toggle('open');
+            uiContainer.classList.toggle('hidden');
+        });
+
+        // Mise à jour de la config via l'UI
+        styleSelect.addEventListener('change', (e) => config.style = e.target.value);
+        countSlider.addEventListener('input', (e) => {
+            config.particleCount = parseInt(e.target.value);
+            countVal.textContent = e.target.value;
+        });
+        gravSlider.addEventListener('input', (e) => {
+            config.gravity = parseFloat(e.target.value);
+            gravVal.textContent = e.target.value;
+        });
+        autoBtn.addEventListener('click', () => {
+            config.autoLaunch = !config.autoLaunch;
+            autoBtn.textContent = `Auto: ${config.autoLaunch ? 'ON' : 'OFF'}`;
+            autoBtn.classList.toggle('active', config.autoLaunch);
+        });
+        audioBtn.addEventListener('click', () => {
+            config.audioEnabled = !config.audioEnabled;
+            audioBtn.textContent = `Sons: ${config.audioEnabled ? 'ON' : 'OFF'}`;
+            audioBtn.classList.toggle('active', config.audioEnabled);
+            if(config.audioEnabled && !audioCtx) initAudio();
+        });
+
+        // Gestion du redimensionnement
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Système Audio Procédural (Web Audio API)
+        let audioCtx = null;
+
+        function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log("Web Audio pas supporté sur ce navigateur.");
+            }
+        }
+
+        function playLaunchSound() {
+            if (!config.audioEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.4);
+            
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playExplosionSound(style) {
+            if (!config.audioEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const bufferSize = audioCtx.sampleRate * (style === 'crackle' ? 0.6 : 0.4);
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseNode = audioCtx.createBufferSource();
+            noiseNode.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(style === 'glitter' ? 400 : 180, audioCtx.currentTime);
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            
+            if (style === 'crackle') {
+                gain.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+                gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            } else {
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            }
+
+            noiseNode.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noiseNode.start();
+
+            if (style === 'classic' || style === 'mix') {
+                const subOsc = audioCtx.createOscillator();
+                const subGain = audioCtx.createGain();
+                subOsc.type = 'triangle';
+                subOsc.frequency.setValueAtTime(80, audioCtx.currentTime);
+                subOsc.frequency.linearRampToValueAtTime(30, audioCtx.currentTime + 0.2);
+                
+                subGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                subGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                
+                subOsc.connect(subGain);
+                subGain.connect(audioCtx.destination);
+                subOsc.start();
+                subOsc.stop(audioCtx.currentTime + 0.25);
+            }
+        }
+
+        // Classes de la simulation
+        class Rocket {
+            constructor(startX, startY, targetX, targetY) {
+                this.x = startX;
+                this.y = startY;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                
+                const dx = targetX - startX;
+                const dy = targetY - startY;
+                this.lifeTime = 45 + Math.random() * 15; 
+                this.currentFrame = 0;
+
+                this.vx = dx / this.lifeTime;
+                this.vy = dy / this.lifeTime;
+                
+                this.trail = [];
+                this.hue = Math.random() * 360;
+                
+                if(!audioCtx && config.audioEnabled) initAudio();
+                playLaunchSound();
+            }
+
+            update() {
+                this.trail.push({x: this.x, y: this.y});
+                if (this.trail.length > 6) this.trail.shift();
+
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.currentFrame++;
+                if (this.currentFrame >= this.lifeTime || this.y <= this.targetY) {
+                    return false; 
+                }
+                return true;
+            }
+
+            draw() {
+                ctx.beginPath();
+                if(this.trail.length > 0) {
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for(let p of this.trail) {
+                        ctx.lineTo(p.x, p.y);
+                    }
+                } else {
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x - this.vx, this.y - this.vy);
+                }
+                ctx.strokeStyle = `hsla(${this.hue}, 100%, 75%, 0.8)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, hue, style) {
+                this.x = x;
+                this.y = y;
+                this.style = style;
+                this.hue = hue;
+                
+                const angle = Math.random() * Math.PI * 2;
+                let speed;
+                
+                if (style === 'glitter') {
+                    speed = Math.random() * 3 + 1;
+                } else if (style === 'crackle') {
+                    speed = Math.random() * 5 + 2;
+                } else { 
+                    speed = Math.random() * 4 + 2;
+                }
+
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+
+                this.alpha = 1;
+                this.fade = Math.random() * 0.015 + (style === 'glitter' ? 0.008 : 0.012);
+                this.friction = style === 'glitter' ? 0.98 : 0.95;
+            }
+
+            update() {
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += config.gravity;
+
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.alpha -= this.fade;
+                return this.alpha > 0;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.style === 'crackle' ? 1.5 : 2, 0, Math.PI * 2);
+                
+                if (this.style === 'glitter') {
+                    let light = Math.random() > 0.3 ? 90 : 40;
+                    ctx.fillStyle = `hsla(${this.hue}, 100%, ${light}%, ${this.alpha})`;
+                } else if (this.style === 'crackle') {
+                    ctx.fillStyle = `hsla(${Math.random() > 0.5 ? 40 : this.hue}, 100%, 70%, ${this.alpha})`;
+                } else {
+                    ctx.fillStyle = `hsla(${this.hue}, 100%, 60%, ${this.alpha})`;
+                }
+                
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        let rockets = [];
+        let particles = [];
+
+        function createExplosion(x, y, chosenStyle) {
+            let style = chosenStyle === 'mix' ? ['classic', 'glitter', 'crackle'][Math.floor(Math.random() * 3)] : chosenStyle;
+            let baseHue = Math.random() * 360;
+
+            for (let i = 0; i < config.particleCount; i++) {
+                let pColor = baseHue + (Math.random() * 30 - 15);
+                particles.push(new Particle(x, y, pColor, style));
+            }
+            playExplosionSound(style);
+        }
+
+        function loop() {
+            ctx.fillStyle = 'rgba(2, 2, 8, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = rockets.length - 1; i >= 0; i--) {
+                let r = rockets[i];
+                if (!r.update()) {
+                    createExplosion(r.targetX, r.targetY, config.style);
+                    rockets.splice(i, 1);
+                } else {
+                    r.draw();
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                if (!p.update()) {
+                    particles.splice(i, 1);
+                } else {
+                    p.draw();
+                }
+            }
+
+            if (config.autoLaunch && Math.random() < 0.035 && rockets.length < 5) {
+                const startX = Math.random() * (canvas.width * 0.6) + (canvas.width * 0.2);
+                const startY = canvas.height;
+                const targetX = startX + (Math.random() * 200 - 100);
+                const targetY = Math.random() * (canvas.height * 0.5) + (canvas.height * 0.1);
+                rockets.push(new Rocket(startX, startY, targetX, targetY));
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        function launchToCoordinates(clientX, clientY) {
+            // Évite le déclenchement si on clique sur les éléments UI visibles
+            if (clientX < 365 && !uiContainer.classList.contains('hidden')) return;
+            if (clientY < 70 && clientX < 70) return; // zone du bouton burger
+
+            const startX = canvas.width / 2 + (Math.random() * 100 - 50);
+            const startY = canvas.height;
+            rockets.push(new Rocket(startX, startY, clientX, clientY));
+        }
+
+        canvas.addEventListener('click', (e) => {
+            launchToCoordinates(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            // Laisse les contrôles UI manipulables sur mobile
+            if (touch.clientX < 365 && !uiContainer.classList.contains('hidden')) return;
+            if (touch.clientY < 70 && touch.clientX < 70) return;
+
+            e.preventDefault();
+            launchToCoordinates(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
