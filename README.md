@@ -55,12 +55,13 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *Demineur*](#Demineur)
 
 
-### Utilitaires
+### Utilitaires et inutilitaires
 - [L'appli *STELLAR*](#STELLAR)
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
 - [L'appli *MindVibe*](#MindVibe)
 - [L'appli *Dojo*](#Dojo)
+- [L'appli *Fleur-de-Fumee*](#Fleur-de-Fumee)
   
 --- 
 
@@ -773,4 +774,20 @@ Application à destination des professeurs en formation sur les usages padagogiq
 
 ---
 
+### Fleur-de-Fumee
+[*Vibe-Codé* avec Gemini 3.5]
 
+<li><a href="https://othoni-hub.github.io/VibeCoding/Fleur-de-Fumee/index.html" target="_blank" rel="noopener noreferrer">Fleur-de-Fumee </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="300" height="200" alt="image" src="https://github.com/user-attachments/assets/fa1b31fe-81d9-4aa0-95f6-3580ad10cc46" />
+
+
+
+Simulateur de feux d'artifice ("Fleur de Fumée" en chinois)
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
