@@ -32,9 +32,8 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *GAUSS*](#GAUSS)
 - [L'appli *SPECTRE-Diagonalisation*](#SPECTRE-Diagonalisation)
 - [L'appli *Endomorphisme-2D*](#Endomorphisme-2D)
-- [L'appli *EndomorphiK*](#EndomorphiK)
+- [L'appli *EndomorphiK*](#EndomorphiK) et variante plus visuelle
 - [L'appli *MAJOR - Urne de Polya*](#MAJOR)
-- 
 - [L'appli *ASIMOV-Simul-invers*](#ASIMOV-Simul-invers)
   
 ### Autres disciplines
@@ -384,6 +383,11 @@ Visualisation des effets d'un endomorphisme de $\mathbb{R}^3$ défini par sa mat
 Visualisation des effets d'un endomorphisme de $\mathbb{R}^3$ défini par sa matrice, avec calcul et visualistation de ses valeurs propres et vecteurs propres.
 
 ***destination :*** Mathématiques CPGE-ECG, algèbre linéaire
+
+#### Variante : plus visuelle
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/Endo-3D/index.html" target="_blank" rel="noopener noreferrer">Endo-3D </a></li>
+
 
 [Retour en haut](#VibeCoding)
 
