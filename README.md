@@ -389,7 +389,7 @@ Visualisation des effets d'un endomorphisme de $\mathbb{R}^3$ défini par sa mat
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/Endo-3D/index.html" target="_blank" rel="noopener noreferrer">Endo-3D </a></li>
 
-<img width="450" height="190" alt="image" src="https://github.com/user-attachments/assets/c5eaf1e0-39cd-48ab-b396-a2b5ebba1839" />
+<img width="450" height="220" alt="image" src="https://github.com/user-attachments/assets/fafb497f-ae4b-4ade-a304-a921e7706f24" />
 
 
 [Retour en haut](#VibeCoding)
