@@ -368,7 +368,7 @@ Visualisation des effets d'un endomorphisme de $\mathbb{R}^3$ défini par sa mat
 
 ---
 
-### EndomorphiK
+### EndomorphiK :white_check_mark:
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/EndomorphiK/index.html" target="_blank" rel="noopener noreferrer">EndomorphiK </a></li>
 
@@ -595,7 +595,7 @@ téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/PICASSO-Ma
 
 ---
 
-### SIMON
+### SIMON :white_check_mark:
 [*Vibe-Codé* avec Gemini 3.5]
 <li><a href="https://othoni-hub.github.io/VibeCoding/SIMON/index.html" target="_blank" rel="noopener noreferrer">SIMON </a></li>
 
@@ -782,7 +782,7 @@ Application à destination des professeurs en formation sur les usages padagogiq
 
 ---
 
-### Fleur-de-Fumee
+### Fleur-de-Fumee :white_check_mark:
 [*Vibe-Codé* avec Gemini 3.5]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/Fleur-de-Fumee/index.html" target="_blank" rel="noopener noreferrer">Fleur-de-Fumee </a></li>
