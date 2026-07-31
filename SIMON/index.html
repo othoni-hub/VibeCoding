@@ -96,6 +96,17 @@
             opacity: 0.3;
             filter: brightness(0.6) saturate(0.8);
             touch-action: manipulation; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pad svg {
+            width: 42%;
+            height: 42%;
+            fill: rgba(0, 0, 0, 0.45);
+            transition: fill 0.1s ease, transform 0.1s ease;
+            pointer-events: none;
         }
 
         .green  { background: #00ff88; border-bottom-right-radius: 12px; }
@@ -108,6 +119,11 @@
             filter: brightness(1.4) saturate(1.2);
             box-shadow: var(--pad-glow);
             transform: scale(0.96);
+        }
+
+        .pad.active svg {
+            fill: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
         }
 
         .center-circle {
@@ -181,10 +197,23 @@
         </header>
 
         <div class="simon-board">
-            <div class="pad green" data-color="green"></div>
-            <div class="pad red" data-color="red"></div>
-            <div class="pad yellow" data-color="yellow"></div>
-            <div class="pad blue" data-color="blue"></div>
+            <!-- Vert = Triangle -->
+            <div class="pad green" data-color="green">
+                <svg viewBox="0 0 24 24"><polygon points="12,3 2,21 22,21"/></svg>
+            </div>
+            <!-- Rouge = Rond -->
+            <div class="pad red" data-color="red">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <!-- Jaune = Carré -->
+            <div class="pad yellow" data-color="yellow">
+                <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            </div>
+            <!-- Bleu = Étoile -->
+            <div class="pad blue" data-color="blue">
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </div>
+            
             <div class="center-circle">
                 <button id="start-btn">START</button>
             </div>
@@ -199,16 +228,10 @@
     </div>
 
     <script>
-        const SOUNDS = {
-            green: 415.30,  
-            red: 311.13,    
-            yellow: 247.94, 
-            blue: 209.30    
-        };
-
         const KEY_MAP = { 'q': 'green', 's': 'red', 'd': 'yellow', 'f': 'blue' };
+        const SOUNDS = { green: 415.30, red: 311.13, yellow: 247.94, blue: 209.30 };
 
-        let audioCtx = null;
+        let globalAudioCtx = null;
         let gameSequence = [];
         let playerSequence = [];
         let score = 0;
@@ -218,59 +241,90 @@
 
         document.getElementById('best-score').textContent = String(bestScore).padStart(2, '0');
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function ensureAudioContext() {
+            if (!globalAudioCtx) {
+                globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
+            if (globalAudioCtx.state === 'suspended') {
+                globalAudioCtx.resume();
             }
+            return globalAudioCtx;
         }
 
-        function playTone(color, duration = 250) {
-            if (!audioCtx) return;
-            try {
-                let osc = audioCtx.createOscillator();
-                let gainNode = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(SOUNDS[color], audioCtx.currentTime);
-                
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration / 1000);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration / 1000);
-            } catch(e) {
-                console.log("Audio Error:", e);
-            }
+        function playTone(frequency, durationMs) {
+            const ctx = ensureAudioContext();
+            if (!ctx) return;
+
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(frequency, now);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.3, now + 0.002); 
+
+            const durationSec = durationMs / 1000;
+            gainNode.gain.setValueAtTime(0.3, now + durationSec - 0.04);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, now + durationSec);
+
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + durationSec);
         }
 
-        function activatePad(color) {
+        function playErrorTone() {
+            const ctx = ensureAudioContext();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(75, now);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, now + 0.5);
+
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+
+        function activatePad(color, duration = 250) {
             const pad = document.querySelector(`.pad.${color}`);
-            if(pad) {
+            if (pad) {
                 pad.classList.add('active');
-                playTone(color, 220);
-                setTimeout(() => pad.classList.remove('active'), 220);
+                playTone(SOUNDS[color], duration);
+                
+                setTimeout(() => {
+                    pad.classList.remove('active');
+                }, duration);
             }
         }
 
-        document.getElementById('start-btn').addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        function handleStart(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
             
-            initAudio();
+            ensureAudioContext();
             
             gameSequence = [];
             score = 0;
             updateScoreDisplay();
             gameActive = true;
             
-            setTimeout(nextRound, 300);
-        });
+            setTimeout(nextRound, 400);
+        }
+
+        const startBtn = document.getElementById('start-btn');
+        startBtn.addEventListener('touchstart', handleStart, { passive: false });
+        startBtn.addEventListener('mousedown', handleStart);
 
         function nextRound() {
             playerSequence = [];
@@ -279,22 +333,22 @@
             const colors = ['green', 'red', 'yellow', 'blue'];
             gameSequence.push(colors[Math.floor(Math.random() * colors.length)]);
             
-            const speed = Math.max(180, 550 - (score * 25));
+            const speed = Math.max(220, 550 - (score * 25));
             
             gameSequence.forEach((color, index) => {
                 setTimeout(() => {
-                    activatePad(color);
+                    activatePad(color, speed);
                     if (index === gameSequence.length - 1) {
                         setTimeout(() => isPlayingSequence = false, speed);
                     }
-                }, (index + 1) * (speed + 120));
+                }, (index + 1) * (speed + 150));
             });
         }
 
         function handleInput(color) {
             if (!gameActive || isPlayingSequence) return;
             
-            activatePad(color);
+            activatePad(color, 250);
             playerSequence.push(color);
             
             const currentIndex = playerSequence.length - 1;
@@ -307,24 +361,13 @@
             if (playerSequence.length === gameSequence.length) {
                 score++;
                 updateScoreDisplay();
-                setTimeout(nextRound, 700);
+                setTimeout(nextRound, 800);
             }
         }
 
         function gameOver() {
             gameActive = false;
-            
-            if (audioCtx) {
-                try {
-                    let osc = audioCtx.createOscillator();
-                    let gainNode = audioCtx.createGain();
-                    osc.frequency.setValueAtTime(42, audioCtx.currentTime);
-                    osc.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.4);
-                } catch(e){}
-            }
+            playErrorTone();
             
             document.body.style.background = '#3a0d15';
             setTimeout(() => document.body.style.background = '#12121a', 250);
@@ -337,7 +380,7 @@
             
             setTimeout(() => {
                 alert(`Game Over ! Score final : ${score}`);
-            }, 100);
+            }, 400);
         }
 
         function updateScoreDisplay() {
@@ -345,17 +388,20 @@
         }
 
         document.querySelectorAll('.pad').forEach(pad => {
-            pad.addEventListener('pointerdown', (e) => {
+            const pressEvent = (e) => {
                 e.preventDefault();
-                initAudio(); 
-                handleInput(e.target.dataset.color);
-            });
+                ensureAudioContext();
+                handleInput(e.currentTarget.dataset.color);
+            };
+            
+            pad.addEventListener('touchstart', pressEvent, { passive: false });
+            pad.addEventListener('mousedown', pressEvent);
         });
 
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (KEY_MAP[key]) {
-                initAudio();
+                ensureAudioContext();
                 handleInput(KEY_MAP[key]);
             }
         });
