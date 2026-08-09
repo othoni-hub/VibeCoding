@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>S.P.I.N. ⚡</title>
+    
+    <!-- Suppression du warning Tailwind dans la console -->
+    <script>
+        const _consoleWarn = console.warn;
+        console.warn = function(...args) {
+            if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+            _consoleWarn.apply(console, args);
+        };
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Algorithme de Kociemba en JS -->
+    <script src="https://cdn.jsdelivr.net/npm/cubejs@1.0.3/lib/cube.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cubejs@1.0.3/lib/solve.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        /* 3D Cube CSS Container */
+        .scene {
+            width: 180px;
+            height: 180px;
+            perspective: 600px;
+            margin: 15px auto;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .scene:active {
+            cursor: grabbing;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-25deg) rotateY(45deg);
+            transition: transform 0.1s ease-out;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 3px;
+            padding: 5px;
+            background: #18181b;
+            border: 2px solid #09090b;
+            box-sizing: border-box;
+            backface-visibility: hidden;
+            cursor: pointer;
+        }
+
+        .face-H { transform: rotateX(90deg) translateZ(90px); }
+        .face-B { transform: rotateX(-90deg) translateZ(90px); }
+        .face-F { transform: translateZ(90px); }
+        .face-A { transform: rotateY(180deg) translateZ(90px); }
+        .face-G { transform: rotateY(-90deg) translateZ(90px); }
+        .face-D { transform: rotateY(90deg) translateZ(90px); }
+
+        .sticker {
+            border-radius: 4px;
+            transition: background-color 0.3s ease, transform 0.2s;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        /* Couleurs */
+        .color-W { background-color: #f8fafc; } /* Blanc */
+        .color-Y { background-color: #eab308; } /* Jaune */
+        .color-G { background-color: #22c55e; } /* Vert */
+        .color-B { background-color: #3b82f6; } /* Bleu */
+        .color-O { background-color: #f97316; } /* Orange */
+        .color-R { background-color: #ef4444; } /* Rouge */
+
+        .active-face-highlight {
+            outline: 4px solid #a855f7;
+            outline-offset: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(90px); }
+            50% { transform: scale(1.03) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(92px); }
+        }
+    </style>
+</head>
+<body class="text-zinc-100 flex flex-col justify-between min-h-screen pb-4">
+
+    <!-- HEADER -->
+    <header class="px-6 pt-5 pb-2 flex justify-between items-center border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
+        <div>
+            <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">S.P.I.N.</h1>
+            <p class="text-[10px] text-zinc-400">Solveur de Positions par Intelligence Numérique</p>
+        </div>
+        <div id="solver-status" class="flex items-center gap-2 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" id="status-dot"></span>
+            <span class="text-[10px] font-semibold text-zinc-300" id="status-text">Moteur...</span>
+        </div>
+    </header>
+
+    <!-- ZONE PRINCIPALE -->
+    <main class="flex-grow flex flex-col justify-center px-4 py-4 max-w-md mx-auto w-full">
+        
+        <!-- ÉTAPE 1 : INTERFACE DE SAISIE -->
+        <div id="screen-input" class="space-y-4">
+            
+            <div class="text-center">
+                <span class="text-xs font-semibold uppercase tracking-widest text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-full">Étape 1 : Remplissage</span>
+                <p class="text-xs text-zinc-400 mt-2">Peins ton cube à la main ou utilise ta caméra pour scanner les faces.</p>
+            </div>
+
+            <!-- MENU DE SÉLECTION DE LA FACE ACTIVE -->
+            <div class="flex justify-between items-center bg-zinc-900/60 p-1.5 rounded-xl border border-zinc-800/80 text-xs">
+                <span class="font-bold pl-2 text-zinc-400 text-[11px]">Face active :</span>
+                <div class="flex gap-1" id="face-selector-group">
+                    <button onclick="setActiveFaceToConfigure('H')" id="btn-face-H" class="px-2 py-1 rounded-md bg-purple-600 font-bold">H</button>
+                    <button onclick="setActiveFaceToConfigure('G')" id="btn-face-G" class="px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">G</button>
+                    <button onclick="setActiveFaceToConfigure('F')" id="btn-face-F" class="px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">F</button>
+                    <button onclick="setActiveFaceToConfigure('D')" id="btn-face-D" class="px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">D</button>
+                    <button onclick="setActiveFaceToConfigure('A')" id="btn-face-A" class="px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">A</button>
+                    <button onclick="setActiveFaceToConfigure('B')" id="btn-face-B" class="px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">B</button>
+                </div>
+            </div>
+
+            <!-- CONTENEUR DU SCANNER ET DU PATRON -->
+            <div class="relative w-full aspect-square bg-zinc-900/40 rounded-2xl border border-zinc-800/80 overflow-hidden flex items-center justify-center">
+                <div id="camera-container" class="hidden absolute inset-0 w-full h-full z-10">
+                    <video id="video-feed" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <div class="absolute inset-0 flex items-center justify-center p-8 bg-black/30">
+                        <div class="grid grid-cols-3 grid-rows-3 gap-2 w-full aspect-square border-4 border-purple-500 rounded-xl max-w-[240px]">
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                            <div class="border border-white/40 rounded flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-purple-500"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-1.5 w-full max-w-[200px] aspect-square p-2 bg-zinc-950 rounded-xl border border-zinc-800" id="current-face-grid"></div>
+            </div>
+
+            <div class="flex gap-2 justify-center">
+                <button id="btn-toggle-camera" onclick="toggleCamera()" class="flex-1 bg-purple-600/20 text-purple-300 border border-purple-500/30 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>Activer la Caméra</span>
+                </button>
+                <button id="btn-capture" onclick="captureFaceColor()" class="hidden flex-1 bg-pink-600 hover:bg-pink-500 text-white py-2.5 px-4 rounded-xl text-xs font-bold shadow-lg shadow-pink-500/20">
+                    📸 Scanner la face
+                </button>
+            </div>
+
+            <!-- PALETTE MANUELLE -->
+            <div class="flex flex-col items-center gap-2 pt-2">
+                <p class="text-[10px] text-zinc-500 font-semibold">Pinceau de correction manuelle :</p>
+                <div class="flex gap-2 justify-center bg-zinc-900/40 p-2 rounded-xl border border-zinc-800/60">
+                    <button class="w-8 h-8 rounded-lg color-W border-2 border-purple-500 transition-all" onclick="selectPaletteColor('W', this)"></button>
+                    <button class="w-8 h-8 rounded-lg color-Y border-2 border-transparent transition-all" onclick="selectPaletteColor('Y', this)"></button>
+                    <button class="w-8 h-8 rounded-lg color-G border-2 border-transparent transition-all" onclick="selectPaletteColor('G', this)"></button>
+                    <button class="w-8 h-8 rounded-lg color-B border-2 border-transparent transition-all" onclick="selectPaletteColor('B', this)"></button>
+                    <button class="w-8 h-8 rounded-lg color-O border-2 border-transparent transition-all" onclick="selectPaletteColor('O', this)"></button>
+                    <button class="w-8 h-8 rounded-lg color-R border-2 border-transparent transition-all" onclick="selectPaletteColor('R', this)"></button>
+                </div>
+            </div>
+
+            <div class="flex gap-2 justify-center pt-2">
+                <button onclick="loadDemoCube()" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 py-3 px-4 rounded-xl text-xs font-semibold">
+                    🎲 Cube Démo
+                </button>
+                <button onclick="startSolving()" id="btn-solve" disabled class="flex-grow bg-gradient-to-r from-purple-600 to-pink-600 disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-500 text-white py-3 px-4 rounded-xl font-bold text-xs shadow-lg shadow-purple-500/10">
+                    Résoudre le Cube
+                </button>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 2 : ÉCRAN DE RÉSOLUTION 3D INTERACTIF -->
+        <div id="screen-solution" class="hidden space-y-3">
+            <div class="text-center">
+                <span class="text-xs font-semibold uppercase tracking-widest text-pink-400 bg-pink-500/10 px-2.5 py-1 rounded-full">Étape 2 : Résolution</span>
+                <p class="text-[11px] text-zinc-400 mt-1.5">Glisse pour orienter. **Clique sur une face** ou utilise les boutons pour tourner.</p>
+            </div>
+
+            <!-- Zone 3D -->
+            <div class="scene" id="scene-3d">
+                <div class="cube" id="cube-3d">
+                    <div class="cube-face face-H" id="face-3d-H" data-face="H"></div>
+                    <div class="cube-face face-B" id="face-3d-B" data-face="B"></div>
+                    <div class="cube-face face-F" id="face-3d-F" data-face="F"></div>
+                    <div class="cube-face face-A" id="face-3d-A" data-face="A"></div>
+                    <div class="cube-face face-G" id="face-3d-G" data-face="G"></div>
+                    <div class="cube-face face-D" id="face-3d-D" data-face="D"></div>
+                </div>
+            </div>
+
+            <!-- COMMANDES MANUELLES TACTILES / BOUTONS -->
+            <div class="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800/80 space-y-1.5">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Rotation manuelle :</span>
+                    <button id="btn-invert-mode" onclick="toggleInvertMode()" class="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded border border-zinc-700 font-semibold">
+                        Inverser ( ' ) : OFF
+                    </button>
+                </div>
+                <div class="grid grid-cols-6 gap-1 text-xs font-bold">
+                    <button onclick="triggerManualMove('H')" class="bg-zinc-800 hover:bg-purple-600 active:bg-purple-500 text-purple-300 hover:text-white py-2 rounded-lg border border-zinc-700/60">H</button>
+                    <button onclick="triggerManualMove('G')" class="bg-zinc-800 hover:bg-purple-600 active:bg-purple-500 text-purple-300 hover:text-white py-2 rounded-lg border border-zinc-700/60">G</button>
+                    <button onclick="triggerManualMove('F')" class="bg-zinc-800 hover:bg-purple-600 active:bg-purple-500 text-purple-300 hover:text-white py-2 rounded-lg border border-zinc-700/60">F</button>
+                    <button onclick="triggerManualMove('D')" class="bg-zinc-800 hover:bg-purple-600 active:bg-purple-500 text-purple-300 hover:text-white py-2 rounded-lg border border-zinc-700/60">D</button>
+                    <button onclick="triggerManualMove('A')" class="bg-zinc-800 hover:bg-purple-600 active:bg-purple-500 text-purple-300 hover:text-white py-2 rounded-lg border border-zinc-700/60">A</button>
+                    <button onclick="triggerManualMove('B')" class="bg-zinc-800 hover:bg-purple-600 active:bg-purple-500 text-purple-300 hover:text-white py-2 rounded-lg border border-zinc-700/60">B</button>
+                </div>
+            </div>
+
+            <!-- Panneau d'instructions -->
+            <div class="bg-zinc-900/60 border border-zinc-800/80 p-3 rounded-xl space-y-1 text-center">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold text-zinc-500" id="step-counter">Mouvement 0 / 0</span>
+                    <span class="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full" id="notation-badge">-</span>
+                </div>
+                <h3 class="text-sm font-extrabold" id="instruction-title">Lancement...</h3>
+                <p class="text-[11px] text-zinc-400 leading-relaxed" id="instruction-desc">Suis pas-à-pas les rotations indiquées.</p>
+            </div>
+
+            <!-- Lecteur -->
+            <div class="flex flex-col gap-2">
+                <div class="flex justify-between items-center bg-zinc-900/40 px-4 py-2 rounded-xl border border-zinc-800/50">
+                    <button onclick="prevStep()" class="p-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button id="btn-play" onclick="togglePlay()" class="p-3 bg-purple-600 hover:bg-purple-500 rounded-full text-white shadow-md">
+                        <svg id="play-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                    <button onclick="nextStep()" class="p-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+                <button onclick="resetToInput()" class="text-xs text-zinc-500 hover:text-zinc-300 font-semibold py-0.5">
+                    ↩ Corriger une face / Recommencer
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER SIGNATURE -->
+    <footer class="text-center py-2 text-[10px] text-zinc-600 px-4 mt-auto">
+        vibe-codé par Olivier Thöni avec l’aide de Gemini 3.5 flash
+    </footer>
+
+    <canvas id="hidden-canvas" class="hidden"></canvas>
+
+    <script>
+        // --- TABLES DE CONVERSION NOTATION FR (H, B, F, A, G, D) / EN (U, D, F, B, L, R) ---
+        const FR_TO_EN = { H: 'U', B: 'D', F: 'F', A: 'B', G: 'L', D: 'R' };
+        const EN_TO_FR = { U: 'H', D: 'B', F: 'F', B: 'A', L: 'G', R: 'D' };
+
+        function moveToEN(moveFR) {
+            if (!moveFR) return '';
+            return moveFR.replace(/^[HBFAGD]/, m => FR_TO_EN[m]);
+        }
+
+        function moveToFR(moveEN) {
+            if (!moveEN) return '';
+            return moveEN.replace(/^[UDFBLR]/, m => EN_TO_FR[m]);
+        }
+
+        // --- 1. CONFIGURATION DU CUBE & ÉTAT ---
+        let currentPaletteColor = 'W';
+        let activeConfigFace = 'H';
+        let invertMode = false;
+        
+        let cubeState = {
+            H: Array(9).fill('W'),
+            B: Array(9).fill('Y'),
+            F: Array(9).fill('G'),
+            A: Array(9).fill('B'),
+            G: Array(9).fill('O'),
+            D: Array(9).fill('R')
+        };
+
+        let rotateX = -25;
+        let rotateY = 45;
+        let isDragging = false;
+        let startX, startY;
+        let previousTouchX, previousTouchY;
+        let totalDragDistance = 0;
+
+        let solutionMoves = [];
+        let currentStepIndex = 0;
+        let playInterval = null;
+        let initialCubeString = "";
+
+        let videoStream = null;
+
+        function initApp() {
+            renderActiveConfigFaceGrid();
+            setup3DDragAndClick();
+            initializeSolver();
+            setupKeyboardControls();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        function initializeSolver() {
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (typeof Cube !== 'undefined' && typeof Cube.initSolver === 'function') {
+                    clearInterval(checkInterval);
+                    try {
+                        Cube.initSolver();
+                        document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500";
+                        document.getElementById('status-text').innerText = "Prêt";
+                        document.getElementById('btn-solve').removeAttribute('disabled');
+                    } catch (e) {
+                        console.error("Erreur d'initialisation du solveur :", e);
+                        document.getElementById('status-text').innerText = "Erreur algo";
+                    }
+                } else if (attempts > 50) {
+                    clearInterval(checkInterval);
+                    document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-red-500 animate-none";
+                    document.getElementById('status-text').innerText = "Erreur CDN";
+                }
+            }, 100);
+        }
+
+        // --- 2. CONFIGURATION ET PALETTE ---
+        function setActiveFaceToConfigure(face) {
+            activeConfigFace = face;
+            document.querySelectorAll('#face-selector-group button').forEach(btn => {
+                btn.className = "px-2 py-1 rounded-md bg-zinc-800 text-zinc-400";
+            });
+            document.getElementById(`btn-face-${face}`).className = "px-2 py-1 rounded-md bg-purple-600 font-bold text-white";
+            renderActiveConfigFaceGrid();
+        }
+
+        function renderActiveConfigFaceGrid() {
+            const grid = document.getElementById('current-face-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                const cellColor = cubeState[activeConfigFace][i];
+                cell.className = `aspect-square sticker color-${cellColor} cursor-pointer flex items-center justify-center`;
+                
+                if (i === 4) {
+                    cell.classList.add('opacity-80');
+                    cell.innerHTML = `<span class="text-xs font-black text-zinc-950/40">${activeConfigFace}</span>`;
+                } else {
+                    cell.addEventListener('click', () => {
+                        cubeState[activeConfigFace][i] = currentPaletteColor;
+                        cell.className = `aspect-square sticker color-${currentPaletteColor} cursor-pointer flex items-center justify-center`;
+                    });
+                }
+                grid.appendChild(cell);
+            }
+        }
+
+        function selectPaletteColor(colorCode, element) {
+            currentPaletteColor = colorCode;
+            const buttons = element.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => btn.classList.remove('border-purple-500'));
+            element.classList.add('border-purple-500');
+        }
+
+        function loadDemoCube() {
+            if (typeof Cube === 'undefined') return;
+            const randomCube = Cube.random();
+            const str = randomCube.asString();
+            
+            const charToColor = {
+                'U': 'W', 'D': 'Y', 'F': 'G',
+                'B': 'B', 'L': 'O', 'R': 'R'
+            };
+
+            const orderEN = ['U', 'R', 'F', 'D', 'L', 'B'];
+            orderEN.forEach((faceEN, fIdx) => {
+                const faceFR = EN_TO_FR[faceEN];
+                const faceStr = str.substring(fIdx * 9, (fIdx + 1) * 9);
+                cubeState[faceFR] = faceStr.split('').map(char => charToColor[char]);
+            });
+
+            renderActiveConfigFaceGrid();
+        }
+
+        // --- 3. CAMÉRA ---
+        async function toggleCamera() {
+            const container = document.getElementById('camera-container');
+            const video = document.getElementById('video-feed');
+            const toggleBtn = document.getElementById('btn-toggle-camera');
+            const captureBtn = document.getElementById('btn-capture');
+
+            if (videoStream) {
+                stopCamera();
+            } else {
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment', width: 640, height: 640 }
+                    });
+                    video.srcObject = videoStream;
+                    container.classList.remove('hidden');
+                    captureBtn.classList.remove('hidden');
+                    toggleBtn.innerHTML = `<span>Désactiver Caméra</span>`;
+                    toggleBtn.classList.add('bg-red-600/20', 'text-red-300', 'border-red-500/30');
+                } catch (e) {
+                    alert("Impossible d'accéder à la caméra arrière. Vérifiez les permissions.");
+                    console.error(e);
+                }
+            }
+        }
+
+        function stopCamera() {
+            const container = document.getElementById('camera-container');
+            const toggleBtn = document.getElementById('btn-toggle-camera');
+            const captureBtn = document.getElementById('btn-capture');
+
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            if (container) container.classList.add('hidden');
+            if (captureBtn) captureBtn.classList.add('hidden');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>Activer la Caméra</span>
+                `;
+                toggleBtn.classList.remove('bg-red-600/20', 'text-red-300', 'border-red-500/30');
+            }
+        }
+
+        function captureFaceColor() {
+            const video = document.getElementById('video-feed');
+            const canvas = document.getElementById('hidden-canvas');
+            const ctx = canvas.getContext('2d');
+
+            if (!videoStream) return;
+
+            const size = Math.min(video.videoWidth, video.videoHeight);
+            canvas.width = size;
+            canvas.height = size;
+
+            const sx = (video.videoWidth - size) / 2;
+            const sy = (video.videoHeight - size) / 2;
+            ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+
+            const points = [
+                {x: 1/6, y: 1/6}, {x: 3/6, y: 1/6}, {x: 5/6, y: 1/6},
+                {x: 1/6, y: 3/6}, {x: 3/6, y: 3/6}, {x: 5/6, y: 3/6},
+                {x: 1/6, y: 5/6}, {x: 3/6, y: 5/6}, {x: 5/6, y: 5/6}
+            ];
+
+            points.forEach((point, i) => {
+                if (i === 4) return;
+
+                const pxX = Math.floor(point.x * size);
+                const pxY = Math.floor(point.y * size);
+                
+                const imgData = ctx.getImageData(pxX - 2, pxY - 2, 5, 5);
+                let r = 0, g = 0, b = 0;
+                for (let j = 0; j < imgData.data.length; j += 4) {
+                    r += imgData.data[j];
+                    g += imgData.data[j+1];
+                    b += imgData.data[j+2];
+                }
+                const count = imgData.data.length / 4;
+                r = Math.floor(r / count);
+                g = Math.floor(g / count);
+                b = Math.floor(b / count);
+
+                cubeState[activeConfigFace][i] = classifyColor(r, g, b);
+            });
+
+            stopCamera();
+            renderActiveConfigFaceGrid();
+        }
+
+        function classifyColor(r, g, b) {
+            const refs = [
+                { name: 'W', rgb: [230, 230, 230] },
+                { name: 'Y', rgb: [210, 190, 20] },
+                { name: 'G', rgb: [10, 150, 50] },
+                { name: 'B', rgb: [15, 60, 170] },
+                { name: 'O', rgb: [220, 100, 10] },
+                { name: 'R', rgb: [190, 20, 20] }
+            ];
+
+            let minDistance = Infinity;
+            let matchedColor = 'W';
+
+            const total = r + g + b;
+            if (total === 0) return 'B';
+            const nr = r / total;
+            const ng = g / total;
+            const nb = b / total;
+
+            refs.forEach(ref => {
+                const refTotal = ref.rgb[0] + ref.rgb[1] + ref.rgb[2];
+                const nRefR = ref.rgb[0] / refTotal;
+                const nRefG = ref.rgb[1] / refTotal;
+                const nRefB = ref.rgb[2] / refTotal;
+
+                const dist = Math.sqrt(
+                    Math.pow(nr - nRefR, 2) + 
+                    Math.pow(ng - nRefG, 2) + 
+                    Math.pow(nb - nRefB, 2)
+                );
+
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    matchedColor = ref.name;
+                }
+            });
+
+            if (r > 190 && g > 190 && b > 190) return 'W';
+            return matchedColor;
+        }
+
+        // --- 4. DÉPLACEMENT CAMERA 3D & INTERACTION TACTILE DIRECTE SUR LES FACES ---
+        function setup3DDragAndClick() {
+            const scene = document.getElementById('scene-3d');
+            const cube = document.getElementById('cube-3d');
+            if (!scene || !cube) return;
+
+            const handleStart = (clientX, clientY) => {
+                isDragging = true;
+                startX = clientX;
+                startY = clientY;
+                previousTouchX = clientX;
+                previousTouchY = clientY;
+                totalDragDistance = 0;
+            };
+
+            const handleMove = (clientX, clientY) => {
+                if (!isDragging) return;
+                const deltaX = clientX - previousTouchX;
+                const deltaY = clientY - previousTouchY;
+
+                totalDragDistance += Math.abs(deltaX) + Math.abs(deltaY);
+
+                rotateY += deltaX * 0.6;
+                rotateX -= deltaY * 0.6;
+                rotateX = Math.max(-85, Math.min(85, rotateX));
+
+                cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                previousTouchX = clientX;
+                previousTouchY = clientY;
+            };
+
+            const handleEnd = (targetElement) => {
+                isDragging = false;
+                if (totalDragDistance < 8 && targetElement) {
+                    const faceElem = targetElement.closest('.cube-face');
+                    if (faceElem) {
+                        const faceCode = faceElem.getAttribute('data-face');
+                        if (faceCode) triggerManualMove(faceCode);
+                    }
+                }
+            };
+
+            scene.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            });
+            scene.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+            });
+            scene.addEventListener('touchend', (e) => {
+                const touch = e.changedTouches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                handleEnd(target);
+            });
+
+            scene.addEventListener('mousedown', (e) => {
+                handleStart(e.clientX, e.clientY);
+            });
+            window.addEventListener('mousemove', (e) => {
+                handleMove(e.clientX, e.clientY);
+            });
+            window.addEventListener('mouseup', (e) => {
+                handleEnd(e.target);
+            });
+        }
+
+        // --- 5. RACCOURCIS CLAVIER ---
+        function setupKeyboardControls() {
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('screen-solution').classList.contains('hidden')) return;
+                
+                const key = e.key.toUpperCase();
+                const validFacesFR = ['H', 'B', 'F', 'A', 'G', 'D'];
+                
+                if (validFacesFR.includes(key)) {
+                    const isShift = e.shiftKey || invertMode;
+                    const move = isShift ? key + "'" : key;
+                    applyMoveToCube(move);
+                }
+            });
+        }
+
+        function toggleInvertMode() {
+            invertMode = !invertMode;
+            const btn = document.getElementById('btn-invert-mode');
+            if (invertMode) {
+                btn.innerText = "Inverser ( ' ) : ON";
+                btn.className = "text-[10px] bg-pink-600 text-white px-2 py-0.5 rounded border border-pink-500 font-bold";
+            } else {
+                btn.innerText = "Inverser ( ' ) : OFF";
+                btn.className = "text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded border border-zinc-700 font-semibold";
+            }
+        }
+
+        function triggerManualMove(faceCodeFR) {
+            const moveFR = invertMode ? faceCodeFR + "'" : faceCodeFR;
+            applyMoveToCube(moveFR);
+        }
+
+        // --- RECALCUL DYNAMIQUE EN NOTATION FRANÇAISE ---
+        function applyMoveToCube(moveExecutedFR) {
+            if (currentStepIndex >= solutionMoves.length && solutionMoves.length > 0) return;
+
+            const expectedMoveFR = solutionMoves[currentStepIndex];
+
+            if (moveExecutedFR === expectedMoveFR) {
+                currentStepIndex++;
+                update3DScene();
+            } else {
+                let currentVirtualCube = Cube.fromString(initialCubeString);
+                for (let i = 0; i < currentStepIndex; i++) {
+                    currentVirtualCube.move(moveToEN(solutionMoves[i]));
+                }
+                currentVirtualCube.move(moveToEN(moveExecutedFR));
+
+                try {
+                    const remainingSolutionEN = currentVirtualCube.solve();
+                    if (remainingSolutionEN) {
+                        const newMovesEN = remainingSolutionEN.split(' ').filter(m => m.trim() !== "");
+                        initialCubeString = currentVirtualCube.asString();
+                        solutionMoves = newMovesEN.map(moveToFR);
+                        currentStepIndex = 0;
+                        update3DScene();
+                    }
+                } catch (e) {
+                    alert("⚠️ Position insoluble atteinte ! Un coin physique est peut-être pivoté.");
+                    console.error(e);
+                }
+            }
+        }
+
+        // --- 6. CALCUL RÉSOLUTION ET MISE À JOUR 3D ---
+        function startSolving() {
+            stopCamera();
+
+            // Vérification des 6 centres
+            const centerColors = [cubeState.H[4], cubeState.D[4], cubeState.F[4], cubeState.B[4], cubeState.G[4], cubeState.A[4]];
+            const uniqueCenters = new Set(centerColors);
+            if (uniqueCenters.size !== 6) {
+                alert("⚠️ Erreur : Les 6 centres doivent être de couleurs différentes ! Vérifiez vos couleurs de centres.");
+                return;
+            }
+
+            const solverInputString = convertStateToSolverString();
+            
+            const counts = {};
+            for (let char of solverInputString) counts[char] = (counts[char] || 0) + 1;
+            const requiredFaces = ['U', 'R', 'F', 'D', 'L', 'B'];
+            const isValidCount = requiredFaces.every(face => counts[face] === 9);
+
+            if (!isValidCount) {
+                alert("⚠️ Saisie invalide : chaque couleur doit comporter exactement 9 facettes sur l'ensemble du cube.");
+                return;
+            }
+
+            document.getElementById('status-text').innerText = "Calcul...";
+
+            setTimeout(() => {
+                try {
+                    const solverCube = Cube.fromString(solverInputString);
+                    const rawSolutionEN = solverCube.solve();
+
+                    if (!rawSolutionEN || rawSolutionEN.includes("Error")) {
+                        alert("⚠️ Cube physiquement impossible ! Vérifiez si un coin n'a pas été tourné à la hand.");
+                        document.getElementById('status-text').innerText = "Prêt";
+                        return;
+                    }
+
+                    const movesEN = rawSolutionEN.split(' ').filter(move => move.trim() !== "");
+                    solutionMoves = movesEN.map(moveToFR);
+                    initialCubeString = solverInputString;
+                    currentStepIndex = 0;
+
+                    document.getElementById('screen-input').classList.add('hidden');
+                    document.getElementById('screen-solution').classList.remove('hidden');
+
+                    update3DScene();
+                } catch (e) {
+                    alert("⚠️ Configuration de cube impossible. Les pièces ne forment pas un Rubik's Cube valide (possible coin pivoté).");
+                    console.error(e);
+                } finally {
+                    document.getElementById('status-text').innerText = "Prêt";
+                }
+            }, 50);
+        }
+
+        function convertStateToSolverString() {
+            const centerMapping = {
+                [cubeState.H[4]]: 'U',
+                [cubeState.D[4]]: 'R',
+                [cubeState.F[4]]: 'F',
+                [cubeState.B[4]]: 'D',
+                [cubeState.G[4]]: 'L',
+                [cubeState.A[4]]: 'B',
+            };
+
+            const orderFR = ['H', 'D', 'F', 'B', 'G', 'A'];
+            let result = "";
+
+            orderFR.forEach(faceFR => {
+                for (let i = 0; i < 9; i++) {
+                    const color = cubeState[faceFR][i];
+                    result += centerMapping[color] || 'U';
+                }
+            });
+            return result;
+        }
+
+        function update3DScene() {
+            const virtualCube = Cube.fromString(initialCubeString);
+            for (let i = 0; i < currentStepIndex; i++) {
+                virtualCube.move(moveToEN(solutionMoves[i]));
+            }
+
+            const currentStrState = virtualCube.asString();
+            const colorMapping = {
+                'U': cubeState.H[4], 'D': cubeState.B[4], 'F': cubeState.F[4],
+                'B': cubeState.A[4], 'L': cubeState.G[4], 'R': cubeState.D[4]
+            };
+
+            const orderEN = ['U', 'R', 'F', 'D', 'L', 'B'];
+            orderEN.forEach((faceEN, faceIndex) => {
+                const faceFR = EN_TO_FR[faceEN];
+                const faceElement = document.getElementById(`face-3d-${faceFR}`);
+                if (!faceElement) return;
+                
+                faceElement.innerHTML = '';
+                faceElement.classList.remove('active-face-highlight');
+
+                const faceOffset = faceIndex * 9;
+                for (let i = 0; i < 9; i++) {
+                    const solverChar = currentStrState[faceOffset + i];
+                    const realColor = colorMapping[solverChar];
+                    const sticker = document.createElement('div');
+                    sticker.className = `sticker color-${realColor}`;
+                    faceElement.appendChild(sticker);
+                }
+            });
+
+            const stepCounter = document.getElementById('step-counter');
+            const notationBadge = document.getElementById('notation-badge');
+            const instructionTitle = document.getElementById('instruction-title');
+            const instructionDesc = document.getElementById('instruction-desc');
+
+            if (currentStepIndex < solutionMoves.length) {
+                const moveFR = solutionMoves[currentStepIndex];
+                stepCounter.innerText = `Mouvement ${currentStepIndex + 1} / ${solutionMoves.length}`;
+                notationBadge.innerText = moveFR;
+                
+                const detail = getMoveInstruction(moveFR);
+                instructionTitle.innerText = detail.title;
+                instructionDesc.innerText = detail.desc;
+
+                const activeFace = document.getElementById(`face-3d-${detail.faceCode}`);
+                if (activeFace) {
+                    activeFace.classList.add('active-face-highlight');
+                    const rotations = {
+                        'H': {x: 90, y: 0}, 'B': {x: -90, y: 0},
+                        'F': {x: 0, y: 0}, 'A': {x: 0, y: 180},
+                        'G': {x: 0, y: -90}, 'D': {x: 0, y: 90}
+                    }[detail.faceCode];
+                    activeFace.style.setProperty('--rx', `${rotations.x}deg`);
+                    activeFace.style.setProperty('--ry', `${rotations.y}deg`);
+                }
+            } else {
+                stepCounter.innerText = `Fini !`;
+                notationBadge.innerText = "✓";
+                instructionTitle.innerText = "Félicitations ! 🎉";
+                instructionDesc.innerText = "Ton Rubik's Cube est résolu.";
+                pause();
+            }
+        }
+
+        function getMoveInstruction(moveFR) {
+            const faceFR = moveFR[0];
+            const modifier = moveFR.substring(1);
+
+            const faceNames = {
+                'H': { name: 'du HAUT (H)', code: 'H' },
+                'B': { name: 'du BAS (B)', code: 'B' },
+                'F': { name: 'de FACE (F)', code: 'F' },
+                'A': { name: 'de l\'ARRIÈRE (A)', code: 'A' },
+                'G': { name: 'de GAUCHE (G)', code: 'G' },
+                'D': { name: 'de DROITE (D)', code: 'D' }
+            };
+
+            let title = "";
+            let desc = "";
+
+            if (modifier === "") {
+                title = `Tourne la face ${faceNames[faceFR].name}`;
+                desc = `Fais pivoter de 90° dans le sens des aiguilles d'une montre.`;
+            } else if (modifier === "'") {
+                title = `Tourne la face ${faceNames[faceFR].name}`;
+                desc = `Fais pivoter de 90° dans le sens INVERSE des aiguilles d'une montre.`;
+            } else if (modifier === "2") {
+                title = `Double-tour face ${faceNames[faceFR].name}`;
+                desc = `Fais pivoter de 180° (demi-tour).`;
+            }
+
+            return { title: title, desc: desc, faceCode: faceNames[faceFR].code };
+        }
+
+        function nextStep() {
+            if (currentStepIndex < solutionMoves.length) {
+                currentStepIndex++;
+                update3DScene();
+            }
+        }
+
+        function prevStep() {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                update3DScene();
+            }
+        }
+
+        function togglePlay() {
+            const btnPlay = document.getElementById('btn-play');
+            const playIcon = document.getElementById('play-icon');
+
+            if (playInterval) {
+                pause();
+            } else {
+                playInterval = setInterval(() => {
+                    if (currentStepIndex < solutionMoves.length) {
+                        nextStep();
+                    } else {
+                        pause();
+                    }
+                }, 2500);
+                btnPlay.className = "p-3 bg-zinc-700 rounded-full text-white";
+                playIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+            }
+        }
+
+        function pause() {
+            const btnPlay = document.getElementById('btn-play');
+            const playIcon = document.getElementById('play-icon');
+            clearInterval(playInterval);
+            playInterval = null;
+            if (btnPlay) btnPlay.className = "p-3 bg-purple-600 hover:bg-purple-500 rounded-full text-white shadow-md";
+            if (playIcon) playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
+        }
+
+        function resetToInput() {
+            pause();
+            document.getElementById('screen-solution').classList.add('hidden');
+            document.getElementById('screen-input').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
