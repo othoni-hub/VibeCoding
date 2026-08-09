@@ -187,7 +187,7 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 
 Visualiser de nombreux solides de l'espace, dont quelques merveilles
 
-***destination :*** Mathématiques, dès la 6<sup>ème</sup>, géométrie programmée
+***destination :*** Mathématiques collège et après, géométrie dans l'espace
 
 [Retour en haut](#VibeCoding)
 
