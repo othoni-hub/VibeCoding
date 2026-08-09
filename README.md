@@ -7,7 +7,7 @@ formateur d'enseignants, de formateurs et de cadres pédagogiques à l'IFUCOME d
 Dans le *vibe-coding*, il n'est pas indispensable de savoir "coder" (c'est-à-dire écrire un programme informatique), même si ça aide.
 Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un outil nouveau et très efficace pour les enseignants et enseignantes, qui ne manquent jamais d'idées !
 
-L'intérêt d'une Application Simple-Page (*SPA : Single Page Application*) est que l'on obtient un fichier HTM unique, qu'il suffit de télécharger, et qui s'ouvre de manière autonome dans le navigateur internet !
+L'intérêt d'une Application Simple-Page (*SPA : Single Page Application*) est que l'on obtient un fichier HTML unique, qu'il suffit de télécharger, et qui s'ouvre de manière autonome dans le navigateur internet !
 
 (Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
