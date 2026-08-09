@@ -204,7 +204,7 @@ Visualiser de nombreux solides de l'espace, dont quelques merveilles
 ### FOURMIS-3D
 
 [*Vibe-Codé* avec Gemini 3.5]
-<li><a href="https://othoni-hub.github.io/VibeCoding/FOURMIS-3D/index.html" target="_blank" rel="noopener noreferrer">FOURMIS-3DC </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/FOURMIS-3D/index.html" target="_blank" rel="noopener noreferrer">FOURMIS-3D </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
