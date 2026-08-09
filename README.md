@@ -182,10 +182,10 @@ Le Boa Constructor est une application sous forme de jeu de plateau, au croiseme
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="400" height="160" alt="image" src="https://github.com/user-attachments/assets/31124b9c-66f2-46ce-9be5-ccc98caebd1b" />
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/31124b9c-66f2-46ce-9be5-ccc98caebd1b" />
 
 
-Visualiser de nombreux solides de l'espace, donc quelques merveilles
+Visualiser de nombreux solides de l'espace, dont quelques merveilles
 
 ***destination :*** Mathématiques, dès la 6<sup>ème</sup>, géométrie programmée
 
