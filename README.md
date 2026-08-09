@@ -49,6 +49,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 ### Jeux
 - [L'appli *PICASSO-Mandalas*](#PICASSO-Mandalas)
 - [L'appli *SIMON*](#SIMON)
+- [L'appli *CyberPulse_Solitaire*](#CyberPulse_Solitaire)
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
 - [L'appli *POKER-Dés*](#POKER)
@@ -627,6 +628,24 @@ Le fameux jeux de SIMON récussité
 ***destination :*** tous 
 
 [Retour en haut](#VibeCoding)
+
+---
+### CyberPulse_Solitaire
+
+[*Vibe-Codé* avec Gemini 3.5 Flash]
+<li><a href="https://othoni-hub.github.io/CyberPulse_Solitaire/SIMON/index.html" target="_blank" rel="noopener noreferrer">CyberPulse_Solitaire </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="200" height="220" alt="image" src="https://github.com/user-attachments/assets/e1ee3e5a-aa54-4e71-b5a0-834e78fb09e1" />
+
+
+Un jeux entre le Taquin ("pousse-pousse") et Labyrinthe (jeux Ravensburger des années 1980). Il y avait un autre jeu qui ressemblait à celui-ci, pour deux joueurs, mais je ne retrouve pas le nom...
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
+
 
 ---
 
