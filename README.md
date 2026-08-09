@@ -752,7 +752,7 @@ Observer le ciel depuis les latitudes françaises(métropole)
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="650" height="350" alt="image" src="https://github.com/user-attachments/assets/166c1325-9140-45bb-afc1-4707900f9edf" />
+<img width="350" height="220" alt="image" src="https://github.com/user-attachments/assets/7168c097-21b7-4e8f-829e-4d3d37636054" />
 
 Apprendre la cryptographie, sur 11 algorithmes historiques alphabétiques ou numériques, avec tuto de déchiffrement adapté aux élèves de 3<sup>ème</sup>  ou de Terminale, selon la difficulté et les notions qu'ils utilisent, et déchiffrement pas à pas.
 
