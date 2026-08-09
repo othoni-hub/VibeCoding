@@ -7,6 +7,8 @@ formateur d'enseignants, de formateurs et de cadres pédagogiques à l'IFUCOME d
 Dans le *vibe-coding*, il n'est pas indispensable de savoir "coder" (c'est-à-dire écrire un programme informatique), même si ça aide.
 Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un outil nouveau et très efficace pour les enseignants et enseignantes, qui ne manquent jamais d'idées !
 
+L'intérêt d'une Application Simple-Page (*SPA : Single Page Application*) est que l'on obtient un fichier HTM unique, qu'il suffit de télécharger, et qui s'ouvre de manière autonome dans le navigateur internet !
+
 (Le présent fichier  : https://github.com/othoni-hub/VibeCoding/?tab=readme-ov-file#readme )
 
 <img width="135" height="200" alt="image" style="border:2px solid #000000;" src="https://github.com/user-attachments/assets/39a17948-2725-4cd6-8a7f-0a32188c6b21" />
@@ -49,6 +51,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 ### Jeux
 - [L'appli *PICASSO-Mandalas*](#PICASSO-Mandalas)
 - [L'appli *SIMON*](#SIMON)
+- [L'appli *RAMDAM*](#RAMDAM)
 - [L'appli *CyberPulse_Solitaire*](#CyberPulse_Solitaire)
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
@@ -619,20 +622,42 @@ téléchargement : https://github.com/othoni-hub/VibeCoding/blob/main/PICASSO-Ma
 ---
 
 ### SIMON :white_check_mark:
-[*Vibe-Codé* avec Gemini 3.5]
+[*Vibe-Codé* avec Gemini 3.5 flash]
 <li><a href="https://othoni-hub.github.io/VibeCoding/SIMON/index.html" target="_blank" rel="noopener noreferrer">SIMON </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
 <img width="200" height="325" alt="image" src="https://github.com/user-attachments/assets/c56c2a87-04ae-4ae2-bb2f-9a351803b146" />
 
-Le fameux jeux de SIMON récussité
+Le fameux jeux de SIMON rescussité
 
 ***destination :*** tous 
 
 [Retour en haut](#VibeCoding)
 
 ---
+
+### RAMDAM
+
+[*Vibe-Codé* avec Gemini 3.5 flash]
+<li><a href="https://othoni-hub.github.io/VibeCoding/RAMDAM/index.html" target="_blank" rel="noopener noreferrer">RAMDAM </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="329" height="649" alt="image" src="https://github.com/user-attachments/assets/ccf580a6-ec06-4eae-9681-0668ad6c7746" />
+
+
+RAMDAM est une application pour smartphone créé en 2012. Chaque jour, une nouvelle partie était proposée.
+
+Il s'agit d'un jeu de lettres, dans lequel on dispose d'une grille 8x8 contenant quelques lettres. Il s'agit de former des mots, soit en faisant glisser une lettre d'une case vers une autre à condition qu'il existe un chemin connexe entre les deux, ou de permuter deux lettres. La difficulté vient du fait que chaque déplacement qui ne crée pas un nouveau mot fait apparaître 3 nouvelles lettres sur la grille. Le jeu se poursuit tant que la grille n'est pas saturée, et au maximum jusqu'à ce que 200 lettres aient été distribuées.
+Une fois n'est pas coutume, ce jeu nécessite un 2nd fichier en plus du fichier HTML : le dictionnaire (ici, le dictionnaire officiel du Scrabble,à télécharger ici :
+
+***destination :*** tous (savoir lire et écrire...) 
+
+[Retour en haut](#VibeCoding)
+
+---
+
 ### CyberPulse_Solitaire
 
 [*Vibe-Codé* avec Gemini 3.5 Flash]
