@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOURMIS3D - Sections Planes du Pavé Droit</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js et OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+    #canvas-container { width: 100vw; height: 100vh; position: relative; }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800">
+
+  <div id="canvas-container">
+    <!-- Bouton Burger Mobile -->
+    <button id="burger-btn" class="md:hidden absolute top-4 left-4 z-50 bg-indigo-600 text-white p-3 rounded-xl shadow-lg focus:outline-none">
+      <svg id="burger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Bouton Bascule Vue 3D / Patron sur Mobile -->
+    <button id="toggle-view-btn" class="md:hidden absolute top-4 right-4 z-50 bg-slate-800 text-white px-4 py-2.5 rounded-xl shadow-lg font-semibold text-xs flex items-center gap-2 border border-slate-600">
+      <span id="toggle-view-icon">📐</span>
+      <span id="toggle-view-text">Patron</span>
+    </button>
+
+    <!-- Panneau de Contrôle -->
+    <aside id="sidebar" class="absolute top-0 left-0 h-full w-80 glass-panel shadow-2xl z-40 transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 overflow-y-auto p-5 flex flex-col justify-between">
+      <div>
+        <!-- En-tête avec Titre et Acronyme -->
+        <div class="mb-4 border-b pb-3">
+          <div class="flex items-center justify-between mb-1">
+            <h1 class="text-2xl font-black text-indigo-900 tracking-tight flex items-center gap-1.5">
+              <span>🐜</span> FOURMIS3D
+            </h1>
+            <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">Maths 3ème</span>
+          </div>
+          <p class="text-[11px] leading-tight text-slate-500 font-medium italic">
+            <strong class="text-indigo-600 not-italic">F</strong>orger l'<strong class="text-indigo-600 not-italic">O</strong>bservateur aux <strong class="text-indigo-600 not-italic">U</strong>sages de la <strong class="text-indigo-600 not-italic">R</strong>eprésentation <strong class="text-indigo-600 not-italic">M</strong>athématique des <strong class="text-indigo-600 not-italic">I</strong>ntersections et <strong class="text-indigo-600 not-italic">S</strong>ections en <strong class="text-indigo-600 not-italic">3D</strong>
+          </p>
+        </div>
+
+        <!-- Dimensions -->
+        <div class="space-y-4">
+          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dimensions (cm)</h2>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="dim-x">Longueur (X)</label>
+              <span id="val-x" class="text-indigo-600 font-semibold">6</span>
+            </div>
+            <input type="range" id="dim-x" min="3" max="10" value="6" step="0.5" class="w-full accent-indigo-600">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="dim-y">Hauteur (Y)</label>
+              <span id="val-y" class="text-indigo-600 font-semibold">4</span>
+            </div>
+            <input type="range" id="dim-y" min="3" max="10" value="4" step="0.5" class="w-full accent-indigo-600">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="dim-z">Profondeur (Z)</label>
+              <span id="val-z" class="text-indigo-600 font-semibold">5</span>
+            </div>
+            <input type="range" id="dim-z" min="3" max="10" value="5" step="0.5" class="w-full accent-indigo-600">
+          </div>
+
+          <hr class="border-slate-200">
+
+          <!-- Position & Orientation de la Fourmi -->
+          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Position & Sens Fourmi</h2>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="start-edge">Arête de départ</label>
+            </div>
+            <select id="start-edge" class="w-full bg-white border border-slate-300 text-slate-700 py-1.5 px-2.5 rounded-lg text-sm font-medium focus:outline-none focus:border-indigo-500">
+              <option value="BF" selected>Arête [BF] (Avant-Droite)</option>
+              <option value="AE">Arête [AE] (Avant-Gauche)</option>
+              <option value="CG">Arête [CG] (Arrière-Droite)</option>
+              <option value="DH">Arête [DH] (Arrière-Gauche)</option>
+              <option value="EF">Arête [EF] (Haut-Avant)</option>
+              <option value="AB">Arête [AB] (Bas-Avant)</option>
+            </select>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="start-pos">Position de départ</label>
+              <span id="val-start-pos" class="text-indigo-600 font-semibold">50%</span>
+            </div>
+            <input type="range" id="start-pos" min="10" max="90" value="50" step="5" class="w-full accent-indigo-600">
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-sm font-medium">Sens de marche</span>
+            <button id="btn-reverse" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 font-semibold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+              <span id="reverse-icon">🔄</span> <span id="reverse-text">Inverser</span>
+            </button>
+          </div>
+
+          <hr class="border-slate-200">
+
+          <!-- Transparence & Direction -->
+          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Réglages du Plan</h2>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="opacity">Transparence faces</label>
+              <span id="val-opacity" class="text-indigo-600 font-semibold">50%</span>
+            </div>
+            <input type="range" id="opacity" min="0.1" max="0.9" value="0.5" step="0.05" class="w-full accent-indigo-600">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="pitch">Inclinaison Verticale</label>
+              <span id="val-pitch" class="text-indigo-600 font-semibold">25°</span>
+            </div>
+            <input type="range" id="pitch" min="-60" max="60" value="25" step="1" class="w-full accent-indigo-600">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="roll">Inclinaison Horizontale</label>
+              <span id="val-roll" class="text-indigo-600 font-semibold">15°</span>
+            </div>
+            <input type="range" id="roll" min="-60" max="60" value="15" step="1" class="w-full accent-indigo-600">
+          </div>
+          <div>
+            <div class="flex justify-between text-sm font-medium mb-1">
+              <label for="speed">Vitesse de la fourmi</label>
+              <span id="val-speed" class="text-indigo-600 font-semibold">1x</span>
+            </div>
+            <input type="range" id="speed" min="0.1" max="3" value="1" step="0.1" class="w-full accent-indigo-600">
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions & Pied de page -->
+      <div class="pt-4 border-t border-slate-200 space-y-3">
+        <button id="btn-start" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow transition flex items-center justify-center gap-2">
+          <span id="btn-icon">▶</span> <span id="btn-text">Lancer la fourmi</span>
+        </button>
+        <button id="btn-reset" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition">
+          Réinitialiser la coupe
+        </button>
+
+        <!-- Crédits en pied de page du menu -->
+        <p class="text-[10px] text-center text-slate-500 pt-2 border-t border-slate-200/60 leading-tight">
+          Créé par <strong>Olivier Thöni</strong>, vibe-codé avec l’aide de <strong>Gemini 3.5 Flash</strong>
+        </p>
+      </div>
+    </aside>
+
+    <!-- Sous-fenêtre Patron (Déplié 2D) adaptative -->
+    <div id="patron-container" class="hidden md:flex md:flex-col absolute bottom-4 right-4 z-30 glass-panel rounded-2xl p-3 shadow-xl w-80 max-w-[calc(100vw-2rem)] transition-all duration-300">
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+          <span>📐</span> Patron du solide
+        </h3>
+        <span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">Tracé 2D</span>
+      </div>
+      <div id="patron-wrapper" class="w-full aspect-[4/3] bg-white rounded-lg border border-slate-200 overflow-hidden relative flex-1">
+        <canvas id="patron-canvas" class="w-full h-full block"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Application State ---
+    const state = {
+      lx: 6, ly: 4, lz: 5,
+      opacity: 0.5,
+      pitch: 25, roll: 15,
+      speed: 1.0,
+      startEdge: 'BF',
+      startPosPercent: 50,
+      reversePath: false,
+      animating: false,
+      progress: 0,
+      splitDistance: 0,
+      isCutCompleted: false,
+      mobileShowPatron: false
+    };
+
+    // --- DOM Elements ---
+    const burgerBtn = document.getElementById('burger-btn');
+    const sidebar = document.getElementById('sidebar');
+    const toggleViewBtn = document.getElementById('toggle-view-btn');
+    const toggleViewText = document.getElementById('toggle-view-text');
+    const toggleViewIcon = document.getElementById('toggle-view-icon');
+    const patronContainer = document.getElementById('patron-container');
+    const patronWrapper = document.getElementById('patron-wrapper');
+
+    const btnStart = document.getElementById('btn-start');
+    const btnReset = document.getElementById('btn-reset');
+    const btnReverse = document.getElementById('btn-reverse');
+    const startEdgeSelect = document.getElementById('start-edge');
+    const patronCanvas = document.getElementById('patron-canvas');
+    const ctxPatron = patronCanvas.getContext('2d');
+
+    // Burger Menu Toggle
+    burgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+    });
+
+    // Mobile View Toggle
+    toggleViewBtn.addEventListener('click', () => {
+      state.mobileShowPatron = !state.mobileShowPatron;
+      if (state.mobileShowPatron) {
+        patronContainer.classList.remove('hidden');
+        patronContainer.classList.add('fixed', 'left-4', 'right-4', 'top-20', 'bottom-8', 'w-auto', 'h-auto', 'z-30', 'flex', 'flex-col');
+        patronWrapper.classList.remove('aspect-[4/3]');
+        patronWrapper.classList.add('h-full');
+        toggleViewText.innerText = "Vue 3D";
+        toggleViewIcon.innerText = "🧊";
+      } else {
+        patronContainer.classList.add('hidden');
+        patronContainer.classList.remove('fixed', 'left-4', 'right-4', 'top-20', 'bottom-8', 'w-auto', 'h-auto', 'z-30', 'flex', 'flex-col');
+        patronWrapper.classList.add('aspect-[4/3]');
+        patronWrapper.classList.remove('h-full');
+        toggleViewText.innerText = "Patron";
+        toggleViewIcon.innerText = "📐";
+      }
+      setTimeout(drawPatron, 50);
+    });
+
+    const bindInput = (id, key, valId, suffix = '', callback = null) => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', (e) => {
+        state[key] = parseFloat(e.target.value);
+        if (valId) document.getElementById(valId).innerText = Math.round(state[key] * 10) / 10 + suffix;
+        if (callback) callback();
+      });
+    };
+
+    bindInput('dim-x', 'lx', 'val-x', '', updateSolid);
+    bindInput('dim-y', 'ly', 'val-y', '', updateSolid);
+    bindInput('dim-z', 'lz', 'val-z', '', updateSolid);
+    bindInput('opacity', 'opacity', 'val-opacity', '%', updateMaterials);
+    bindInput('pitch', 'pitch', 'val-pitch', '°', recalculatePath);
+    bindInput('roll', 'roll', 'val-roll', '°', recalculatePath);
+    bindInput('speed', 'speed', 'val-speed', 'x');
+    bindInput('start-pos', 'startPosPercent', 'val-start-pos', '%', recalculatePath);
+
+    startEdgeSelect.addEventListener('change', (e) => {
+      state.startEdge = e.target.value;
+      recalculatePath();
+    });
+
+    btnReverse.addEventListener('click', () => {
+      state.reversePath = !state.reversePath;
+      recalculatePath();
+    });
+
+    document.getElementById('val-opacity').innerText = Math.round(state.opacity * 100) + '%';
+
+    // --- Three.js Setup ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf8fafc);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(12, 10, 14);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.localClippingEnabled = true;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    dirLight.position.set(10, 20, 15);
+    scene.add(dirLight);
+
+    // --- 3D Objects ---
+    const topGroup = new THREE.Group();
+    const bottomGroup = new THREE.Group();
+    scene.add(topGroup);
+    scene.add(bottomGroup);
+
+    let planeNormal = new THREE.Vector3(0, 1, 0);
+    let planeConstant = 0;
+    const clipPlaneTop = new THREE.Plane(planeNormal, 0);
+    const clipPlaneBottom = new THREE.Plane(new THREE.Vector3(), 0);
+
+    let topMesh, bottomMesh, topEdges, bottomEdges;
+    let redCapTop, redCapBottom, redCapEdgesTop, redCapEdgesBottom;
+    let pathLine;
+    let pathPoints3D = [];
+
+    // Ant Mesh
+    const antGroup = new THREE.Group();
+    const antBodyMat = new THREE.MeshLambertMaterial({ color: 0xb91c1c });
+    const antHead = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), antBodyMat);
+    const antAbdomen = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), antBodyMat);
+    antAbdomen.position.z = -0.25;
+    antHead.position.z = 0.2;
+    antGroup.add(antHead, antAbdomen);
+    scene.add(antGroup);
+
+    function updateMaterials() {
+      if (topMesh && bottomMesh) {
+        topMesh.material.opacity = state.opacity;
+        bottomMesh.material.opacity = state.opacity;
+      }
+    }
+
+    function createCuboidMeshes() {
+      while (topGroup.children.length) topGroup.remove(topGroup.children[0]);
+      while (bottomGroup.children.length) bottomGroup.remove(bottomGroup.children[0]);
+
+      const geom = new THREE.BoxGeometry(state.lx, state.ly, state.lz);
+      
+      const matTop = new THREE.MeshPhongMaterial({
+        color: 0x6366f1,
+        transparent: true,
+        opacity: state.opacity,
+        side: THREE.DoubleSide,
+        clippingPlanes: [clipPlaneTop],
+        clipShadows: true
+      });
+
+      const matBottom = new THREE.MeshPhongMaterial({
+        color: 0x3b82f6,
+        transparent: true,
+        opacity: state.opacity,
+        side: THREE.DoubleSide,
+        clippingPlanes: [clipPlaneBottom],
+        clipShadows: true
+      });
+
+      topMesh = new THREE.Mesh(geom, matTop);
+      bottomMesh = new THREE.Mesh(geom, matBottom);
+
+      const edgeGeom = new THREE.EdgesGeometry(geom);
+      const topEdgeMat = new THREE.LineBasicMaterial({ color: 0x1e1b4b, linewidth: 2, clippingPlanes: [clipPlaneTop] });
+      const bottomEdgeMat = new THREE.LineBasicMaterial({ color: 0x1e1b4b, linewidth: 2, clippingPlanes: [clipPlaneBottom] });
+
+      topEdges = new THREE.LineSegments(edgeGeom, topEdgeMat);
+      bottomEdges = new THREE.LineSegments(edgeGeom, bottomEdgeMat);
+
+      topGroup.add(topMesh, topEdges);
+      bottomGroup.add(bottomMesh, bottomEdges);
+
+      recalculatePath();
+    }
+
+    function getStartAnchorPoint() {
+      const hx = state.lx / 2, hy = state.ly / 2, hz = state.lz / 2;
+      const t = state.startPosPercent / 100;
+      switch (state.startEdge) {
+        case 'BF': return new THREE.Vector3(hx, -hy + t * state.ly, hz);
+        case 'AE': return new THREE.Vector3(-hx, -hy + t * state.ly, hz);
+        case 'CG': return new THREE.Vector3(hx, -hy + t * state.ly, -hz);
+        case 'DH': return new THREE.Vector3(-hx, -hy + t * state.ly, -hz);
+        case 'EF': return new THREE.Vector3(-hx + t * state.lx, hy, hz);
+        case 'AB': return new THREE.Vector3(-hx + t * state.lx, -hy, hz);
+        default:   return new THREE.Vector3(hx, -hy + t * state.ly, hz);
+      }
+    }
+
+    function recalculatePath() {
+      const pitchRad = (state.pitch * Math.PI) / 180;
+      const rollRad = (state.roll * Math.PI) / 180;
+
+      planeNormal = new THREE.Vector3(
+        Math.sin(rollRad),
+        Math.cos(pitchRad) * Math.cos(rollRad),
+        Math.sin(pitchRad)
+      ).normalize();
+
+      const startPoint = getStartAnchorPoint();
+      planeConstant = -planeNormal.dot(startPoint);
+
+      clipPlaneTop.normal.copy(planeNormal);
+      clipPlaneTop.constant = planeConstant;
+
+      clipPlaneBottom.normal.copy(planeNormal).negate();
+      clipPlaneBottom.constant = -planeConstant;
+
+      const hx = state.lx / 2, hy = state.ly / 2, hz = state.lz / 2;
+      const edges = [
+        [new THREE.Vector3(-hx, -hy, -hz), new THREE.Vector3(-hx, hy, -hz)],
+        [new THREE.Vector3(hx, -hy, -hz), new THREE.Vector3(hx, hy, -hz)],
+        [new THREE.Vector3(hx, -hy, hz), new THREE.Vector3(hx, hy, hz)],
+        [new THREE.Vector3(-hx, -hy, hz), new THREE.Vector3(-hx, hy, hz)],
+        [new THREE.Vector3(-hx, hy, -hz), new THREE.Vector3(hx, hy, -hz)],
+        [new THREE.Vector3(hx, hy, -hz), new THREE.Vector3(hx, hy, hz)],
+        [new THREE.Vector3(hx, hy, hz), new THREE.Vector3(-hx, hy, hz)],
+        [new THREE.Vector3(-hx, hy, hz), new THREE.Vector3(-hx, hy, -hz)],
+        [new THREE.Vector3(-hx, -hy, -hz), new THREE.Vector3(hx, -hy, -hz)],
+        [new THREE.Vector3(hx, -hy, -hz), new THREE.Vector3(hx, -hy, hz)],
+        [new THREE.Vector3(hx, -hy, hz), new THREE.Vector3(-hx, -hy, hz)],
+        [new THREE.Vector3(-hx, -hy, hz), new THREE.Vector3(-hx, -hy, -hz)],
+      ];
+
+      const plane = new THREE.Plane(planeNormal, planeConstant);
+      let intersections = [];
+
+      edges.forEach(edge => {
+        const line = new THREE.Line3(edge[0], edge[1]);
+        const target = new THREE.Vector3();
+        if (plane.intersectLine(line, target)) {
+          // Filtrage rigoureux des doublons
+          if (!intersections.some(p => p.distanceTo(target) < 1e-3)) {
+            intersections.push(target);
+          }
+        }
+      });
+
+      if (intersections.length < 3) {
+        pathPoints3D = [];
+        return;
+      }
+
+      // Tri angulaire par rapport au centre géométrique de la section
+      const center = intersections.reduce((acc, p) => acc.add(p), new THREE.Vector3()).divideScalar(intersections.length);
+      const u = new THREE.Vector3().subVectors(intersections[0], center).normalize();
+      const v = new THREE.Vector3().crossVectors(planeNormal, u).normalize();
+
+      intersections.sort((a, b) => {
+        const va = a.clone().sub(center);
+        const vb = b.clone().sub(center);
+        const angleA = Math.atan2(va.dot(v), va.dot(u));
+        const angleB = Math.atan2(vb.dot(v), vb.dot(u));
+        return angleA - angleB;
+      });
+
+      // Caler le premier point de la chaîne sur l'ancrage choisi
+      let minIdx = 0;
+      let minDst = Infinity;
+      intersections.forEach((pt, i) => {
+        const d = pt.distanceTo(startPoint);
+        if (d < minDst) { minDst = d; minIdx = i; }
+      });
+
+      let reordered = [];
+      for (let i = 0; i < intersections.length; i++) {
+        reordered.push(intersections[(minIdx + i) % intersections.length]);
+      }
+
+      if (state.reversePath) {
+        reordered.reverse();
+        reordered.unshift(reordered.pop());
+      }
+
+      // Conserver les points ordonnés exacts pour la section
+      const orderedPolygon = [...reordered];
+
+      // Boucler le chemin 3D
+      reordered.push(reordered[0].clone());
+      pathPoints3D = reordered;
+
+      if (pathLine) scene.remove(pathLine);
+      const lineGeom = new THREE.BufferGeometry().setFromPoints(pathPoints3D);
+      const lineMat = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 });
+      pathLine = new THREE.Line(lineGeom, lineMat);
+      scene.add(pathLine);
+
+      // Plaques de fermeture reconstruites sur le polygone exact non croisé
+      if (redCapTop) topGroup.remove(redCapTop);
+      if (redCapBottom) bottomGroup.remove(redCapBottom);
+
+      const capShape = new THREE.Shape();
+      orderedPolygon.forEach((p, idx) => {
+        const x2d = p.clone().sub(center).dot(u);
+        const y2d = p.clone().sub(center).dot(v);
+        if (idx === 0) capShape.moveTo(x2d, y2d);
+        else capShape.lineTo(x2d, y2d);
+      });
+      capShape.closePath();
+
+      const capGeom = new THREE.ShapeGeometry(capShape);
+      const capMat = new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide });
+
+      redCapTop = new THREE.Mesh(capGeom, capMat);
+      redCapBottom = new THREE.Mesh(capGeom, capMat);
+
+      const capEdgeGeom = new THREE.EdgesGeometry(capGeom);
+      const capEdgeMat = new THREE.LineBasicMaterial({ color: 0x1e1b4b, linewidth: 2 });
+      redCapEdgesTop = new THREE.LineSegments(capEdgeGeom, capEdgeMat);
+      redCapEdgesBottom = new THREE.LineSegments(capEdgeGeom, capEdgeMat);
+
+      redCapTop.add(redCapEdgesTop);
+      redCapBottom.add(redCapEdgesBottom);
+
+      const rotMatrix = new THREE.Matrix4().makeBasis(u, v, planeNormal);
+      redCapTop.rotation.setFromRotationMatrix(rotMatrix);
+      redCapBottom.rotation.setFromRotationMatrix(rotMatrix);
+      
+      redCapTop.position.copy(center);
+      redCapBottom.position.copy(center);
+
+      redCapTop.visible = state.isCutCompleted;
+      redCapBottom.visible = state.isCutCompleted;
+
+      topGroup.add(redCapTop);
+      bottomGroup.add(redCapBottom);
+
+      state.progress = 0;
+      updateAntPosition(0);
+      drawPatron();
+    }
+
+    function updateSolid() {
+      createCuboidMeshes();
+      topGroup.position.set(0, 0, 0);
+      bottomGroup.position.set(0, 0, 0);
+      clipPlaneTop.constant = planeConstant;
+      clipPlaneBottom.constant = -planeConstant;
+      state.isCutCompleted = false;
+      state.splitDistance = 0;
+    }
+
+    function updateAntPosition(progressVal) {
+      if (pathPoints3D.length < 2) return;
+
+      const totalSegments = pathPoints3D.length - 1;
+      const totalProgress = progressVal * totalSegments;
+      const segIndex = Math.min(Math.floor(totalProgress), totalSegments - 1);
+      const segAlpha = totalProgress - segIndex;
+
+      const p1 = pathPoints3D[segIndex];
+      const p2 = pathPoints3D[segIndex + 1];
+
+      const currentPos = new THREE.Vector3().lerpVectors(p1, p2, segAlpha);
+      antGroup.position.copy(currentPos);
+
+      const dir = new THREE.Vector3().subVectors(p2, p1).normalize();
+      if (dir.length() > 0.001) {
+        antGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+      }
+    }
+
+    // --- ALIGNEMENT PARFAIT & CADRAGE DYNAMIQUE DU PATRON 2D ---
+    function drawPatron() {
+      const w = patronCanvas.width = patronWrapper.clientWidth * 2;
+      const h = patronCanvas.height = patronWrapper.clientHeight * 2;
+      ctxPatron.clearRect(0, 0, w, h);
+
+      const scale = Math.min(
+        (w - 40) / (2 * state.lx + 2 * state.lz),
+        (h - 40) / (2 * state.ly + 2 * state.lz)
+      );
+      const cx = w / 2;
+      const cy = h / 2;
+
+      const faceBoxes = [
+        { id: 'front',  name: "Avant",   x: cx - (state.lx * scale)/2, y: cy - (state.ly * scale)/2, w: state.lx * scale, h: state.ly * scale },
+        { id: 'left',   name: "Gauche",  x: cx - (state.lx * scale)/2 - (state.lz * scale), y: cy - (state.ly * scale)/2, w: state.lz * scale, h: state.ly * scale },
+        { id: 'right',  name: "Droite",  x: cx + (state.lx * scale)/2, y: cy - (state.ly * scale)/2, w: state.lz * scale, h: state.ly * scale },
+        { id: 'top',    name: "Haut",    x: cx - (state.lx * scale)/2, y: cy - (state.ly * scale)/2 - (state.lz * scale), w: state.lx * scale, h: state.lz * scale },
+        { id: 'bottom', name: "Bas",     x: cx - (state.lx * scale)/2, y: cy + (state.ly * scale)/2, w: state.lx * scale, h: state.lz * scale },
+        { id: 'back',   name: "Arrière", x: cx - (state.lx * scale)/2, y: cy - (state.ly * scale)/2 - (state.lz * scale) - (state.ly * scale), w: state.lx * scale, h: state.ly * scale }
+      ];
+
+      ctxPatron.lineWidth = 2;
+      ctxPatron.strokeStyle = '#475569';
+      ctxPatron.fillStyle = '#f8fafc';
+
+      faceBoxes.forEach(f => {
+        ctxPatron.fillRect(f.x, f.y, f.w, f.h);
+        ctxPatron.strokeRect(f.x, f.y, f.w, f.h);
+        ctxPatron.fillStyle = '#94a3b8';
+        ctxPatron.font = 'bold 18px system-ui';
+        ctxPatron.textAlign = 'center';
+        ctxPatron.fillText(f.name, f.x + f.w / 2, f.y + f.h / 2 + 6);
+        ctxPatron.fillStyle = '#f8fafc';
+      });
+
+      // MAPPING 3D -> 2D
+      function point3dToNet2d(p) {
+        const eps = 1e-3;
+        const hx = state.lx / 2, hy = state.ly / 2, hz = state.lz / 2;
+
+        if (Math.abs(p.z - hz) < eps) {
+          return { face: 'front', x: p.x, y: -p.y };
+        }
+        if (Math.abs(p.x + hx) < eps) {
+          return { face: 'left', x: -hx - (hz - p.z), y: -p.y };
+        }
+        if (Math.abs(p.x - hx) < eps) {
+          return { face: 'right', x: hx + (hz - p.z), y: -p.y };
+        }
+        if (Math.abs(p.y - hy) < eps) {
+          return { face: 'top', x: p.x, y: -hy - (hz - p.z) };
+        }
+        if (Math.abs(p.y + hy) < eps) {
+          return { face: 'bottom', x: p.x, y: hy + (hz - p.z) };
+        }
+        if (Math.abs(p.z + hz) < eps) {
+          return { face: 'back', x: p.x, y: -hy - 2 * hz - (hy - p.y) };
+        }
+        return null;
+      }
+
+      if (pathPoints3D.length > 1) {
+        ctxPatron.strokeStyle = '#ef4444';
+        ctxPatron.lineWidth = 4;
+
+        for (let i = 0; i < pathPoints3D.length - 1; i++) {
+          const pA = pathPoints3D[i];
+          const pB = pathPoints3D[i + 1];
+
+          const steps = 40;
+          let lastPt = null;
+
+          ctxPatron.beginPath();
+          for (let s = 0; s <= steps; s++) {
+            const alpha = s / steps;
+            const pt3d = new THREE.Vector3().lerpVectors(pA, pB, alpha);
+            const netPt = point3dToNet2d(pt3d);
+
+            if (netPt) {
+              const canvasX = cx + netPt.x * scale;
+              const canvasY = cy + netPt.y * scale;
+
+              if (!lastPt || lastPt.face !== netPt.face) {
+                ctxPatron.stroke();
+                ctxPatron.beginPath();
+                ctxPatron.moveTo(canvasX, canvasY);
+              } else {
+                ctxPatron.lineTo(canvasX, canvasY);
+              }
+              lastPt = netPt;
+            }
+          }
+          ctxPatron.stroke();
+        }
+
+        const antNet = point3dToNet2d(antGroup.position);
+        if (antNet) {
+          const antX = cx + antNet.x * scale;
+          const antY = cy + antNet.y * scale;
+
+          ctxPatron.fillStyle = '#b91c1c';
+          ctxPatron.beginPath();
+          ctxPatron.arc(antX, antY, 7, 0, Math.PI * 2);
+          ctxPatron.fill();
+        }
+      }
+    }
+
+    // --- Animation Controls ---
+    btnStart.addEventListener('click', () => {
+      if (state.isCutCompleted) {
+        state.isCutCompleted = false;
+        state.splitDistance = 0;
+        topGroup.position.set(0, 0, 0);
+        bottomGroup.position.set(0, 0, 0);
+        clipPlaneTop.constant = planeConstant;
+        clipPlaneBottom.constant = -planeConstant;
+      }
+      state.animating = true;
+      state.progress = 0;
+      document.getElementById('btn-text').innerText = "Marche en cours...";
+      btnStart.disabled = true;
+      btnStart.classList.add('opacity-50');
+    });
+
+    btnReset.addEventListener('click', () => {
+      state.animating = false;
+      state.progress = 0;
+      state.splitDistance = 0;
+      state.isCutCompleted = false;
+      topGroup.position.set(0, 0, 0);
+      bottomGroup.position.set(0, 0, 0);
+      clipPlaneTop.constant = planeConstant;
+      clipPlaneBottom.constant = -planeConstant;
+      if (redCapTop) redCapTop.visible = false;
+      if (redCapBottom) redCapBottom.visible = false;
+      document.getElementById('btn-text').innerText = "Lancer la fourmi";
+      btnStart.disabled = false;
+      btnStart.classList.remove('opacity-50');
+      updateAntPosition(0);
+      drawPatron();
+    });
+
+    // Main Render Loop
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+
+      if (state.animating) {
+        state.progress += delta * 0.35 * state.speed;
+        if (state.progress >= 1) {
+          state.progress = 1;
+          state.animating = false;
+          state.isCutCompleted = true;
+          document.getElementById('btn-text').innerText = "Coupe effectuée !";
+          btnStart.disabled = false;
+          btnStart.classList.remove('opacity-50');
+        }
+        updateAntPosition(state.progress);
+        drawPatron();
+      }
+
+      if (state.isCutCompleted && state.splitDistance < 2.0) {
+        state.splitDistance += delta * 1.5;
+        const offset = planeNormal.clone().multiplyScalar(state.splitDistance);
+        
+        topGroup.position.copy(offset);
+        bottomGroup.position.copy(offset.clone().negate());
+
+        clipPlaneTop.constant = planeConstant - state.splitDistance;
+        clipPlaneBottom.constant = -planeConstant - state.splitDistance;
+
+        if (redCapTop) redCapTop.visible = true;
+        if (redCapBottom) redCapBottom.visible = true;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Resize Handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      drawPatron();
+    });
+
+    // Initial Start
+    createCuboidMeshes();
+    animate();
+  </script>
+</body>
+</html>
