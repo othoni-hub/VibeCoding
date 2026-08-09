@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Labyrinthe Taquin - CyberPulse</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent: #58a6ff;
+      --accent-glow: rgba(88, 166, 255, 0.4);
+      --success: #3fb950;
+      --success-glow: rgba(63, 185, 80, 0.6);
+      --tile-bg: #21262d;
+      --tile-hover: #30363d;
+      --pipe-color: #8b949e;
+      --pipe-active: #58a6ff;
+      --bulb-off: #30363d;
+      --text: #c9d1d9;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    /* Layout & Header */
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      background: linear-gradient(135deg, #58a6ff, #bc8cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .hud {
+      display: flex;
+      gap: 15px;
+      background: var(--card-bg);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #30363d;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .hud span {
+      color: var(--accent);
+    }
+
+    /* Game Container & Grid Layout (7x7 system: bulbs around 5x5 board) */
+    .game-container {
+      position: relative;
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid #30363d;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      touch-action: manipulation;
+    }
+
+    .board-layout {
+      display: grid;
+      grid-template-columns: 36px repeat(5, min(14vw, 65px)) 36px;
+      grid-template-rows: 36px repeat(5, min(14vw, 65px)) 36px;
+      gap: 4px;
+      align-items: center;
+      justify-items: center;
+    }
+
+    /* Bulbs styling */
+    .bulb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bulb-off);
+      border: 2px solid #484f58;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .bulb.target {
+      background: #e3b341;
+      border-color: #f2cc60;
+      box-shadow: 0 0 12px #e3b341, 0 0 24px rgba(227, 179, 65, 0.4);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    .bulb.connected {
+      background: var(--success);
+      border-color: #56d364;
+      box-shadow: 0 0 14px var(--success-glow);
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      100% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Sliders Board */
+    .board {
+      grid-column: 2 / 7;
+      grid-row: 2 / 7;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      gap: 4px;
+      width: 100%;
+      height: 100%;
+      background: #0d1117;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      position: relative;
+    }
+
+    /* Tiles (Dalles) */
+    .tile {
+      background: var(--tile-bg);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease-out, background-color 0.2s, border-color 0.2s;
+      border: 1px solid #30363d;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tile:not(.empty):hover {
+      background: var(--tile-hover);
+      border-color: #484f58;
+    }
+
+    .tile.empty {
+      background: transparent;
+      border: 1px dashed #21262d;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    /* SVG Pipe Graphics */
+    .tile svg {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .pipe {
+      stroke: var(--pipe-color);
+      stroke-width: 12;
+      stroke-linecap: round;
+      fill: none;
+      transition: stroke 0.3s ease;
+    }
+
+    .tile.connected .pipe {
+      stroke: var(--success);
+      filter: drop-shadow(0 0 4px var(--success-glow));
+    }
+
+    /* Overlay Screen (Victory / Start) */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(13, 17, 23, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      text-align: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .overlay h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .btn {
+      margin-top: 15px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0d1117;
+      background: var(--accent);
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+      background: #79c0ff;
+    }
+
+    .records {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: #8b949e;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>CyberPulse Solitaire</h1>
+    <div class="hud">
+      <div>Manche: <span id="round-display">1/5</span></div>
+      <div>Temps: <span id="time-display">00:00</span></div>
+      <div>Coup(s): <span id="moves-display">0</span></div>
+    </div>
+  </header>
+
+  <div class="game-container">
+    <div class="board-layout" id="board-layout">
+      <!-- Bulbs and 5x5 board generated dynamically by JS -->
+    </div>
+
+    <!-- Overlay Victory / End Game -->
+    <div class="overlay" id="overlay">
+      <h2 id="overlay-title">Partie Terminée !</h2>
+      <p id="overlay-desc">Score final</p>
+      <div class="records" id="records-display"></div>
+      <button class="btn" id="start-btn" onclick="startGame()">Nouvelle Partie</button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       AUDIO SYSTEM (Web Audio API)
+       ========================================================================= */
+    const AudioSys = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+      playMove() {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      },
+      playWin() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.1, now + i * 0.08);
+          gain.gain.linearRampToValueAtTime(0.01, now + i * 0.08 + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 0.25);
+        });
+      }
+    };
+
+    /* =========================================================================
+       GAME CONFIG & TILE TYPES
+       Directions: 0: TOP, 1: RIGHT, 2: BOTTOM, 3: LEFT
+       ========================================================================= */
+    const TILE_TYPES = {
+      H: [false, true, false, true],    // Barre Horizontale
+      V: [true, false, true, false],    // Barre Verticale
+      L_TR: [true, true, false, false],  // Équerre Haut-Droite
+      L_RB: [false, true, true, false],  // Équerre Droite-Bas
+      L_BL: [false, false, true, true],  // Équerre Bas-Gauche
+      L_LT: [true, false, false, true],  // Équerre Gauche-Haut
+      CROSS: [true, true, true, true]   // Joker (+)
+    };
+
+    function createDeck() {
+      const deck = [];
+      for (let i = 0; i < 5; i++) deck.push('H');
+      for (let i = 0; i < 5; i++) deck.push('V');
+      for (let i = 0; i < 5; i++) deck.push('L_TR');
+      for (let i = 0; i < 5; i++) deck.push('L_RB');
+      for (let i = 0; i < 5; i++) deck.push('L_BL');
+      for (let i = 0; i < 5; i++) deck.push('L_LT');
+      for (let i = 0; i < 4; i++) deck.push('CROSS');
+      return deck; // Total: 34 dalles possibles, on en prendra 24 au hasard + 1 vide
+    }
+
+    /* =========================================================================
+       GAME STATE
+       ========================================================================= */
+    let grid = Array(25).fill(null); // 5x5 board array
+    let emptyIdx = 24; // Empty slot
+    let round = 1;
+    let totalMoves = 0;
+    let startTime = null;
+    let timerInterval = null;
+    let elapsedTime = 0;
+    let targetBulbs = []; // [bulb1, bulb2]
+    let bulbsList = [];   // Array of 20 bulb objects { id, row, col, dir }
+
+    // Init 20 bulbs positions around the 5x5 grid
+    function initBulbs() {
+      bulbsList = [];
+      let id = 0;
+      // Top row (0-4)
+      for (let c = 0; c < 5; c++) bulbsList.push({ id: id++, row: -1, col: c, dir: 2 });
+      // Right col (5-9)
+      for (let r = 0; r < 5; r++) bulbsList.push({ id: id++, row: r, col: 5, dir: 3 });
+      // Bottom row (10-14)
+      for (let c = 4; c >= 0; c--) bulbsList.push({ id: id++, row: 5, col: c, dir: 0 });
+      // Left col (15-19)
+      for (let r = 4; r >= 0; r--) bulbsList.push({ id: id++, row: r, col: -1, dir: 1 });
+    }
+
+    /* =========================================================================
+       BOARD DOM RENDERING
+       ========================================================================= */
+    const layoutEl = document.getElementById('board-layout');
+
+    function buildLayoutDOM() {
+      layoutEl.innerHTML = '';
+      
+      // Build 7x7 grid structure
+      for (let r = -1; r <= 5; r++) {
+        for (let c = -1; c <= 5; c++) {
+          if ((r === -1 || r === 5) && (c === -1 || c === 5)) {
+            // Corners - empty space
+            const emptyDiv = document.createElement('div');
+            layoutEl.appendChild(emptyDiv);
+          } else if (r === -1 || r === 5 || c === -1 || c === 5) {
+            // Bulb locations
+            const bulbObj = bulbsList.find(b => b.row === r && b.col === c);
+            const bulbEl = document.createElement('div');
+            bulbEl.className = 'bulb';
+            bulbEl.id = `bulb-${bulbObj.id}`;
+            bulbEl.innerText = bulbObj.id + 1;
+            layoutEl.appendChild(bulbEl);
+          } else if (r === 0 && c === 0) {
+            // Center 5x5 board container
+            const boardEl = document.createElement('div');
+            boardEl.className = 'board';
+            boardEl.id = 'board';
+            layoutEl.appendChild(boardEl);
+          }
+        }
+      }
+    }
+
+    function renderBoard() {
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+
+      grid.forEach((type, idx) => {
+        const tileEl = document.createElement('div');
+        tileEl.className = `tile ${type === null ? 'empty' : ''}`;
+        
+        if (type !== null) {
+          tileEl.appendChild(createTileSVG(type));
+          tileEl.onclick = () => onTileClick(idx);
+        }
+
+        boardEl.appendChild(tileEl);
+      });
+
+      updateBulbsUI();
+      checkConnection();
+    }
+
+    function createTileSVG(type) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 100 100');
+
+      let paths = '';
+      switch (type) {
+        case 'H':
+          paths = '<path class="pipe" d="M 0,50 L 100,50" />';
+          break;
+        case 'V':
+          paths = '<path class="pipe" d="M 50,0 L 50,100" />';
+          break;
+        case 'L_TR':
+          paths = '<path class="pipe" d="M 50,0 A 50,50 0 0,0 100,50" />';
+          break;
+        case 'L_RB':
+          paths = '<path class="pipe" d="M 100,50 A 50,50 0 0,0 50,100" />';
+          break;
+        case 'L_BL':
+          paths = '<path class="pipe" d="M 50,100 A 50,50 0 0,0 0,50" />';
+          break;
+        case 'L_LT':
+          paths = '<path class="pipe" d="M 0,50 A 50,50 0 0,0 50,0" />';
+          break;
+        case 'CROSS':
+          paths = '<path class="pipe" d="M 0,50 L 100,50 M 50,0 L 50,100" />';
+          break;
+      }
+      svg.innerHTML = paths;
+      return svg;
+    }
+
+    /* =========================================================================
+       TAQUIN SLIDING LOGIC
+       ========================================================================= */
+    function onTileClick(idx) {
+      if (isAdjacent(idx, emptyIdx)) {
+        AudioSys.init();
+        AudioSys.playMove();
+
+        // Swap
+        grid[emptyIdx] = grid[idx];
+        grid[idx] = null;
+        emptyIdx = idx;
+
+        totalMoves++;
+        document.getElementById('moves-display').innerText = totalMoves;
+
+        renderBoard();
+      }
+    }
+
+    function isAdjacent(i1, i2) {
+      const r1 = Math.floor(i1 / 5), c1 = i1 % 5;
+      const r2 = Math.floor(i2 / 5), c2 = i2 % 5;
+      return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
+    }
+
+    /* =========================================================================
+       PATHFINDING (BFS / CONNECTIVITY CHECK)
+       ========================================================================= */
+    function checkConnection() {
+      const b1 = bulbsList[targetBulbs[0]];
+      const b2 = bulbsList[targetBulbs[1]];
+
+      // Clear connected highlights
+      document.querySelectorAll('.tile').forEach(t => t.classList.remove('connected'));
+
+      // BFS setup
+      const queue = [];
+      const visited = new Set();
+      const parentMap = new Map();
+
+      // Start at b1 entry cell
+      const startR = b1.row + (b1.dir === 2 ? 1 : b1.dir === 0 ? -1 : 0);
+      const startC = b1.col + (b1.dir === 1 ? 1 : b1.dir === 3 ? -1 : 0);
+      const startIdx = startR * 5 + startC;
+
+      if (grid[startIdx] && TILE_TYPES[grid[startIdx]][(b1.dir + 2) % 4]) {
+        queue.push({ idx: startIdx, entryDir: (b1.dir + 2) % 4 });
+        visited.add(`${startIdx}-${(b1.dir + 2) % 4}`);
+      }
+
+      let targetReached = false;
+      let finalState = null;
+
+      while (queue.length > 0) {
+        const current = queue.shift();
+        const { idx, entryDir } = current;
+        const tileType = grid[idx];
+
+        if (!tileType) continue;
+
+        const r = Math.floor(idx / 5);
+        const c = idx % 5;
+        const openings = TILE_TYPES[tileType];
+
+        // Check if connected to bulb 2
+        const targetR = b2.row + (b2.dir === 2 ? 1 : b2.dir === 0 ? -1 : 0);
+        const targetC = b2.col + (b2.dir === 1 ? 1 : b2.dir === 3 ? -1 : 0);
+        if (r === targetR && c === targetC && openings[(b2.dir + 2) % 4]) {
+          targetReached = true;
+          finalState = current;
+          break;
+        }
+
+        // Explore neighbors
+        const dirs = [
+          { r: r - 1, c: c, outDir: 0, inDir: 2 }, // Top
+          { r: r, c: c + 1, outDir: 1, inDir: 3 }, // Right
+          { r: r + 1, c: c, outDir: 2, inDir: 0 }, // Bottom
+          { r: r, c: c - 1, outDir: 3, inDir: 1 }  // Left
+        ];
+
+        for (const d of dirs) {
+          if (openings[d.outDir] && d.r >= 0 && d.r < 5 && d.c >= 0 && d.c < 5) {
+            const nextIdx = d.r * 5 + d.c;
+            const nextTile = grid[nextIdx];
+
+            if (nextTile && TILE_TYPES[nextTile][d.inDir]) {
+              const stateKey = `${nextIdx}-${d.inDir}`;
+              if (!visited.has(stateKey)) {
+                visited.add(stateKey);
+                parentMap.set(stateKey, current);
+                queue.push({ idx: nextIdx, entryDir: d.inDir });
+              }
+            }
+          }
+        }
+      }
+
+      if (targetReached) {
+        // Highlight path
+        let curr = finalState;
+        while (curr) {
+          const tileEl = document.getElementById('board').children[curr.idx];
+          if (tileEl) tileEl.classList.add('connected');
+          curr = parentMap.get(`${curr.idx}-${curr.entryDir}`);
+        }
+
+        document.getElementById(`bulb-${b1.id}`).classList.add('connected');
+        document.getElementById(`bulb-${b2.id}`).classList.add('connected');
+
+        setTimeout(nextRound, 600);
+      }
+    }
+
+    /* =========================================================================
+       GAME FLOW & ROUNDS
+       ========================================================================= */
+    function startGame() {
+      AudioSys.init();
+      round = 1;
+      totalMoves = 0;
+      elapsedTime = 0;
+      document.getElementById('moves-display').innerText = '0';
+      document.getElementById('round-display').innerText = '1/5';
+      document.getElementById('overlay').classList.remove('active');
+
+      // Shuffle 24 tiles from deck + 1 empty
+      const deck = createDeck();
+      shuffleArray(deck);
+      grid = deck.slice(0, 24);
+      grid.push(null); // empty
+      emptyIdx = 24;
+      shuffleGrid();
+
+      // Start timer
+      clearInterval(timerInterval);
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 1000);
+
+      pickTargetBulbs();
+      renderBoard();
+    }
+
+    function shuffleGrid() {
+      // Perform random valid slides to ensure solvable grid
+      for (let i = 0; i < 80; i++) {
+        const neighbors = [];
+        const r = Math.floor(emptyIdx / 5), c = emptyIdx % 5;
+        if (r > 0) neighbors.push(emptyIdx - 5);
+        if (r < 4) neighbors.push(emptyIdx + 5);
+        if (c > 0) neighbors.push(emptyIdx - 1);
+        if (c < 4) neighbors.push(emptyIdx + 1);
+
+        const rand = neighbors[Math.floor(Math.random() * neighbors.length)];
+        grid[emptyIdx] = grid[rand];
+        grid[rand] = null;
+        emptyIdx = rand;
+      }
+    }
+
+    function pickTargetBulbs() {
+      let b1 = Math.floor(Math.random() * 20);
+      let b2 = Math.floor(Math.random() * 20);
+      while (b1 === b2) b2 = Math.floor(Math.random() * 20);
+      targetBulbs = [b1, b2];
+    }
+
+    function updateBulbsUI() {
+      document.querySelectorAll('.bulb').forEach(b => {
+        b.className = 'bulb';
+      });
+      targetBulbs.forEach(id => {
+        const bulb = document.getElementById(`bulb-${id}`);
+        if (bulb) bulb.classList.add('target');
+      });
+    }
+
+    function nextRound() {
+      AudioSys.playWin();
+
+      if (round < 5) {
+        round++;
+        document.getElementById('round-display').innerText = `${round}/5`;
+        pickTargetBulbs();
+        renderBoard();
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      
+      // Save High Scores
+      const bestTime = localStorage.getItem('cyberpulse_best_time');
+      const bestMoves = localStorage.getItem('cyberpulse_best_moves');
+
+      const isNewTime = !bestTime || elapsedTime < parseInt(bestTime);
+      const isNewMoves = !bestMoves || totalMoves < parseInt(bestMoves);
+
+      if (isNewTime) localStorage.setItem('cyberpulse_best_time', elapsedTime);
+      if (isNewMoves) localStorage.setItem('cyberpulse_best_moves', totalMoves);
+
+      // Display Victory
+      document.getElementById('overlay-title').innerText = "Victoire ! ⚡";
+      document.getElementById('overlay-desc').innerHTML = `
+        Temps total : <b>${formatTime(elapsedTime)}</b><br>
+        Déplacements : <b>${totalMoves}</b>
+      `;
+
+      document.getElementById('records-display').innerHTML = `
+        🏆 Records :<br>
+        Meilleur Temps : ${isNewTime ? '<b>' + formatTime(elapsedTime) + ' (Nouveau!)</b>' : formatTime(bestTime)}<br>
+        Moins de coups : ${isNewMoves ? '<b>' + totalMoves + ' (Nouveau!)</b>' : bestMoves}
+      `;
+
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    /* =========================================================================
+       UTILITIES
+       ========================================================================= */
+    function updateTimer() {
+      elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById('time-display').innerText = formatTime(elapsedTime);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    // Initialize layout on load
+    initBulbs();
+    buildLayoutDOM();
+    document.getElementById('overlay').classList.add('active');
+  </script>
+</body>
+</html>
