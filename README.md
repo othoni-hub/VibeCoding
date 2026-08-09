@@ -58,6 +58,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 
 ### Utilitaires et inutilitaires
 - [L'appli *STELLAR*](#STELLAR)
+- [L'appli *CryptoGaming*](#CryptoGaming)
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
 - [L'appli *MindVibe*](#MindVibe)
