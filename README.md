@@ -647,12 +647,12 @@ Le fameux jeux de SIMON rescussité
 <img width="329" height="649" alt="image" src="https://github.com/user-attachments/assets/ccf580a6-ec06-4eae-9681-0668ad6c7746" />
 
 
-RAMDAM est une application pour smartphone créé en 2012. Chaque jour, une nouvelle partie était proposée.
+**RAMDAM** est une application pour smartphone créé en 2012. Chaque jour, une nouvelle partie était proposée.
 
 Il s'agit d'un jeu de lettres, dans lequel on dispose d'une grille 8x8 contenant quelques lettres. Il s'agit de former des mots, soit en faisant glisser une lettre d'une case vers une autre à condition qu'il existe un chemin connexe entre les deux, ou de permuter deux lettres. La difficulté vient du fait que chaque déplacement qui ne crée pas un nouveau mot fait apparaître 3 nouvelles lettres sur la grille. Le jeu se poursuit tant que la grille n'est pas saturée, et au maximum jusqu'à ce que 200 lettres aient été distribuées.
-Une fois n'est pas coutume, ce jeu nécessite un 2nd fichier en plus du fichier HTML : le dictionnaire (ici, le dictionnaire officiel du Scrabble,à télécharger ici :
+Une fois n'est pas coutume, ce jeu nécessite un 2nd fichier en plus du fichier HTML : le dictionnaire (ici, le dictionnaire officiel du Scrabble,à télécharger ici : https://github.com/othoni-hub/VibeCoding/raw/refs/heads/main/RAMDAM/French%20ODS%20dictionary.txt 
 
-***destination :*** tous (savoir lire et écrire...) 
+***destination :*** tous (savoir lire et écrire, quand-même...) 
 
 [Retour en haut](#VibeCoding)
 
