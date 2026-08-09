@@ -138,7 +138,7 @@ Pour donner le goût et la confiance aux futures femmes de sciences !
 [Retour en haut](#VibeCoding)
 
 ---
-### LightBot
+### LightBot :white_check_mark:
 [*Vibe-Codé* avec Claude 4.6 Sonnet]
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/LightBot/index.html" target="_blank" rel="noopener noreferrer">LightBot </a></li> 
