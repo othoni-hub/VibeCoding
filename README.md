@@ -633,7 +633,7 @@ Le fameux jeux de SIMON récussité
 ### CyberPulse_Solitaire
 
 [*Vibe-Codé* avec Gemini 3.5 Flash]
-<li><a href="https://othoni-hub.github.io/CyberPulse_Solitaire/SIMON/index.html" target="_blank" rel="noopener noreferrer">CyberPulse_Solitaire </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/CyberPulse_Solitaire/index.html" target="_blank" rel="noopener noreferrer">CyberPulse_Solitaire </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
