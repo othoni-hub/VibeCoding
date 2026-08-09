@@ -23,6 +23,7 @@ L'intérêt d'une Application Simple-Page (*SPA : Single Page Application*) est 
 - [L'appli *LightBot*](#LightBot)
 - [L'appli *Constructor*](#Constructor)
 - [L'appli *Solides3D*](#Solides3D)
+- [L'appli *FOURMIS-3D*](#FOURMIS-3D)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *Lissajous*](#Lissajous)
 - [L'appli *BRIQUE*](#BRIQUE)
@@ -198,6 +199,23 @@ Visualiser de nombreux solides de l'espace, dont quelques merveilles
 
 [Retour en haut](#VibeCoding)
 
+---
+
+### FOURMIS-3D
+
+[*Vibe-Codé* avec Gemini 3.5]
+<li><a href="https://othoni-hub.github.io/VibeCoding/FOURMIS-3D/index.html" target="_blank" rel="noopener noreferrer">FOURMIS-3DC </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="450" height="250" alt="image" src="https://github.com/user-attachments/assets/d07e45fa-1534-48f7-bb8a-14902493d887" />
+
+
+Visualiser une section plane d'un parallélépipède rectangle
+
+***destination :*** Mathématiques 3<sup>ème</sup>, géométrie dans l'espace
+
+[Retour en haut](#VibeCoding)
 
 ---
 
@@ -209,7 +227,7 @@ Visualiser de nombreux solides de l'espace, dont quelques merveilles
 
 <img width="470" height="225" alt="image" src="https://github.com/user-attachments/assets/9fba1a70-5368-4aec-aee4-1cb47b8c7d4b" />
 
-Visualiseur intéractif de coniques
+Visualiseur interactif de coniques
 
 ***destination :*** L3 Mathématiques, coniques
 
