@@ -65,6 +65,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *MindVibe*](#MindVibe)
 - [L'appli *Dojo*](#Dojo)
 - [L'appli *Fleur-de-Fumee*](#Fleur-de-Fumee)
+- [L'appli *Tiny-Planet*](#Tiny-Planet)
   
 --- 
 
@@ -874,6 +875,27 @@ Application à destination des professeurs en formation sur les usages padagogiq
 
 
 Simulateur de feux d'artifice ("Fleur de Fumée" en chinois)
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### Tiny-Planet
+
+[*Vibe-Codé* avec Gemini 3.5]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/Tiny-Planet/index.html" target="_blank" rel="noopener noreferrer">Tiny-Planet </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="300" height="175" alt="image" src="https://github.com/user-attachments/assets/36d7c52e-15c1-4559-ae2d-7c2a1a58ff7b" />
+
+
+
+Transforme une photo de paysage en micro-planète (ou en "trou de ver")
 
 ***destination :*** tous 
 
