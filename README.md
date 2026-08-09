@@ -744,6 +744,25 @@ Observer le ciel depuis les latitudes françaises(métropole)
 
 ---
 
+### CryptoGaming
+
+[*Vibe-Codé* avec Gemini 3.5 Flash]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/CryptoGaming/index.html" target="_blank" rel="noopener noreferrer">CryptoGaming </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="650" height="350" alt="image" src="https://github.com/user-attachments/assets/166c1325-9140-45bb-afc1-4707900f9edf" />
+
+Apprendre la cryptographie, sur 11 algorithmes historiques alphabétiques ou numériques, avec tuto de déchiffrement adapté aux élèves de 3<sup>ème</sup>  ou de Terminale, selon la difficulté et les notions qu'ils utilisent, et déchiffrement pas à pas.
+
+***destination :*** tous / Cryptographie
+
+[Retour en haut](#VibeCoding)
+
+
+---
+
 ### CHROMA
 
 [*Vibe-Codé* avec Gemini 3.5]
