@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto SPA - 11 Algorithmes + Détails d'étapes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-950 p-4">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+        <span>🔒</span> Crypto Playground (11 Algo SPA + Détails)
+      </h1>
+      <span class="text-xs text-slate-500 font-mono">Vibe-Coded Edition</span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl w-full mx-auto p-4 flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- Panel Gauche : Selecteur -->
+    <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 h-fit">
+      <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Algorithme</h2>
+      <select id="algoSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-emerald-400 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <option value="atbash">1. Atbash</option>
+        <option value="caesar">2. Chiffre de César</option>
+        <option value="bcd">3. BCD (Binary-Coded Decimal)</option>
+        <option value="morse">4. Code Morse</option>
+        <option value="affine">5. Chiffre d'Affine</option>
+        <option value="vigenere">6. Chiffre de Vigenère</option>
+        <option value="vernam">7. Vernam (XOR)</option>
+        <option value="base64">8. Base64</option>
+        <option value="hill">9. Chiffre de Hill (2x2)</option>
+        <option value="dh">10. Diffie-Hellman (Chiffrement par clé partagée)</option>
+        <option value="rsa">11. RSA (Break & Chiffrement)</option>
+      </select>
+
+      <div id="algoDesc" class="mt-4 text-xs text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3">
+        <!-- Description dynamique -->
+      </div>
+
+      <button id="btnTutorial" class="w-full mt-4 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 font-medium text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+        <span>💡</span> Tutoriel de Décryptage
+      </button>
+    </section>
+
+    <!-- Panel Droite : Interface de Chiffrement -->
+    <section class="md:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 flex flex-col gap-4">
+
+      <!-- Options / Clés dynamiques -->
+      <div id="dynamicParams" class="grid grid-cols-2 gap-3 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
+        <!-- Généré dynamiquement -->
+      </div>
+
+      <!-- Entrée -->
+      <div class="flex flex-col gap-1">
+        <label id="inputLabel" class="text-xs font-semibold text-slate-400">Message / Entrée :</label>
+        <textarea id="inputText" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Entrez votre message ici..."></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div id="actionButtons" class="flex gap-3">
+        <button id="btnEncode" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors">Chiffrer / Coder</button>
+        <button id="btnDecode" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">Déchiffrer / Décoder</button>
+      </div>
+
+      <!-- Sortie principale -->
+      <div class="flex flex-col gap-1 mt-2">
+        <label class="text-xs font-semibold text-slate-400">Résultat / Sortie :</label>
+        <div id="outputText" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 font-mono text-emerald-400 text-sm min-h-[60px] break-all whitespace-pre-wrap select-all">
+          ---
+        </div>
+      </div>
+
+      <!-- Zone de détails intermédiaires -->
+      <div class="flex flex-col gap-1 mt-2">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-semibold text-amber-400 flex items-center gap-1">
+            <span>🔍</span> Détail des étapes de calcul :
+          </label>
+          <span class="text-[10px] text-slate-500">Trace d'exécution</span>
+        </div>
+        <div id="stepsText" class="w-full bg-slate-950/80 border border-amber-500/20 rounded-lg p-3 font-mono text-amber-200/90 text-xs min-h-[100px] max-h-[220px] overflow-y-auto break-all whitespace-pre-wrap select-all leading-relaxed">
+          Saisissez un message et lancez un calcul pour afficher les étapes...
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Modal / Pop-up Tutoriel -->
+  <div id="tutorialModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl relative flex flex-col gap-4 max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 id="modalTitle" class="text-lg font-bold text-amber-400 flex items-center gap-2">
+          <span>📖</span> Tutoriel de Décryptage
+        </h3>
+        <button id="closeModal" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div id="modalBody" class="text-sm text-slate-300 overflow-y-auto space-y-3 font-sans leading-relaxed">
+        <!-- Tutoriel dynamique -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="border-t border-slate-700 pt-3 flex justify-end">
+        <button id="closeModalBtn" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-2 px-4 rounded-lg">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Descriptions ---
+    const descs = {
+      atbash: "Substitution inverse A<->Z, B<->Y.",
+      caesar: "Décalage alphabétique fixe d'un nombre k.",
+      bcd: "Chaque chiffre décimal est codé sur 4 bits.",
+      morse: "Traduction du texte en impulsions courtes/longues (.-).",
+      affine: "Chiffrement (a*x + b) mod 26.",
+      vigenere: "Décalages multiples contrôlés par une clé textuelle.",
+      vernam: "Opération XOR (bit à bit) avec la clé répétée.",
+      base64: "Encodage binaire vers texte alphanumérique.",
+      hill: "Multiplication de blocs de 2 lettres par une matrice 2x2 mod 26.",
+      dh: "Chiffrement symétrique dérivé de la clé partagée Diffie-Hellman (S = g^ab mod p).",
+      rsa: "Chiffrement/Déchiffrement RSA modulaire (C = M^e mod N, M = C^d mod N)."
+    };
+
+    // --- Tutoriels de Décryptage ---
+    const tutorials = {
+      atbash: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/20 text-emerald-300 mb-2">Niveau : 3ème</span>
+        <p><strong>Le principe du miroir :</strong> Imagine l'alphabet plié en deux au milieu. La première lettre (A) devient la dernière (Z), la 2ème (B) devient l'avant-dernière (Y).</p>
+        <p><strong>Comment décrypter :</strong> C'est un code "auto-réciproque" ! Pour retrouver le message d'origine, repasse exactement le texte chiffré dans le même miroir (A repasse en Z, Z repasse en A).</p>`,
+
+      caesar: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/20 text-emerald-300 mb-2">Niveau : 3ème</span>
+        <p><strong>L'idée :</strong> On a décalé toutes les lettres d'un certain nombre de crans vers la droite (par exemple +3).</p>
+        <p><strong>Si tu connais la clé ($k$) :</strong> Recule simplement du même nombre de crans vers la gauche (fais $-k$).</p>
+        <p><strong>Si tu n'as pas la clé :</strong> Il n'y a que 25 décalages possibles ! Teste-les tous un par un (attaque par force brute) ou cherche la lettre qui apparaît le plus souvent : en français, c'est presque toujours le **E**.</p>`,
+
+      bcd: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/20 text-emerald-300 mb-2">Niveau : 3ème</span>
+        <p><strong>Codage chiffre par chiffre :</strong> Ce n'est pas un secret, juste une façon de parler en binaire (0 et 1) aux ordinateurs. Chaque chiffre de 0 à 9 est remplacé par un bloc fixe de 4 bits.</p>
+        <p><strong>Comment décoder :</strong> Découpe le message par paquets de 4 bits. Convertis chaque paquet en nombre décimal (ex: <code>0101</code> = $4 + 1 = 5$).</p>`,
+
+      morse: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/20 text-emerald-300 mb-2">Niveau : 3ème</span>
+        <p><strong>Langage de télégraphe :</strong> Chaque lettre est représentée par une combinaison de sons courts (points <code>.</code>) et longs (traits <code>-</code>).</p>
+        <p><strong>Comment décoder :</strong> Regarde les espaces entre les symboles. Prends chaque groupe de points/traits et cherche dans le tableau de correspondance Morse pour retrouver la lettre.</p>`,
+
+      affine: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-blue-500/20 text-blue-300 mb-2">Niveau : 1ère / Tle Spé</span>
+        <p><strong>Le chiffrement :</strong> $y \equiv (a \cdot x + b) \pmod{26}$. C'est une fonction affine appliquée sur les lettres $x \in \{0, \dots, 25\}$.</p>
+        <p><strong>Pour décrypter :</strong> Il faut isoler $x$. On obtient $x \equiv a^{-1} \cdot (y - b) \pmod{26}$.</p>
+        <p class="bg-slate-900 p-2 rounded font-mono text-xs text-amber-300">Point clé : $a^{-1}$ est l'inverse modulaire de $a \bmod 26$. Il n'existe que si $\gcd(a, 26) = 1$ (théorème de Bézout).</p>`,
+
+      vigenere: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-blue-500/20 text-blue-300 mb-2">Niveau : 2nde / 1ère</span>
+        <p><strong>Plusieurs Césars à la suite :</strong> On utilise un mot-clé (ex: "CLE"). La 1ère lettre du message subit un décalage 'C', la 2ème un décalage 'L', etc.</p>
+        <p><strong>Avec la clé :</strong> Pour chaque lettre, soustrais la valeur de la lettre de la clé correspondante : $P_i \equiv (C_i - K_{i \bmod L}) \pmod{26}$.</p>
+        <p><strong>Sans la clé :</strong> Analyse de fréquence sur les sous-textes (méthode de Kasiski) pour trouver d'abord la longueur de la clé.</p>`,
+
+      vernam: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-500/20 text-indigo-300 mb-2">Niveau : Tle Spé Maths</span>
+        <p><strong>Le masque jetable (XOR binaire) :</strong> On applique l'opérateur logique XOR ($\oplus$) bit à bit entre le message $M$ et la clé $K$.</p>
+        <p><strong>Propriété algébrique du XOR :</strong> $A \oplus A = 0$ et $A \oplus 0 = A$. L'opération est involutive.</p>
+        <p class="bg-slate-900 p-2 rounded font-mono text-xs text-amber-300">Déchiffrement : C ⊕ K = (M ⊕ K) ⊕ K = M ⊕ (K ⊕ K) = M ⊕ 0 = M</p>
+        <p>Si la clé est aussi longue que le message et parfaitement aléatoire, le chiffrement est prouvé incassable (théorème de Shannon).</p>`,
+
+      base64: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/20 text-emerald-300 mb-2">Niveau : 3ème / 2nde</span>
+        <p><strong>Regroupement de bits :</strong> Utile pour envoyer des données binaires (images, fichiers) sous forme de texte imprimable.</p>
+        <p><strong>Comment décoder :</strong> On prend 4 caractères Base64 (chacun codé sur 6 bits, soit $4 \times 6 = 24$ bits). On rassemble ces 24 bits puis on les re-découpe en 3 octets de 8 bits ($3 \times 8 = 24$ bits) pour retrouver les caractères d'origine.</p>`,
+
+      hill: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-500/20 text-indigo-300 mb-2">Niveau : Tle Spé Maths (Matrices)</span>
+        <p><strong>Chiffrement vectoriel :</strong> Les paires de lettres sont représentées par un vecteur $X = \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}$. Le bloc chiffré est $Y \equiv M \cdot X \pmod{26}$ où $M$ est une matrice $2 \times 2$.</p>
+        <p><strong>Pour déchiffrer :</strong> On multiplie par la matrice inverse : $X \equiv M^{-1} \cdot Y \pmod{26}$.</p>
+        <p class="bg-slate-900 p-2 rounded font-mono text-xs text-amber-300">Calcul : M⁻¹ = det(M)⁻¹ · adj(M) mod 26. La matrice est inversible ssi gcd(det(M), 26) = 1.</p>`,
+
+      dh: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-500/20 text-indigo-300 mb-2">Niveau : Tle Spé Maths (Congruences)</span>
+        <p><strong>Échange de clés modulaire :</strong> Basé sur la commutativité des puissances dans les corps finis $\mathbb{Z}/p\mathbb{Z}$.</p>
+        <p>Alice envoie $A \equiv g^a \pmod p$. Bob envoie $B \equiv g^b \pmod p$.</p>
+        <p class="bg-slate-900 p-2 rounded font-mono text-xs text-amber-300">Clé commune : (g^b)^a ≡ g^(a·b) ≡ (g^a)^b ≡ S (mod p)</p>
+        <p><strong>Sécurité :</strong> Écouter $A$ et $B$ ne permet pas de retrouver $S$ sans résoudre le problème du <em>logarithme discret</em>.</p>`,
+
+      rsa: `
+        <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-500/20 text-indigo-300 mb-2">Niveau : Tle Spé Maths (Arithmétique)</span>
+        <p><strong>Calcul de la clé privée $d$ par cassage :</strong></p>
+        <ol class="list-decimal list-inside space-y-1 mt-1 text-xs">
+          <li><strong>Factorisation :</strong> On cherche $p$ et $q$ tels que $N = p \cdot q$.</li>
+          <li><strong>Indicateur d'Euler :</strong> On calcule $\phi(N) = (p-1)(q-1)$.</li>
+          <li><strong>Inversion modulaire :</strong> On résout $e \cdot d \equiv 1 \pmod{\phi(N)}$.</li>
+          <li><strong>Déchiffrement :</strong> Le message est restauré par $M \equiv C^d \pmod N$.</li>
+        </ol>`
+    };
+
+    // --- Dictionnaires Morse ---
+    const MORSE_MAP = {
+      'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+      'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+      'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+      'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+      'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+      '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+      '8': '---..', '9': '----.', ' ': '/'
+    };
+    const REVERSE_MORSE = Object.fromEntries(Object.entries(MORSE_MAP).map(([k, v]) => [v, k]));
+
+    // --- Helpers Math & Exponentiation Rapide ---
+    function mod(n, m) { return ((n % m) + m) % m; }
+    
+    function modInverse(a, m) {
+      a = mod(a, m);
+      for (let x = 1; x < m; x++) if (mod(a * x, m) === 1) return x;
+      return null;
+    }
+
+    function modPow(base, exp, modulus) {
+      if (modulus === 1n) return 0n;
+      let result = 1n;
+      base = base % modulus;
+      while (exp > 0n) {
+        if (exp % 2n === 1n) result = (result * base) % modulus;
+        exp = exp / 2n;
+        base = (base * base) % modulus;
+      }
+      return result;
+    }
+
+    // --- DOM Elements ---
+    const algoSelect = document.getElementById('algoSelect');
+    const dynamicParams = document.getElementById('dynamicParams');
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const stepsText = document.getElementById('stepsText');
+    const algoDesc = document.getElementById('algoDesc');
+
+    // Modal Elements
+    const tutorialModal = document.getElementById('tutorialModal');
+    const btnTutorial = document.getElementById('btnTutorial');
+    const closeModal = document.getElementById('closeModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+
+    // --- Interface Controller ---
+    function updateUI() {
+      const algo = algoSelect.value;
+      algoDesc.textContent = descs[algo];
+      dynamicParams.innerHTML = '';
+      inputText.disabled = false;
+
+      if (algo === 'caesar') {
+        dynamicParams.innerHTML = `
+          <div class="col-span-2 flex items-center gap-2">
+            <label class="text-xs text-slate-400">Décalage (k):</label>
+            <input type="number" id="caesarK" value="3" class="bg-slate-900 border border-slate-700 rounded p-1 w-20 text-sm font-mono text-center">
+          </div>`;
+      } else if (algo === 'affine') {
+        dynamicParams.innerHTML = `
+          <div><label class="text-xs text-slate-400">a (premier avec 26):</label>
+          <input type="number" id="affineA" value="5" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>
+          <div><label class="text-xs text-slate-400">b (décalage):</label>
+          <input type="number" id="affineB" value="8" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>`;
+      } else if (algo === 'vigenere' || algo === 'vernam') {
+        dynamicParams.innerHTML = `
+          <div class="col-span-2"><label class="text-xs text-slate-400">Clé :</label>
+          <input type="text" id="strKey" value="KEY" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono uppercase"></div>`;
+      } else if (algo === 'hill') {
+        dynamicParams.innerHTML = `
+          <div class="col-span-2"><label class="text-xs text-slate-400">Matrice 2x2 [a, b, c, d] :</label>
+          <div class="grid grid-cols-4 gap-1 mt-1">
+            <input type="number" id="hA" value="3" class="bg-slate-900 border border-slate-700 rounded p-1 text-center font-mono text-sm">
+            <input type="number" id="hB" value="3" class="bg-slate-900 border border-slate-700 rounded p-1 text-center font-mono text-sm">
+            <input type="number" id="hC" value="2" class="bg-slate-900 border border-slate-700 rounded p-1 text-center font-mono text-sm">
+            <input type="number" id="hD" value="5" class="bg-slate-900 border border-slate-700 rounded p-1 text-center font-mono text-sm">
+          </div></div>`;
+      } else if (algo === 'dh') {
+        dynamicParams.innerHTML = `
+          <div class="col-span-2 grid grid-cols-3 gap-2">
+            <div><label class="text-xs text-slate-400">p (modulo):</label><input type="number" id="dhP" value="23" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>
+            <div><label class="text-xs text-slate-400">g (base):</label><input type="number" id="dhG" value="5" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>
+            <div><label class="text-xs text-slate-400">a (privé A):</label><input type="number" id="dhA" value="6" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>
+          </div>
+          <button onclick="calcDH()" class="col-span-2 bg-slate-700 hover:bg-slate-600 text-emerald-300 font-semibold py-1 rounded text-xs mt-1 border border-slate-600">Simuler uniquement l'échange DH</button>`;
+      } else if (algo === 'rsa') {
+        dynamicParams.innerHTML = `
+          <div><label class="text-xs text-slate-400">N (Module < 1M):</label><input type="number" id="rsaN" value="880351" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>
+          <div><label class="text-xs text-slate-400">e (Public):</label><input type="number" id="rsaE" value="65537" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-sm font-mono"></div>
+          <button onclick="breakRSA()" class="col-span-2 bg-slate-700 hover:bg-slate-600 text-amber-300 font-semibold py-1 rounded text-xs mt-1 border border-slate-600">Factoriser & Trouver d (Simu)</button>`;
+      }
+    }
+
+    algoSelect.addEventListener('change', updateUI);
+    updateUI();
+
+    // --- Modal Handler ---
+    btnTutorial.addEventListener('click', () => {
+      const algo = algoSelect.value;
+      const titleName = algoSelect.options[algoSelect.selectedIndex].text;
+      modalTitle.innerHTML = `<span>📖</span> Tutoriel Décryptage : ${titleName}`;
+      modalBody.innerHTML = tutorials[algo] || "<p>Tutoriel non disponible.</p>";
+      tutorialModal.classList.remove('hidden');
+      tutorialModal.classList.add('flex');
+    });
+
+    const hideModal = () => {
+      tutorialModal.classList.add('hidden');
+      tutorialModal.classList.remove('flex');
+    };
+
+    closeModal.addEventListener('click', hideModal);
+    closeModalBtn.addEventListener('click', hideModal);
+    tutorialModal.addEventListener('click', (e) => {
+      if (e.target === tutorialModal) hideModal();
+    });
+
+    // --- Moteurs de calcul avec traçage d'étapes ---
+    document.getElementById('btnEncode').addEventListener('click', () => process(true));
+    document.getElementById('btnDecode').addEventListener('click', () => process(false));
+
+    function process(encode) {
+      const algo = algoSelect.value;
+      const input = inputText.value;
+      let res = "";
+      let steps = [];
+
+      steps.push(`[Mode] : ${encode ? "Chiffrement / Encodage" : "Déchiffrement / Décodage"}`);
+      steps.push(`[Entrée] : "${input}"`);
+
+      try {
+        if (algo === 'atbash') {
+          steps.push(`[Formule] : Symétrie inverse (pos_out = 25 - pos_in)`);
+          res = input.replace(/[a-zA-Z]/g, c => {
+            const base = c >= 'a' ? 97 : 65;
+            const inPos = c.charCodeAt(0) - base;
+            const outPos = 25 - inPos;
+            const outChar = String.fromCharCode(base + outPos);
+            steps.push(`  - '${c}' (pos ${inPos}) ➔ '${outChar}' (pos ${outPos})`);
+            return outChar;
+          });
+        } 
+        else if (algo === 'caesar') {
+          let k = parseInt(document.getElementById('caesarK').value) || 0;
+          const shiftVal = encode ? k : -k;
+          steps.push(`[Clé k] = ${k} | Décalage effectif = ${shiftVal}`);
+          steps.push(`[Formule] : pos_out = (pos_in + ${shiftVal}) mod 26`);
+
+          res = input.replace(/[a-zA-Z]/g, c => {
+            const base = c >= 'a' ? 97 : 65;
+            const inPos = c.charCodeAt(0) - base;
+            const outPos = mod(inPos + shiftVal, 26);
+            const outChar = String.fromCharCode(base + outPos);
+            steps.push(`  - '${c}' (${inPos}) + (${shiftVal}) = ${outPos} ➔ '${outChar}'`);
+            return outChar;
+          });
+        }
+        else if (algo === 'bcd') {
+          if (encode) {
+            steps.push(`[Méthode] : Conversion de chaque chiffre décimal en 4 bits binaires.`);
+            res = input.split('').map(c => {
+              if (/\d/.test(c)) {
+                const bin = parseInt(c).toString(2).padStart(4, '0');
+                steps.push(`  - Chiffre ${c} ➔ ${bin}`);
+                return bin;
+              }
+              steps.push(`  - Caractère '${c}' (conservé sans modif)`);
+              return c;
+            }).join(' ');
+          } else {
+            steps.push(`[Méthode] : Découpage par bloc binaire 4 bits ➔ Chiffre décimal.`);
+            res = input.trim().split(/\s+/).map(b => {
+              if (/^[01]{4}$/.test(b)) {
+                const dec = parseInt(b, 2);
+                steps.push(`  - Bloc ${b} ➔ ${dec}`);
+                return dec;
+              }
+              steps.push(`  - Bloc non-BCD '${b}' (conservé)`);
+              return b;
+            }).join('');
+          }
+        }
+        else if (algo === 'morse') {
+          if (encode) {
+            steps.push(`[Méthode] : Conversion caractères alpha ➔ Impulsions Morse.`);
+            res = input.toUpperCase().split('').map(c => {
+              const code = MORSE_MAP[c] || c;
+              steps.push(`  - '${c}' ➔ ${code}`);
+              return code;
+            }).join(' ');
+          } else {
+            steps.push(`[Méthode] : Traduction blocs Morse ➔ Caractères.`);
+            res = input.trim().split(' ').map(m => {
+              const char = REVERSE_MORSE[m] || m;
+              steps.push(`  - '${m}' ➔ ${char}`);
+              return char;
+            }).join('');
+          }
+        }
+        else if (algo === 'affine') {
+          const a = parseInt(document.getElementById('affineA').value);
+          const b = parseInt(document.getElementById('affineB').value);
+          const aInv = modInverse(a, 26);
+          
+          steps.push(`[Paramètres] : a = ${a}, b = ${b}`);
+          if (!aInv) throw new Error("Le paramètre 'a' n'a pas d'inverse mod 26 (gcd(a,26) ≠ 1) !");
+          steps.push(`[Inverse modulaire] : a⁻¹ mod 26 = ${aInv}`);
+
+          if (encode) {
+            steps.push(`[Formule] : y = (${a}*x + ${b}) mod 26`);
+          } else {
+            steps.push(`[Formule] : x = ${aInv}*(y - ${b}) mod 26`);
+          }
+
+          res = input.toUpperCase().replace(/[A-Z]/g, c => {
+            const x = c.charCodeAt(0) - 65;
+            let outPos = encode ? mod(a * x + b, 26) : mod(aInv * (x - b), 26);
+            const outChar = String.fromCharCode(65 + outPos);
+            steps.push(`  - '${c}' (${x}) ➔ calc = ${outPos} ➔ '${outChar}'`);
+            return outChar;
+          });
+        }
+        else if (algo === 'vigenere') {
+          const key = document.getElementById('strKey').value.toUpperCase().replace(/[^A-Z]/g, '');
+          if (!key) throw new Error("La clé doit contenir au moins une lettre !");
+          steps.push(`[Clé nettoyée] : "${key}" (Longueur = ${key.length})`);
+          
+          let kIdx = 0;
+          res = input.toUpperCase().replace(/[A-Z]/g, c => {
+            const kChar = key[kIdx % key.length];
+            const kVal = kChar.charCodeAt(0) - 65;
+            const shift = encode ? kVal : -kVal;
+            const inPos = c.charCodeAt(0) - 65;
+            const outPos = mod(inPos + shift, 26);
+            const outChar = String.fromCharCode(65 + outPos);
+
+            steps.push(`  - '${c}' (${inPos}) + Clé['${kChar}'](${shift >= 0 ? '+'+shift : shift}) ➔ ${outPos} ('${outChar}')`);
+            kIdx++;
+            return outChar;
+          });
+        }
+        else if (algo === 'vernam') {
+          const key = document.getElementById('strKey').value;
+          if (!key) throw new Error("Veuillez saisir une clé !");
+          steps.push(`[Opération] : XOR bit à bit (c ⊕ key[i % len])`);
+
+          res = input.split('').map((c, i) => {
+            const kChar = key[i % key.length];
+            const cCode = c.charCodeAt(0);
+            const kCode = kChar.charCodeAt(0);
+            const xorVal = cCode ^ kCode;
+            const outChar = String.fromCharCode(xorVal);
+
+            const cBin = cCode.toString(2).padStart(8, '0');
+            const kBin = kCode.toString(2).padStart(8, '0');
+            const xorBin = xorVal.toString(2).padStart(8, '0');
+
+            steps.push(`  - '${c}' (${cBin}) ⊕ '${kChar}' (${kBin}) = ${xorBin} (Ascii ${xorVal})`);
+            return outChar;
+          }).join('');
+        }
+        else if (algo === 'base64') {
+          if (encode) {
+            steps.push(`[Procédure] : Regroupement des octets (8 bits) vers paquets de 6 bits.`);
+            res = btoa(input);
+            steps.push(`  - Chaine convertie en Base64 standard avec btoa().`);
+          } else {
+            steps.push(`[Procédure] : Reconstitution des octets de 8 bits depuis les symboles 6 bits.`);
+            res = atob(input);
+            steps.push(`  - Décodage réussi via atob().`);
+          }
+        }
+        else if (algo === 'hill') {
+          let a = parseInt(document.getElementById('hA').value), b = parseInt(document.getElementById('hB').value);
+          let c = parseInt(document.getElementById('hC').value), d = parseInt(document.getElementById('hD').value);
+          
+          let det = mod(a * d - b * c, 26);
+          let detInv = modInverse(det, 26);
+          steps.push(`[Matrice M] = [[${a}, ${b}], [${c}, ${d}]]`);
+          steps.push(`[Déterminant] det = (${a}*${d} - ${b}*${c}) mod 26 = ${det}`);
+
+          if (!detInv) throw new Error("Matrice non inversible mod 26 (gcd(det, 26) ≠ 1) !");
+          steps.push(`[Inverse du déterminant] det⁻¹ mod 26 = ${detInv}`);
+
+          if (!encode) {
+            let mA = mod(d * detInv, 26), mB = mod(-b * detInv, 26);
+            let mC = mod(-c * detInv, 26), mD = mod(a * detInv, 26);
+            steps.push(`[Matrice Inverse M⁻¹] = [[${mA}, ${mB}], [${mC}, ${mD}]]`);
+            a = mA; b = mB; c = mC; d = mD;
+          }
+
+          let cleanText = input.toUpperCase().replace(/[^A-Z]/g, '');
+          if (cleanText.length % 2 !== 0) {
+            cleanText += 'X';
+            steps.push(`[Remplissage] : Ajout de 'X' pour avoir un nombre pair de lettres (${cleanText})`);
+          }
+
+          let out = '';
+          for (let i = 0; i < cleanText.length; i += 2) {
+            let x1 = cleanText.charCodeAt(i) - 65, x2 = cleanText.charCodeAt(i+1) - 65;
+            let y1 = mod(a * x1 + b * x2, 26);
+            let y2 = mod(c * x1 + d * x2, 26);
+            let char1 = String.fromCharCode(65 + y1), char2 = String.fromCharCode(65 + y2);
+            steps.push(`  - Bloc ['${cleanText[i]}','${cleanText[i+1]}'] (${x1}, ${x2}) ➔ M*X = (${y1}, ${y2}) ➔ ['${char1}','${char2}']`);
+            out += char1 + char2;
+          }
+          res = out;
+        }
+        else if (algo === 'dh') {
+          const p = parseInt(document.getElementById('dhP').value);
+          const g = parseInt(document.getElementById('dhG').value);
+          const a = parseInt(document.getElementById('dhA').value);
+          const b = 15; // Clé privée simulee pour Bob
+          
+          const A = mod(Math.pow(g, a), p);
+          const B = mod(Math.pow(g, b), p);
+          const keyS = mod(Math.pow(B, a), p); // Clé commune
+          
+          steps.push(`[Paramètres Diffie-Hellman] : p = ${p}, g = ${g}`);
+          steps.push(`  1. Alice (clé a=${a}) calcule A = g^a mod p = ${g}^${a} mod ${p} = ${A}`);
+          steps.push(`  2. Bob (clé b=${b}) calcule B = g^b mod p = ${g}^${b} mod ${p} = ${B}`);
+          steps.push(`  3. Clé partagée S = B^a mod p = ${B}^${a} mod ${p} = ${keyS}`);
+
+          let shift = encode ? keyS : -keyS;
+          steps.push(`[Application Chiffrement César] avec décalage k = S = ${keyS}`);
+
+          res = input.replace(/[a-zA-Z]/g, c => {
+            const base = c >= 'a' ? 97 : 65;
+            const inPos = c.charCodeAt(0) - base;
+            const outPos = mod(inPos + shift, 26);
+            const outChar = String.fromCharCode(base + outPos);
+            steps.push(`  - '${c}' (${inPos}) shift (${shift}) ➔ ${outPos} ('${outChar}')`);
+            return outChar;
+          });
+          res += `\n\n[Clé partagée calculée : S = ${keyS}]`;
+        }
+        else if (algo === 'rsa') {
+          const N = parseInt(document.getElementById('rsaN').value);
+          const e = parseInt(document.getElementById('rsaE').value);
+
+          steps.push(`[Cible RSA] Module N = ${N}, Exposant public e = ${e}`);
+
+          // Factorisation
+          let p = 0, q = 0;
+          let limit = Math.floor(Math.sqrt(N));
+          for (let i = 2; i <= limit; i++) {
+            if (N % i === 0) { p = i; q = N / i; break; }
+          }
+          if (!p) throw new Error("Impossible de factoriser N.");
+          
+          const phi = (p - 1) * (q - 1);
+          const d = modInverse(e, phi);
+          if (!d) throw new Error("Impossible de calculer la clé privée d.");
+
+          steps.push(`  1. Factorisation N : p = ${p}, q = ${q}`);
+          steps.push(`  2. Indicator d'Euler φ(N) = (${p}-1)(${q}-1) = ${phi}`);
+          steps.push(`  3. Clé privée calculée d = e⁻¹ mod φ(N) = ${d}`);
+
+          const BigN = BigInt(N);
+          const exp = BigInt(encode ? e : d);
+
+          if (encode) {
+            steps.push(`[Formule Chiffrement] : C = M^e mod N = M^${e} mod ${N}`);
+            res = input.split('').map(c => {
+              const m = BigInt(c.charCodeAt(0));
+              const cipher = modPow(m, exp, BigN).toString();
+              steps.push(`  - '${c}' (ASCII ${m}) ➔ C = ${cipher}`);
+              return cipher;
+            }).join(' ');
+          } else {
+            steps.push(`[Formule Déchiffrement] : M = C^d mod N = C^${d} mod ${N}`);
+            res = input.trim().split(/\s+/).map(val => {
+              if (!val || isNaN(val)) return '';
+              const c = BigInt(val);
+              const m = modPow(c, exp, BigN);
+              const char = String.fromCharCode(Number(m));
+              steps.push(`  - Bloc C=${val} ➔ M = ASCII ${m} ('${char}')`);
+              return char;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        res = "Erreur: " + err.message;
+        steps.push(`[❌ Interruption par Erreur] : ${err.message}`);
+      }
+
+      outputText.textContent = res;
+      stepsText.textContent = steps.join('\n');
+    }
+
+    // --- Simulation DH originale ---
+    window.calcDH = function() {
+      const p = parseInt(document.getElementById('dhP').value);
+      const g = parseInt(document.getElementById('dhG').value);
+      const a = parseInt(document.getElementById('dhA').value);
+      const b = 15;
+      
+      const A = mod(Math.pow(g, a), p);
+      const B = mod(Math.pow(g, b), p);
+      const keyA = mod(Math.pow(B, a), p);
+
+      const logLines = [
+        `[Simulation Échange Diffie-Hellman]`,
+        `Paramètres publics : p = ${p}, g = ${g}`,
+        `1. Alice choisit sa secret-key a = ${a}`,
+        `   -> Calcule sa clé publique A = g^a mod p = ${g}^${a} mod ${p} = ${A}`,
+        `2. Bob choisit sa secret-key b = ${b}`,
+        `   -> Calcule sa clé publique B = g^b mod p = ${g}^${b} mod ${p} = ${B}`,
+        `3. Alice reçoit B et calcule le secret partagé :`,
+        `   -> S = B^a mod p = ${B}^${a} mod ${p} = ${keyA}`,
+        `4. Bob reçoit A et calcule le secret partagé :`,
+        `   -> S = A^b mod p = ${A}^${b} mod ${p} = ${keyA}`,
+        `Conclusion : Alice et Bob partagent le même secret S = ${keyA} sans l'avoir transmis en clair !`
+      ];
+
+      outputText.textContent = 
+        `1. Alice calcule Clé Publique A = (${g}^${a}) mod ${p} = ${A}\n` +
+        `2. Bob (b=${b}) calcule Clé Publique B = (${g}^${b}) mod ${p} = ${B}\n` +
+        `3. Clé Secrète Partagée calculée : S = (${B}^${a}) mod ${p} = ${keyA}`;
+
+      stepsText.textContent = logLines.join('\n');
+    };
+
+    // --- Simulation Break RSA originale ---
+    window.breakRSA = function() {
+      const N = parseInt(document.getElementById('rsaN').value);
+      const e = parseInt(document.getElementById('rsaE').value);
+      
+      let steps = [`[Attaque par Factorisation sur N = ${N}]`];
+
+      let p = 0, q = 0;
+      let limit = Math.floor(Math.sqrt(N));
+      steps.push(`1. Recherche de facteurs premiers jusqu'à √N ≈ ${limit}...`);
+
+      for (let i = 2; i <= limit; i++) {
+        if (N % i === 0) { p = i; q = N / i; break; }
+      }
+
+      if (!p) {
+        outputText.textContent = "Échec : N est premier ou introuvable.";
+        steps.push(`❌ Aucun facteur trouvé.`);
+        stepsText.textContent = steps.join('\n');
+        return;
+      }
+
+      steps.push(`2. Facteurs trouvés : p = ${p}, q = ${q}`);
+      const phi = (p - 1) * (q - 1);
+      steps.push(`3. Indicatrice d'Euler φ(N) = (${p}-1) * (${q}-1) = ${phi}`);
+      
+      const d = modInverse(e, phi);
+      steps.push(`4. Résolution d'inversion modulaire e*d ≡ 1 mod φ(N)`);
+      steps.push(`   -> d = InverseMod(${e}, ${phi}) = ${d}`);
+
+      outputText.textContent = 
+        `[+] Factorisation réussie !\n` +
+        ` -> p = ${p}\n -> q = ${q}\n` +
+        ` -> phi(N) = ${phi}\n` +
+        ` -> Clé privée calculée (d) = ${d}`;
+
+      stepsText.textContent = steps.join('\n');
+    };
+  </script>
+</body>
+</html>
