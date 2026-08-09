@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiny Planet Studio Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 font-sans">
+
+  <!-- Header -->
+  <header class="text-center my-3">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
+      Tiny Planet Studio 🪐
+    </h1>
+    <p class="text-xs sm:text-sm text-slate-400 mt-1">Transforme tes paysages en mini-mondes</p>
+  </header>
+
+  <!-- Zone Principale (Adaptée Mobile & Desktop) -->
+  <main class="w-full max-w-sm md:max-w-4xl flex flex-col md:flex-row items-center md:items-start justify-center gap-6 my-auto">
+    
+    <!-- Zone Canvas / Drag & Drop -->
+    <div id="drop-zone" class="w-full md:w-1/2 aspect-square bg-slate-800 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center border-2 border-dashed border-slate-700 relative transition-colors duration-200 cursor-pointer">
+      <div id="placeholder-text" class="text-slate-500 text-sm text-center px-6 flex flex-col items-center gap-2 pointer-events-none">
+        <span class="text-3xl">📁</span>
+        <p>Importe une photo ou glisse-dépose la ici</p>
+      </div>
+      <canvas id="planetCanvas" class="hidden w-full h-full object-cover"></canvas>
+    </div>
+
+    <!-- Conteneur Contrôles & Actions (Desktop à droite) -->
+    <div class="w-full md:w-1/2 flex flex-col gap-4">
+      
+      <!-- Panneau de Contrôles -->
+      <div id="controls-panel" class="hidden w-full flex flex-col gap-3 bg-slate-800/60 p-4 rounded-xl border border-slate-700 text-xs sm:text-sm">
+        
+        <!-- Rotation -->
+        <div class="flex flex-col gap-1">
+          <div class="flex justify-between">
+            <label class="text-slate-300">Rotation</label>
+            <span id="angleVal" class="text-teal-400 font-mono">0°</span>
+          </div>
+          <input type="range" id="angleSlider" min="0" max="360" value="0" class="w-full accent-teal-400 cursor-pointer">
+        </div>
+
+        <!-- Toggle Trou de Ver -->
+        <div class="flex justify-between items-center py-1 border-t border-b border-slate-700/50 my-1">
+          <label class="font-semibold text-teal-300">Mode Trou de Ver (Ciel au centre)</label>
+          <input type="checkbox" id="invertToggle" class="w-4 h-4 accent-teal-400 cursor-pointer">
+        </div>
+
+        <!-- Adoucissement Couture -->
+        <div class="flex flex-col gap-1">
+          <div class="flex justify-between">
+            <label class="text-slate-300">Adoucissement raccord</label>
+            <span id="blendVal" class="text-teal-400 font-mono">10px</span>
+          </div>
+          <input type="range" id="blendSlider" min="0" max="50" value="10" class="w-full accent-teal-400 cursor-pointer">
+        </div>
+
+        <!-- Couleur du Fond -->
+        <div class="flex justify-between items-center">
+          <label class="text-slate-300">Fond des coins</label>
+          <select id="bgSelect" class="bg-slate-700 text-white rounded p-1 border border-slate-600 focus:outline-none cursor-pointer">
+            <option value="black">Noir Espace</option>
+            <option value="white">Blanc</option>
+            <option value="transparent">Transparent</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Actions & Exports -->
+      <footer class="w-full flex flex-col gap-2">
+        <label class="w-full py-3 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-semibold rounded-xl text-center cursor-pointer shadow-lg transition text-sm">
+          📷 Importer une photo
+          <input type="file" id="imageInput" accept="image/*" class="hidden">
+        </label>
+
+        <div id="download-group" class="hidden flex gap-2">
+          <button id="downloadJpg" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold rounded-xl text-center shadow-lg transition text-xs sm:text-sm">
+            Télécharger JPG
+          </button>
+          <button id="downloadSvg" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-semibold rounded-xl text-center shadow-lg transition text-xs sm:text-sm">
+            Télécharger SVG
+          </button>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const dropZone = document.getElementById('drop-zone');
+    const canvas = document.getElementById('planetCanvas');
+    const ctx = canvas.getContext('2d');
+    const placeholderText = document.getElementById('placeholder-text');
+    const downloadGroup = document.getElementById('download-group');
+    const controlsPanel = document.getElementById('controls-panel');
+
+    const angleSlider = document.getElementById('angleSlider');
+    const invertToggle = document.getElementById('invertToggle');
+    const blendSlider = document.getElementById('blendSlider');
+    const bgSelect = document.getElementById('bgSelect');
+
+    let loadedImg = null;
+
+    // Traitement du fichier image
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+
+      loadedImg = new Image();
+      loadedImg.onload = () => {
+        canvas.classList.remove('hidden');
+        placeholderText.classList.add('hidden');
+        downloadGroup.classList.remove('hidden');
+        controlsPanel.classList.remove('hidden');
+        dropZone.classList.remove('border-dashed', 'cursor-pointer');
+        dropZone.classList.add('border-solid');
+        render();
+      };
+      loadedImg.src = URL.createObjectURL(file);
+    }
+
+    // Input classique
+    imageInput.addEventListener('change', (e) => {
+      handleFile(e.target.files[0]);
+    });
+
+    // Clic sur la zone drop-zone si vide
+    dropZone.addEventListener('click', () => {
+      if (!loadedImg) imageInput.click();
+    });
+
+    // Drag and Drop (Ordinateur)
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('border-teal-400', 'bg-slate-700/50');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('border-teal-400', 'bg-slate-700/50');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      handleFile(file);
+    });
+
+    // Inputs contrôles
+    [angleSlider, invertToggle, blendSlider, bgSelect].forEach(el => {
+      el.addEventListener('input', () => {
+        document.getElementById('angleVal').innerText = angleSlider.value + '°';
+        document.getElementById('blendVal').innerText = blendSlider.value + 'px';
+        render();
+      });
+    });
+
+    function render() {
+      if (!loadedImg) return;
+
+      const size = 600; // Résolution de calcul interne
+      canvas.width = size;
+      canvas.height = size;
+
+      const angleShift = (parseInt(angleSlider.value) / 360) * size;
+      const invert = invertToggle.checked;
+      const blendWidth = parseInt(blendSlider.value);
+      const bgMode = bgSelect.value;
+
+      // 1. Preparation de l'image source dans un canvas temporaire
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = size;
+      tempCanvas.height = size;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.drawImage(loadedImg, 0, 0, size, size);
+
+      // 2. Adoucissement de la couture verticale (raccord des bords)
+      if (blendWidth > 0) {
+        const leftStrip = tempCtx.getImageData(0, 0, blendWidth, size);
+        const gradientCanvas = document.createElement('canvas');
+        gradientCanvas.width = blendWidth;
+        gradientCanvas.height = size;
+        gradientCanvas.getContext('2d').putImageData(leftStrip, 0, 0);
+
+        tempCtx.save();
+        tempCtx.globalAlpha = 0.5;
+        tempCtx.drawImage(gradientCanvas, size - blendWidth, 0, blendWidth, size);
+        tempCtx.restore();
+      }
+
+      const srcData = tempCtx.getImageData(0, 0, size, size);
+      const dstData = ctx.createImageData(size, size);
+
+      const srcPixels = srcData.data;
+      const dstPixels = dstData.data;
+
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const maxRadius = size / 2;
+
+      // 3. Transformation par Coordonnées Polaires
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const dx = x - centerX;
+          const dy = y - centerY;
+
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          let angle = Math.atan2(dy, dx); 
+          if (angle < 0) angle += 2 * Math.PI;
+
+          const dstIndex = (y * size + x) * 4;
+
+          if (distance <= maxRadius) {
+            // Mappage de l'angle (Axe X) + Décalage de rotation
+            let srcX = Math.floor(((angle / (2 * Math.PI)) * size) + angleShift) % size;
+            if (srcX < 0) srcX += size;
+            
+            // Mappage du rayon (Axe Y)
+            let normalizedRadius = distance / maxRadius; // 0 (centre) -> 1 (bord)
+
+            // Mode Tiny Planet (Normal) : le sol (bas de l'image) va au centre.
+            // Mode Trou de Ver (Inversé) : le ciel (haut de l'image) va au centre.
+            if (!invert) {
+              normalizedRadius = 1 - normalizedRadius;
+            }
+
+            const srcY = Math.floor(normalizedRadius * (size - 1));
+            const srcIndex = (srcY * size + srcX) * 4;
+
+            dstPixels[dstIndex]     = srcPixels[srcIndex];     // R
+            dstPixels[dstIndex + 1] = srcPixels[srcIndex + 1]; // G
+            dstPixels[dstIndex + 2] = srcPixels[srcIndex + 2]; // B
+            dstPixels[dstIndex + 3] = srcPixels[srcIndex + 3]; // A
+          } else {
+            // Gestion du fond hors sphère
+            if (bgMode === 'black') {
+              dstPixels[dstIndex] = 15; dstPixels[dstIndex+1] = 23; dstPixels[dstIndex+2] = 42; dstPixels[dstIndex+3] = 255;
+            } else if (bgMode === 'white') {
+              dstPixels[dstIndex] = 255; dstPixels[dstIndex+1] = 255; dstPixels[dstIndex+2] = 255; dstPixels[dstIndex+3] = 255;
+            } else {
+              dstPixels[dstIndex+3] = 0; // Arrière-plan transparent
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(dstData, 0, 0);
+    }
+
+    // Export au format JPG
+    document.getElementById('downloadJpg').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'tiny-planet.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.92);
+      link.click();
+    });
+
+    // Export au format SVG (conteneur vectoriel)
+    document.getElementById('downloadSvg').addEventListener('click', () => {
+      const dataUrl = canvas.toDataURL('image/png');
+      const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}"><image href="${dataUrl}" x="0" y="0" width="${canvas.width}" height="${canvas.height}" /></svg>`;
+      const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+      const link = document.createElement('a');
+      link.download = 'tiny-planet.svg';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    });
+  </script>
+</body>
+</html>
