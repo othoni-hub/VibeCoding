@@ -20,6 +20,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *LOGO-Simulateur*](#LOGO-Simulateur)
 - [L'appli *LightBot*](#LightBot)
 - [L'appli *Constructor*](#Constructor)
+- [L'appli *Solides3D*](#Solides3D)
 - [L'appli *i-CONIC*](#i-CONIC)
 - [L'appli *Lissajous*](#Lissajous)
 - [L'appli *BRIQUE*](#BRIQUE)
@@ -167,6 +168,24 @@ LightBot, application d'apprentissage de la programmation, ludique et esthétiqu
 
 
 Le Boa Constructor est une application sous forme de jeu de plateau, au croisement de la forge de MineCraft et du bouton "Créer un nouvel outil" de Geogebra, destiné à faire acquérir des compétences en pensée computationnelle, tout en consolidant les définitions des outils de la géométrie.
+
+***destination :*** Mathématiques, dès la 6<sup>ème</sup>, géométrie programmée
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### Solides3D
+[*Vibe-Codé* avec Claude 4.6 Sonnet ]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/Solides3D/index.html" target="_blank" rel="noopener noreferrer">Solides3D </a></li> 
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="400" height="160" alt="image" src="https://github.com/user-attachments/assets/31124b9c-66f2-46ce-9be5-ccc98caebd1b" />
+
+
+Visualiser de nombreux solides de l'espace, donc quelques merveilles
 
 ***destination :*** Mathématiques, dès la 6<sup>ème</sup>, géométrie programmée
 
