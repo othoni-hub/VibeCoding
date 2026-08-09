@@ -61,6 +61,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *CryptoGaming*](#CryptoGaming)
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
+- [L'appli *ASCII-Art*](#ASCII-Art)ASCII-Art
 - [L'appli *MindVibe*](#MindVibe)
 - [L'appli *Dojo*](#Dojo)
 - [L'appli *Fleur-de-Fumee*](#Fleur-de-Fumee)
@@ -797,6 +798,26 @@ Section plane du cube chromatique et codes RVB
 GIF-It DID2GI est une application pour smartphone uniquement pour la création de Gif animés à partir de photos de votre photothèque.
 
 ***destination :*** tous (surtout celles et ceux qui en ont marre des versions d'essais limitées à 3 jours que l'on trouve sur les Stores)
+
+[Retour en haut](#VibeCoding)
+
+---
+
+### ASCII-Art
+
+[*Vibe-Codé* avec Gemini 3.5 Flash]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/ASCII-Art/index.html" target="_blank" rel="noopener noreferrer">ASCII-Art </a></li>
+
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="315" height="330" alt="image" src="https://github.com/user-attachments/assets/1318c919-b5db-43af-826b-cf1076c492e6" />
+
+
+Transformer une image en ASCII-Art, noir et blanc, ou couleur
+
+***destination :*** tous 
 
 [Retour en haut](#VibeCoding)
 
