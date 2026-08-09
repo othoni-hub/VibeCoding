@@ -677,6 +677,25 @@ Une fois n'est pas coutume, ce jeu nécessite un 2nd fichier en plus du fichier 
 
 ---
 
+### SPIN-RubiksCube
+
+[*Vibe-Codé* avec Gemini 3.5 Flash étendu]
+<li><a href="https://othoni-hub.github.io/VibeCoding/SPIN-RubiksCube/index.html" target="_blank" rel="noopener noreferrer">SPIN-RubiksCube </a></li>
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+<img width="550" height="380" alt="image" src="https://github.com/user-attachments/assets/1fc48350-e747-46da-b0a2-fdd59829288f" />
+
+
+
+Un solveur de Rubik's Cube, avec l'algorithme optimal (le temps de résolution dans la machine est de l'ordre de 0.05 seconde !)
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
+
+---
+
 ### CyberPulse_Solitaire
 
 [*Vibe-Codé* avec Gemini 3.5 Flash]
