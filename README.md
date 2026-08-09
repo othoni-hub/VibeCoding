@@ -53,6 +53,7 @@ L'intérêt d'une Application Simple-Page (*SPA : Single Page Application*) est 
 - [L'appli *PICASSO-Mandalas*](#PICASSO-Mandalas)
 - [L'appli *SIMON*](#SIMON)
 - [L'appli *RAMDAM*](#RAMDAM)
+- [L'appli *SPIN-RubiksCube*](#SPIN-RubiksCube)
 - [L'appli *CyberPulse_Solitaire*](#CyberPulse_Solitaire)
 - [L'appli *Arbre Fractal*](#ArbreFractal)
 - [L'appli *VOLUME (SketchUp like)*](#VOLUME)
@@ -684,7 +685,7 @@ Une fois n'est pas coutume, ce jeu nécessite un 2nd fichier en plus du fichier 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="550" height="380" alt="image" src="https://github.com/user-attachments/assets/1fc48350-e747-46da-b0a2-fdd59829288f" />
+<img width="350" height="280" alt="image" src="https://github.com/user-attachments/assets/1fc48350-e747-46da-b0a2-fdd59829288f" />
 
 
 
