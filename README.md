@@ -61,7 +61,7 @@ Il suffit d'avoir une idée et de vouloir la mettre en oeuvre, ce qui en fait un
 - [L'appli *CryptoGaming*](#CryptoGaming)
 - [L'appli *CHROMA*](#CHROMA)
 - [L'appli *GIF-IT-SmartPhone*](#GIF-IT-SmartPhone)
-- [L'appli *ASCII-Art*](#ASCII-Art)ASCII-Art
+- [L'appli *ASCII-Art*](#ASCII-Art)
 - [L'appli *MindVibe*](#MindVibe)
 - [L'appli *Dojo*](#Dojo)
 - [L'appli *Fleur-de-Fumee*](#Fleur-de-Fumee)
