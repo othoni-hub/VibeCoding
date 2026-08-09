@@ -685,7 +685,7 @@ Une fois n'est pas coutume, ce jeu nécessite un 2nd fichier en plus du fichier 
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-<img width="550" height="280" alt="image" src="https://github.com/user-attachments/assets/1fc48350-e747-46da-b0a2-fdd59829288f" />
+<img width="500" height="280" alt="image" src="https://github.com/user-attachments/assets/1fc48350-e747-46da-b0a2-fdd59829288f" />
 
 
 
