@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RAMDAM - Le Jeu de Mots Strategique</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      touch-action: manipulation;
+    }
+    .tile-letter {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .tile-selected {
+      transform: scale(0.92);
+      box-shadow: 0 0 0 3px #f59e0b, 0 8px 16px rgba(245, 158, 11, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 select-none relative">
+
+  <!-- Modal Dictionnaire Obligatoire -->
+  <div id="dictModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center space-y-6">
+      <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-3xl font-extrabold">
+        R
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-white mb-2">Charger le Dictionnaire</h1>
+        <p class="text-slate-400 text-sm">
+          Pour jouer à RAMDAM, chargez votre fichier <code class="bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded">.txt</code> contenant le dictionnaire (ex: Scrabble / ODS, un mot par ligne).
+        </p>
+      </div>
+      <label class="block cursor-pointer">
+        <span class="sr-only">Choisir un fichier .txt</span>
+        <div class="w-full py-4 px-6 border-2 border-dashed border-slate-700 hover:border-amber-500/50 bg-slate-800/50 hover:bg-slate-800 rounded-xl transition flex flex-col items-center justify-center gap-2 group">
+          <svg class="w-8 h-8 text-slate-400 group-hover:text-amber-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <span class="text-sm font-semibold text-slate-300 group-hover:text-white" id="fileNameLabel">Sélectionner un fichier .txt</span>
+        </div>
+        <input type="file" id="dictInput" accept=".txt" class="hidden">
+      </label>
+      <div id="dictStatus" class="text-xs text-slate-500 min-h-[1.5rem]">En attente de fichier...</div>
+      <button id="startBtn" disabled class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-slate-950 font-extrabold rounded-xl transition shadow-lg shadow-amber-500/10">
+        Lancer la Partie
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Règles du Jeu -->
+  <div id="rulesModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h2 class="text-xl font-extrabold text-amber-400 flex items-center gap-2">
+          <span>📜</span> Règles de RAMDAM
+        </h2>
+        <button id="closeRulesBtn" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+      
+      <div class="text-xs text-slate-300 space-y-3 leading-relaxed">
+        <p><strong class="text-white">Objectif :</strong> Former un maximum de mots valides de 5 à 8 lettres sur un plateau 8x8 avant d'épuiser la réserve de 200 lettres ou d'être totalement bloqué.</p>
+        
+        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-2">
+          <p class="font-bold text-amber-300">🕹️ Déplacements :</p>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li><strong>Case vide :</strong> Déplacement possible uniquement s'il existe un <em>chemin libre</em> (cases blanches adjacentes non occupées).</li>
+            <li><strong>Case occupée :</strong> Permutation directe des deux lettres.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-2">
+          <p class="font-bold text-amber-300">🔤 Mots & Orientations :</p>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li>Les mots de <strong>5 à 8 lettres</strong> se lisent de gauche à droite, de droite à gauche, de haut en bas ou de bas en haut.</li>
+            <li>Quand un mot se forme, il disparaît immédiatement et rapporte des points.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-2">
+          <p class="font-bold text-amber-300">⏱️ Chrono & Triplets :</p>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li>Chaque coup déplacé sans former de mot déclenche l'arrivée du triplet de lettres suivant.</li>
+            <li>Si 60s s'écoulent sans action, un triplet tombe automatiquement.</li>
+            <li>Les <strong>5 prochains triplets</strong> sont visibles à l'avance.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-2">
+          <p class="font-bold text-amber-300">⚠️ Fin de Partie :</p>
+          <p class="text-slate-400">Si la grille est pleine, vous disposez d'<strong>1 minute ultime</strong> pour former un mot. Sinon, la partie s'arrête. En fin de partie, vous gagnez <strong>+5 pts par case vide</strong> restant sur le plateau !</p>
+        </div>
+      </div>
+
+      <button id="understoodRulesBtn" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition text-sm">
+        J'ai compris !
+      </button>
+    </div>
+  </div>
+
+  <!-- Bandeau Fin de Partie (Modal Game Over) -->
+  <div id="gameOverModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-40 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-5">
+      <div class="w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-2xl font-extrabold">
+        🏁
+      </div>
+      <div>
+        <h2 class="text-2xl font-extrabold text-white mb-1">Fin de Partie !</h2>
+        <p id="gameOverReason" class="text-slate-400 text-xs">Le plateau est rempli.</p>
+      </div>
+      <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Score Final</div>
+        <div id="finalScoreDisplay" class="text-4xl font-extrabold text-amber-400 mt-1">0</div>
+      </div>
+      <button id="restartBtn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition shadow-lg shadow-amber-500/10">
+        Rejouer une Partie
+      </button>
+    </div>
+  </div>
+
+  <!-- Header & Tableau de bord -->
+  <header class="w-full max-w-lg space-y-3">
+    <!-- Barre supérieure : Titre & Bouton Règles -->
+    <div class="flex justify-between items-center px-1">
+      <span class="font-extrabold text-lg tracking-wider text-amber-400">RAMDAM</span>
+      <button id="openRulesBtn" class="text-xs font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow">
+        <span>❓</span> Règles
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 rounded-2xl p-3 shadow-xl">
+      <div>
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Score</div>
+        <div id="scoreDisplay" class="text-2xl font-extrabold text-amber-400">0</div>
+      </div>
+      
+      <!-- Timer Bar -->
+      <div class="flex flex-col items-center">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Chrono</div>
+        <div class="relative w-24 h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+          <div id="timerBar" class="h-full bg-amber-500 transition-all duration-1000 ease-linear w-full"></div>
+        </div>
+        <span id="timerText" class="text-[11px] font-semibold text-slate-300 mt-1">60s</span>
+      </div>
+
+      <div class="text-right">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Restantes</div>
+        <div id="remainingDisplay" class="text-2xl font-extrabold text-slate-200">192</div>
+      </div>
+    </div>
+
+    <!-- Affichage des 5 prochains triplets -->
+    <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-2.5 space-y-1">
+      <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">5 Prochains triplets</div>
+      <div id="nextTripletsContainer" class="flex justify-between items-center gap-1 overflow-x-auto py-1">
+        <!-- Généré dynamiquement -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Grille du Jeu (8x8) -->
+  <main class="w-full max-w-lg aspect-square my-auto p-1.5">
+    <div id="grid" class="w-full h-full bg-slate-900 border border-slate-800/80 rounded-2xl p-2 grid grid-cols-8 grid-rows-8 gap-1.5 shadow-2xl relative">
+      <!-- Les 64 cases -->
+    </div>
+  </main>
+
+  <!-- Footer & Crédits -->
+  <footer class="w-full max-w-lg text-center space-y-2 mt-auto pt-2">
+    <div id="messageBox" class="min-h-[2rem] flex items-center justify-center text-sm font-bold text-emerald-400 transition-all">
+      Chargez le dictionnaire pour démarrer !
+    </div>
+    <div class="text-[10px] text-slate-500 pb-1 border-t border-slate-900 pt-2">
+      Jeu ressuscité par <span class="text-slate-400 font-semibold">Olivier Thöni</span>, vibe-codé avec l’aide de <span class="text-amber-400/90 font-semibold">Gemini 3.5 flash</span>
+    </div>
+  </footer>
+
+  <script>
+    const BOARD_SIZE = 8;
+    const LETTER_SCORES = {
+      E:1, A:1, I:1, N:1, O:1, R:1, S:1, T:1, U:1, L:1,
+      D:2, M:2, G:2,
+      B:3, C:3, P:3,
+      F:4, H:4, V:4,
+      J:8, Q:8,
+      K:10, W:10, X:10, Y:10, Z:10
+    };
+
+    const LETTER_FREQUENCIES = "EEEEEEEEEEEEEEEEEAAAAAAAAAIIIIIIIIINNNNNNNNOOOOOOOORRRRRRRSSSSSSSTTTTTTTUUUUUULLLLLDDDMMMGBBCCPPFFHHVVJQKWXYZ";
+
+    let dictionary = null;
+    let board = Array(BOARD_SIZE * BOARD_SIZE).fill(null);
+    let letterPool = [];
+    let selectedIndex = null;
+    let score = 0;
+    let timer = 60;
+    let timerInterval = null;
+    let gameActive = false;
+
+    const gridEl = document.getElementById('grid');
+    const dictInput = document.getElementById('dictInput');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const dictModal = document.getElementById('dictModal');
+    const rulesModal = document.getElementById('rulesModal');
+    const openRulesBtn = document.getElementById('openRulesBtn');
+    const closeRulesBtn = document.getElementById('closeRulesBtn');
+    const understoodRulesBtn = document.getElementById('understoodRulesBtn');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const gameOverReason = document.getElementById('gameOverReason');
+    const finalScoreDisplay = document.getElementById('finalScoreDisplay');
+    const dictStatus = document.getElementById('dictStatus');
+    const fileNameLabel = document.getElementById('fileNameLabel');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const remainingDisplay = document.getElementById('remainingDisplay');
+    const nextTripletsContainer = document.getElementById('nextTripletsContainer');
+    const timerBar = document.getElementById('timerBar');
+    const timerText = document.getElementById('timerText');
+    const messageBox = document.getElementById('messageBox');
+
+    // Gestion de la Pop-up Règles
+    openRulesBtn.addEventListener('click', () => rulesModal.classList.remove('hidden'));
+    closeRulesBtn.addEventListener('click', () => rulesModal.classList.add('hidden'));
+    understoodRulesBtn.addEventListener('click', () => rulesModal.classList.add('hidden'));
+
+    function createBoardUI() {
+      gridEl.innerHTML = '';
+      for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        const cell = document.createElement('div');
+        cell.dataset.index = i;
+        cell.className = 'w-full h-full bg-slate-950/60 border border-slate-800/40 rounded-xl flex items-center justify-center cursor-pointer relative transition-all duration-150 hover:border-slate-700';
+        cell.addEventListener('click', () => handleCellClick(i));
+        gridEl.appendChild(cell);
+      }
+    }
+
+    dictInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      fileNameLabel.textContent = file.name;
+      dictStatus.textContent = "Lecture et indexation du dictionnaire...";
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const lines = event.target.result.split(/\r?\n/);
+        dictionary = new Set();
+        
+        for (let line of lines) {
+          const word = line.trim().toUpperCase();
+          if (word.length >= 5 && word.length <= 8) {
+            dictionary.add(word);
+          }
+        }
+
+        dictStatus.textContent = `Dictionnaire prêt (${dictionary.size} mots valides)`;
+        dictStatus.className = "text-xs text-emerald-400 font-semibold";
+        startBtn.disabled = false;
+      };
+      reader.readAsText(file);
+    });
+
+    startBtn.addEventListener('click', () => {
+      if (!dictionary) return;
+      dictModal.classList.add('hidden');
+      initGame();
+    });
+
+    restartBtn.addEventListener('click', () => {
+      gameOverModal.classList.add('hidden');
+      initGame();
+    });
+
+    function generatePool() {
+      let pool = [];
+      for (let i = 0; i < 192; i++) {
+        const char = LETTER_FREQUENCIES[Math.floor(Math.random() * LETTER_FREQUENCIES.length)];
+        pool.push(char);
+      }
+      return pool;
+    }
+
+    function initGame() {
+      board = Array(BOARD_SIZE * BOARD_SIZE).fill(null);
+      letterPool = generatePool();
+      score = 0;
+      gameActive = true;
+      selectedIndex = null;
+      scoreDisplay.textContent = '0';
+      remainingDisplay.textContent = '192';
+      
+      createBoardUI();
+
+      const initialIndices = getRandomEmptyIndices(8);
+      initialIndices.forEach(idx => {
+        board[idx] = getRandomLetter();
+      });
+
+      updateBoardUI();
+      updateNextTripletsUI();
+      resetTimer();
+      
+      validateExistingWords();
+      showMessage("Partie lancée ! Formez des mots de 5 à 8 lettres.", "text-amber-400");
+    }
+
+    function getRandomLetter() {
+      return LETTER_FREQUENCIES[Math.floor(Math.random() * LETTER_FREQUENCIES.length)];
+    }
+
+    function getRandomEmptyIndices(count) {
+      const empty = board.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+      const shuffled = empty.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function isBoardFull() {
+      return board.every(val => val !== null);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timer = 60;
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        if (!gameActive) return;
+        timer--;
+        updateTimerUI();
+
+        if (timer <= 0) {
+          if (isBoardFull()) {
+            endGame(false, "Temps écoulé ! Impossible de libérer le plateau à temps.");
+          } else {
+            showMessage("Temps écoulé ! Tirage de 3 lettres.", "text-rose-400");
+            spawnTriplet();
+          }
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const percentage = (timer / 60) * 100;
+      timerBar.style.width = `${percentage}%`;
+      timerText.textContent = `${timer}s`;
+
+      if (isBoardFull()) {
+        timerBar.className = "h-full bg-rose-600 transition-all duration-1000 ease-linear w-full animate-pulse";
+      } else if (timer <= 10) {
+        timerBar.className = "h-full bg-rose-500 transition-all duration-1000 ease-linear w-full";
+      } else {
+        timerBar.className = "h-full bg-amber-500 transition-all duration-1000 ease-linear w-full";
+      }
+    }
+
+    function hasPath(fromIdx, toIdx) {
+      if (fromIdx === toIdx) return false;
+      
+      const visited = new Array(BOARD_SIZE * BOARD_SIZE).fill(false);
+      const queue = [fromIdx];
+      visited[fromIdx] = true;
+
+      while (queue.length > 0) {
+        const curr = queue.shift();
+        if (curr === toIdx) return true;
+
+        const neighbors = getNeighbors(curr);
+        for (let n of neighbors) {
+          if (!visited[n]) {
+            if (board[n] === null || n === toIdx) {
+              visited[n] = true;
+              queue.push(n);
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function getNeighbors(idx) {
+      const row = Math.floor(idx / BOARD_SIZE);
+      const col = idx % BOARD_SIZE;
+      const neighbors = [];
+
+      if (row > 0) neighbors.push(idx - BOARD_SIZE);
+      if (row < BOARD_SIZE - 1) neighbors.push(idx + BOARD_SIZE);
+      if (col > 0) neighbors.push(idx - 1);
+      if (col < BOARD_SIZE - 1) neighbors.push(idx + 1);
+
+      return neighbors;
+    }
+
+    function handleCellClick(index) {
+      if (!gameActive) return;
+
+      if (selectedIndex === null) {
+        if (board[index] !== null) {
+          selectedIndex = index;
+          updateBoardUI();
+        }
+        return;
+      }
+
+      if (selectedIndex === index) {
+        selectedIndex = null;
+        updateBoardUI();
+        return;
+      }
+
+      const from = selectedIndex;
+      const to = index;
+
+      if (board[to] === null) {
+        if (hasPath(from, to)) {
+          board[to] = board[from];
+          board[from] = null;
+          selectedIndex = null;
+          processMove();
+        } else {
+          showMessage("Aucun chemin libre pour cette case !", "text-rose-400");
+          selectedIndex = null;
+          updateBoardUI();
+        }
+      } else {
+        const temp = board[to];
+        board[to] = board[from];
+        board[from] = temp;
+        selectedIndex = null;
+        processMove();
+      }
+    }
+
+    function processMove() {
+      updateBoardUI();
+      const foundWords = validateExistingWords();
+
+      if (!foundWords) {
+        if (isBoardFull()) {
+          endGame(false, "Plateau bloqué ! Aucun mot formé.");
+        } else {
+          spawnTriplet();
+        }
+      }
+    }
+
+    function validateExistingWords() {
+      const wordsFound = checkBoardForWords();
+
+      if (wordsFound.length > 0) {
+        let pointsGained = 0;
+        let wordsText = [];
+
+        wordsFound.forEach(({ word, indices }) => {
+          wordsText.push(word);
+          let wordScore = 0;
+          indices.forEach(idx => {
+            if (board[idx]) {
+              wordScore += LETTER_SCORES[board[idx]] || 1;
+            }
+          });
+          pointsGained += wordScore * (word.length - 4);
+
+          indices.forEach(idx => {
+            board[idx] = null;
+          });
+        });
+
+        score += pointsGained;
+        scoreDisplay.textContent = score;
+        showMessage(`Mot validé : ${wordsText.join(', ')} (+${pointsGained} pts) !`, "text-emerald-400");
+        
+        updateBoardUI();
+        resetTimer();
+        return true;
+      }
+      return false;
+    }
+
+    function spawnTriplet() {
+      if (letterPool.length === 0) {
+        checkEndGame();
+        return;
+      }
+
+      const emptyIndices = getRandomEmptyIndices(3);
+      
+      for (let i = 0; i < emptyIndices.length; i++) {
+        if (letterPool.length > 0) {
+          const letter = letterPool.shift();
+          board[emptyIndices[i]] = letter;
+        }
+      }
+
+      remainingDisplay.textContent = letterPool.length;
+      updateNextTripletsUI();
+      updateBoardUI();
+
+      const wordCleared = validateExistingWords();
+
+      if (!wordCleared && isBoardFull()) {
+        resetTimer();
+        showMessage("⚠️ PLATEAU PLEIN ! Vous avez 60s pour former un mot !", "text-rose-400 animate-pulse");
+      } else {
+        resetTimer();
+      }
+
+      if (letterPool.length === 0 && !isBoardFull()) {
+        checkEndGame();
+      }
+    }
+
+    function checkBoardForWords() {
+      const found = [];
+      const directions = [
+        { r: 0, c: 1 },   // Gauche -> Droite
+        { r: 0, c: -1 },  // Droite -> Gauche
+        { r: 1, c: 0 },   // Haut -> Bas
+        { r: -1, c: 0 }   // Bas -> Haut
+      ];
+
+      for (let len = 8; len >= 5; len--) {
+        for (let r = 0; r < BOARD_SIZE; r++) {
+          for (let c = 0; c < BOARD_SIZE; c++) {
+            for (let dir of directions) {
+              const endR = r + dir.r * (len - 1);
+              const endC = c + dir.c * (len - 1);
+
+              if (endR >= 0 && endR < BOARD_SIZE && endC >= 0 && endC < BOARD_SIZE) {
+                let word = "";
+                let indices = [];
+                let valid = true;
+
+                for (let i = 0; i < len; i++) {
+                  const currR = r + dir.r * i;
+                  const currC = c + dir.c * i;
+                  const idx = currR * BOARD_SIZE + currC;
+
+                  if (board[idx] === null) {
+                    valid = false;
+                    break;
+                  }
+                  word += board[idx];
+                  indices.push(idx);
+                }
+
+                if (valid && dictionary.has(word)) {
+                  found.push({ word, indices });
+                }
+              }
+            }
+          }
+        }
+      }
+      return found;
+    }
+
+    function updateBoardUI() {
+      const cells = gridEl.children;
+      for (let i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        const cell = cells[i];
+        const letter = board[i];
+
+        cell.innerHTML = '';
+        cell.className = 'w-full h-full bg-slate-950/60 border border-slate-800/40 rounded-xl flex items-center justify-center cursor-pointer relative transition-all duration-150 hover:border-slate-700';
+
+        if (letter !== null) {
+          const tile = document.createElement('div');
+          
+          let bgClass = "bg-amber-500 border-amber-400 text-slate-950";
+          if (LETTER_SCORES[letter] >= 8) bgClass = "bg-rose-500 border-rose-400 text-white";
+          else if (LETTER_SCORES[letter] >= 3) bgClass = "bg-indigo-500 border-indigo-400 text-white";
+
+          tile.className = `w-full h-full rounded-xl flex flex-col items-center justify-center font-extrabold text-lg sm:text-xl tile-letter ${bgClass}`;
+          
+          if (i === selectedIndex) {
+            tile.classList.add('tile-selected');
+          }
+
+          tile.innerHTML = `
+            <span>${letter}</span>
+            <span class="text-[9px] opacity-75 font-bold absolute bottom-0.5 right-1.5">${LETTER_SCORES[letter] || 1}</span>
+          `;
+          cell.appendChild(tile);
+        }
+      }
+    }
+
+    function updateNextTripletsUI() {
+      nextTripletsContainer.innerHTML = '';
+      
+      for (let t = 0; t < 5; t++) {
+        const tripletGroup = document.createElement('div');
+        tripletGroup.className = `flex gap-0.5 p-1 rounded-lg border ${t === 0 ? 'bg-amber-500/10 border-amber-500/30' : 'bg-slate-800/40 border-slate-800'}`;
+
+        for (let i = 0; i < 3; i++) {
+          const idx = t * 3 + i;
+          const letter = letterPool[idx] || '-';
+          const box = document.createElement('div');
+          box.className = `w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center font-extrabold text-xs ${t === 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}`;
+          box.textContent = letter;
+          tripletGroup.appendChild(box);
+        }
+        nextTripletsContainer.appendChild(tripletGroup);
+      }
+    }
+
+    function showMessage(msg, colorClass = "text-slate-200") {
+      messageBox.textContent = msg;
+      messageBox.className = `min-h-[2rem] flex items-center justify-center text-sm font-bold ${colorClass} transition-all`;
+    }
+
+    function checkEndGame() {
+      const emptyCount = board.filter(val => val === null).length;
+      if (letterPool.length === 0) {
+        const bonus = emptyCount * 5;
+        score += bonus;
+        scoreDisplay.textContent = score;
+        endGame(true, `Victoire ! Bonus cases vides : +${bonus} pts !`);
+      }
+    }
+
+    function endGame(victory, reason) {
+      gameActive = false;
+      clearInterval(timerInterval);
+
+      gameOverReason.textContent = reason;
+      finalScoreDisplay.textContent = score;
+      gameOverModal.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
