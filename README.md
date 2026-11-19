@@ -71,6 +71,7 @@ L'intérêt d'une Application Simple-Page (*SPA : Single Page Application*) est 
 - [L'appli *Dojo*](#Dojo)
 - [L'appli *Fleur-de-Fumee*](#Fleur-de-Fumee)
 - [L'appli *Tiny-Planet*](#Tiny-Planet)
+- [L'appli *Pecha-Kucha*](#Pecha-Kucha)
   
 --- 
 
@@ -958,8 +959,26 @@ Simulateur de feux d'artifice ("Fleur de Fumée" en chinois)
 <img width="300" height="175" alt="image" src="https://github.com/user-attachments/assets/36d7c52e-15c1-4559-ae2d-7c2a1a58ff7b" />
 
 
-
 Transforme une photo de paysage en micro-planète (ou en "trou de ver")
+
+***destination :*** tous 
+
+[Retour en haut](#VibeCoding)
+
+### Pecha-Kucha
+
+[*Vibe-Codé* avec Gemini 3.5]
+
+<li><a href="https://othoni-hub.github.io/VibeCoding/Tiny-Planet/index.html" target="_blank" rel="noopener noreferrer">Tiny-Planet </a></li>
+
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/ed9252b4-23c4-4bcd-b391-7f10f88dd507" />
+
+*(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
+
+
+
+
+Visualisaeur chronométré de diaporama pdf 
 
 ***destination :*** tous 
 
