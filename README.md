@@ -971,14 +971,12 @@ Transforme une photo de paysage en micro-planète (ou en "trou de ver")
 
 <li><a href="https://othoni-hub.github.io/VibeCoding/Tiny-Planet/index.html" target="_blank" rel="noopener noreferrer">Tiny-Planet </a></li>
 
-<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/ed9252b4-23c4-4bcd-b391-7f10f88dd507" />
+<img width="348" height="251" alt="image" src="https://github.com/user-attachments/assets/3bcd5d98-23be-4f48-8e00-d1348001d48b" />
+
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
-
-
-
-Visualisaeur chronométré de diaporama pdf 
+Visualiseur chronométré de diaporama pdf 
 
 ***destination :*** tous 
 
