@@ -970,7 +970,7 @@ Transforme une photo de paysage en micro-planète (ou en "trou de ver")
 
 [*Vibe-Codé* avec Gemini 3.5]
 
-<li><a href="https://othoni-hub.github.io/VibeCoding/Pecha-Kucha_V2.2.html.html" target="_blank" rel="noopener noreferrer">Pecha-Kucha </a></li>
+<li><a href="https://othoni-hub.github.io/VibeCoding/Pecha-Kucha_V2.2.html" target="_blank" rel="noopener noreferrer">Pecha-Kucha </a></li>
 
 *(Clic gauche pour ouvrir dans le navigateur, clic droit pour télécharger)*
 
