@@ -1,6 +1,5 @@
 # VibeCoding
-<li><a href="https://othoni-hub.github.io/VibeCoding/Pecha-Kucha_V2.2.html" target="_blank" rel="noopener noreferrer">ELLES-TimeLine </a></li> 
-https://othoni-hub/VibeCoding/Pecha-Kucha_V2.2.html
+
 Applications "page-unique" pédagogiques ou autres, *vibe-codées* avec l'aide de **Gemini 3.5**, **Claude Sonnet 4.6**, ou **Lumo 2.0** (prometteur), par **Olivier Thöni**, 
 
 professeur agrégé de mathématiques en CPGE-ECG, mathématiques appliquées, au lycée St-Charles Ste Croix - Le Mans, 
